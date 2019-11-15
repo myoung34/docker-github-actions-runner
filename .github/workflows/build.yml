@@ -10,9 +10,6 @@ jobs:
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
-
-     #This Action Emits 2 Variables, IMAGE_SHA_NAME and IMAGE_URL 
-     #which you can reference in subsequent steps
     - name: Publish Docker Image to GPR
       uses: myoung34/gpr-docker-publish@master
       id: docker
@@ -22,3 +19,9 @@ jobs:
         IMAGE_NAME: 'runner'
         DOCKERFILE_PATH: 'Dockerfile'
         BUILD_CONTEXT: '.'
+    - name: Publish to Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: myoung34/github-runner
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
