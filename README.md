@@ -45,3 +45,21 @@ job "github_runner" {
   }
 }
 ```
+
+## Usage ##
+
+```
+name: Package
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+    - uses: actions/checkout@v1
+    - name: build packages
+      run: make all
+```
