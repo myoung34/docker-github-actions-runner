@@ -19,9 +19,15 @@ jobs:
         IMAGE_NAME: 'runner'
         DOCKERFILE_PATH: 'Dockerfile'
         BUILD_CONTEXT: '.'
-    - name: Publish to Registry
+  build_hub:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Publish to Hub Registry
       uses: elgohr/Publish-Docker-Github-Action@master
       with:
         name: myoung34/github-runner
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
+
