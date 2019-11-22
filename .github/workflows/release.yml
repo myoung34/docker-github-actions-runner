@@ -1,8 +1,8 @@
 name: Publish Docker
 on:
   push:
-    branches:    
-      - master
+    tags:
+      - '*'
 
 jobs:
   build:
@@ -10,6 +10,8 @@ jobs:
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
+    - name: get version
+      run: echo "::set-env name=IMAGE_TAG::$(cat Dockerfile | grep ARG\ GH_RUNNER_VERSION | sed 's/.*="\(.*\)"/\1/g')"
     - name: Publish Docker Image to GPR
       uses: myoung34/gpr-docker-publish@master
       id: docker
@@ -30,4 +32,4 @@ jobs:
         name: myoung34/github-runner
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
-
+        tag_names: true

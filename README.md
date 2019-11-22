@@ -8,11 +8,10 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 Manual:
 
 ```
-docker login docker.pkg.github.com -u myoung34 -p foo
 docker run -it \
   -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
   -e RUNNER_TOKEN="footoken" \
-  docker.pkg.github.com/myoung34/docker-github-actions-runner/runner:latest
+  myoung34/github-runner:latest
 ```
 
 Nomad:
@@ -32,12 +31,7 @@ job "github_runner" {
 
     config {
       privileged = true
-      image = "docker.pkg.github.com/myoung34/docker-github-actions-runner/runner:latest"
-      auth {
-        username = "myoung34"
-        password = "foo"
-        server_address = "docker.pkg.github.com"
-      }
+      image = "myoung34/github-runner:latest"
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock"
       ]

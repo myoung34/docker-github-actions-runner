@@ -1,0 +1,33 @@
+name: Publish Docker
+on:
+  push:
+    branches:    
+      - master
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Publish Docker Image to GPR
+      uses: myoung34/gpr-docker-publish@master
+      id: docker
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        IMAGE_NAME: 'runner'
+        DOCKERFILE_PATH: 'Dockerfile'
+        BUILD_CONTEXT: '.'
+  build_hub:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Publish to Hub Registry
+      uses: elgohr/Publish-Docker-Github-Action@master
+      with:
+        name: myoung34/github-runner
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
