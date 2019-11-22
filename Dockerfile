@@ -1,7 +1,7 @@
 FROM ubuntu:xenial-20191024
 LABEL maintainer="3vilpenguin@gmail.com"
 
-ARG GH_RUNNER_VERSION="2.160.0"
+ARG GH_RUNNER_VERSION="2.160.2"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update && \
