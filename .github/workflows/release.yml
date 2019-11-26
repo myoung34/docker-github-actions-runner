@@ -5,23 +5,7 @@ on:
       - '*'
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=IMAGE_TAG::$(cat Dockerfile | grep ARG\ GH_RUNNER_VERSION | sed 's/.*="\(.*\)"/\1/g')"
-    - name: Publish Docker Image to GPR
-      uses: machine-learning-apps/gpr-docker-publish@master
-      id: docker
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        IMAGE_NAME: 'runner'
-        DOCKERFILE_PATH: 'Dockerfile'
-        BUILD_CONTEXT: '.'
-  release_hub:
+  release_x86:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
@@ -33,3 +17,16 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
         tag_names: true
+  release_arm:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: get version
+      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
+    - name: Build
+      run: docker build -f Dockerfile.arm -t myoung34/github-runner:${TAG}-arm .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:${TAG}-arm

@@ -1,0 +1,51 @@
+FROM ubuntu:xenial-20191024
+LABEL maintainer="3vilpenguin@gmail.com"
+
+ARG GH_RUNNER_VERSION="2.161.0"
+ARG GIT_VERSION="2.9.2"
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# hadolint ignore=DL3003
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+    curl \
+    tar \
+    apt-transport-https \
+    ca-certificates \
+    sudo \
+    gnupg-agent \
+    software-properties-common \
+    build-essential \
+    zlib1g-dev \
+    gettext \
+    liblttng-ust-ctl2 \
+    liblttng-ust0 \
+    liburcu4 \
+    libcurl4-openssl-dev \
+  && rm -rf /var/lib/apt/lists/* \
+  && cd /tmp \
+  && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
+  && tar zxf git.tgz \
+  && cd git-${GIT_VERSION} \
+  && ./configure --prefix=/usr \
+  && make \
+  && make install \
+  && cd / \
+  && rm -rf /tmp/git.tgz /tmp/git-${GIT_VERSION}
+
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
+  && add-apt-repository "deb [arch=armhf] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  && apt-get update \
+  && apt-get install -y docker.io --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /actions-runner
+RUN curl -O https://githubassets.azureedge.net/runners/${GH_RUNNER_VERSION}/actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
+  && tar -zxf actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
+  && rm -f actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
+  && mkdir /_work
+
+WORKDIR /_work
+COPY entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

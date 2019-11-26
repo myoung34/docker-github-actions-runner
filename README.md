@@ -3,15 +3,31 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners) with docker-in-docker
 
+This has been tested and verified on:
+
+ * x86_64
+ * armhf
+
 ## Examples ##
 
 Manual:
+
+### X86_64 ###
 
 ```
 docker run -it \
   -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
   -e RUNNER_TOKEN="footoken" \
   myoung34/github-runner:latest
+```
+
+### ARMHF (raspberry pi) ###
+
+```
+docker run -it \
+  -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
+  -e RUNNER_TOKEN="footoken" \
+  myoung34/github-runner:latest-arm
 ```
 
 Nomad:
