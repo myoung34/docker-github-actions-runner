@@ -2,7 +2,7 @@ FROM ubuntu:bionic
 LABEL maintainer="3vilpenguin@gmail.com"
 
 ARG GH_RUNNER_VERSION="2.161.0"
-ARG GIT_VERSION="2.9.2"
+ARG GIT_VERSION="2.23.0"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
