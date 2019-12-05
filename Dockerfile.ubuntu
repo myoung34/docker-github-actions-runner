@@ -1,4 +1,4 @@
-FROM ubuntu:xenial-20191024
+FROM ubuntu:bionic
 LABEL maintainer="3vilpenguin@gmail.com"
 
 ARG GH_RUNNER_VERSION="2.161.0"

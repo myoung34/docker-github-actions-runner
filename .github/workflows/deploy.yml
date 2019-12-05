@@ -6,25 +6,69 @@ on:
       - develop
 
 jobs:
-  deploy_x86:
+  ubuntu_latest_deploy_x86:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
-    - name: Publish to Hub Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
-      with:
-        name: myoung34/github-runner
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
-  deploy_arm:
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu -t myoung34/github-runner:latest .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:latest
+  ubuntu_bionic_deploy_x86:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-bionic -t myoung34/github-runner:ubuntu-bionic .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-bionic
+  ubuntu_xenial_deploy_x86:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-xenial -t myoung34/github-runner:ubuntu-xenial .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-xenial
+  ubuntu_latest_deploy_arm:
     runs-on: self-hosted
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: Build
-      run: docker build -f Dockerfile.arm -t myoung34/github-runner:latest-arm .
+      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:latest-arm .
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Push to hub registry
       run: docker push myoung34/github-runner:latest-arm
+  ubuntu_bionic_deploy_arm:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:ubuntu-bionic-arm .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-bionic-arm
+  ubuntu_xenial_deploy_arm:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:ubuntu-xenial-arm .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-xenial-arm
