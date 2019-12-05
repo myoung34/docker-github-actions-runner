@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 LABEL maintainer="3vilpenguin@gmail.com"
 
-ARG GH_RUNNER_VERSION="2.161.0"
+ARG GH_RUNNER_VERSION="2.162.0"
 ARG GIT_VERSION="2.23.0"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -18,9 +18,9 @@ RUN apt-get update && \
     build-essential \
     zlib1g-dev \
     gettext \
-    liblttng-ust-ctl2 \
+    liblttng-ust-ctl4 \
     liblttng-ust0 \
-    liburcu4 \
+    liburcu6 \
     libcurl4-openssl-dev \
   && rm -rf /var/lib/apt/lists/* \
   && cd /tmp \
