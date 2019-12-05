@@ -22,6 +22,7 @@ RUN apt-get update && \
     liblttng-ust0 \
     liburcu6 \
     libcurl4-openssl-dev \
+    inetutils-ping \
   && rm -rf /var/lib/apt/lists/* \
   && cd /tmp \
   && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
