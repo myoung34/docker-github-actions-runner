@@ -18,7 +18,7 @@ RUN apt-get update && \
     build-essential \
     zlib1g-dev \
     gettext \
-    liblttng-ust-ctl2 \
+    liblttng-ust-ctl4 \
     liblttng-ust0 \
     liburcu4 \
     libcurl4-openssl-dev \
