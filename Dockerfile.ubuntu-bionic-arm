@@ -20,7 +20,7 @@ RUN apt-get update && \
     gettext \
     liblttng-ust-ctl4 \
     liblttng-ust0 \
-    liburcu4 \
+    liburcu6 \
     libcurl4-openssl-dev \
     inetutils-ping \
   && rm -rf /var/lib/apt/lists/* \
