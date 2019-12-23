@@ -1,6 +1,9 @@
 FROM ubuntu:bionic
 LABEL maintainer="3vilpenguin@gmail.com"
 
+ARG DOCKER_ARCH=armhf
+ARG ACTIONS_ARCH=arm
+
 ARG GH_RUNNER_VERSION="2.163.1"
 ARG GIT_VERSION="2.23.0"
 
@@ -35,15 +38,15 @@ RUN apt-get update && \
   && rm -rf /tmp/git.tgz /tmp/git-${GIT_VERSION}
 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
-  && add-apt-repository "deb [arch=armhf] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  && add-apt-repository "deb [arch=${DOCKER_ARCH}] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
   && apt-get update \
   && apt-get install -y docker.io --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /actions-runner
-RUN curl -O https://githubassets.azureedge.net/runners/${GH_RUNNER_VERSION}/actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
-  && tar -zxf actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
-  && rm -f actions-runner-linux-arm-${GH_RUNNER_VERSION}.tar.gz \
+RUN curl -O https://githubassets.azureedge.net/runners/${GH_RUNNER_VERSION}/actions-runner-linux-${ACTIONS_ARCH}-${GH_RUNNER_VERSION}.tar.gz \
+  && tar -zxf actions-runner-linux-${ACTIONS_ARCH}-${GH_RUNNER_VERSION}.tar.gz \
+  && rm -f actions-runner-linux-${ACTIONS_ARCH}-${GH_RUNNER_VERSION}.tar.gz \
   && mkdir /_work
 
 WORKDIR /_work

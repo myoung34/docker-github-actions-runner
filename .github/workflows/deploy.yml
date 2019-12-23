@@ -72,3 +72,36 @@ jobs:
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Push to hub registry
       run: docker push myoung34/github-runner:ubuntu-xenial-arm
+  ubuntu_latest_deploy_arm64:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:latest-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:latest-arm64
+  ubuntu_bionic_deploy_arm64:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:ubuntu-bionic-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-bionic-arm64
+  ubuntu_xenial_deploy_arm64:
+    runs-on: self-hosted
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Build
+      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:ubuntu-xenial-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Push to hub registry
+      run: docker push myoung34/github-runner:ubuntu-xenial-arm64
