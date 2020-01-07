@@ -5,120 +5,59 @@ on:
       - '*'
 
 jobs:
-  ubuntu_tag_deploy_x86:
+  ubuntu_tag_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
       run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu -t myoung34/github-runner:${TAG} .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}
-  ubuntu_bionic_deploy_x86:
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu -t myoung34/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
+  ubuntu_bionic_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
       run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic -t myoung34/github-runner:${TAG}-ubuntu-bionic .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-ubuntu-bionic
-  ubuntu_xenial_deploy_x86:
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu-bionic -t myoung34/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
+  ubuntu_xenial_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
       run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial -t myoung34/github-runner:${TAG}-ubuntu-xenial .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu-xenial -t myoung34/github-runner:${TAG}-ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
+
       run: docker push myoung34/github-runner:${TAG}-ubuntu-xenial
-  ubuntu_tag_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:${TAG}-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-arm
-  ubuntu_bionic_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:${TAG}-ubuntu-bionic-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-ubuntu-bionic-arm
-  ubuntu_xenial_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:${TAG}-ubuntu-xenial-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-ubuntu-xenial-arm
-  ubuntu_tag_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:${TAG}-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-arm64
-  ubuntu_bionic_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:${TAG}-ubuntu-bionic-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-ubuntu-bionic-arm64
-  ubuntu_xenial_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: get version
-      run: echo "::set-env name=TAG::$(echo ${GITHUB_REF} | sed -e "s/refs\/tags\///g")"
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:${TAG}-ubuntu-xenial-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:${TAG}-ubuntu-xenial-arm64

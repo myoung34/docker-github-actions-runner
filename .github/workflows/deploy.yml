@@ -6,102 +6,51 @@ on:
       - develop
 
 jobs:
-  ubuntu_latest_deploy_x86:
+  ubuntu_latest_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu -t myoung34/github-runner:latest .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:latest
-  ubuntu_bionic_deploy_x86:
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu -t myoung34/github-runner:latest --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
+  ubuntu_bionic_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic -t myoung34/github-runner:ubuntu-bionic .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-bionic
-  ubuntu_xenial_deploy_x86:
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu-bionic -t myoung34/github-runner:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
+  ubuntu_xenial_deploy:
     runs-on: ubuntu-latest
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial -t myoung34/github-runner:ubuntu-xenial .
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-xenial
-  ubuntu_latest_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
     - name: Build
-      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:latest-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:latest-arm
-  ubuntu_bionic_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:ubuntu-bionic-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-bionic-arm
-  ubuntu_xenial_deploy_arm:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:ubuntu-xenial-arm .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-xenial-arm
-  ubuntu_latest_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-arm -t myoung34/github-runner:latest-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:latest-arm64
-  ubuntu_bionic_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-bionic-arm -t myoung34/github-runner:ubuntu-bionic-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-bionic-arm64
-  ubuntu_xenial_deploy_arm64:
-    runs-on: self-hosted
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Build
-      run: docker build -f Dockerfile.ubuntu-xenial-arm -t myoung34/github-runner:ubuntu-xenial-arm64 --build-arg DOCKER_ARCH=arm64 --build-arg ACTIONS_ARCH=arm64 .
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Push to hub registry
-      run: docker push myoung34/github-runner:ubuntu-xenial-arm64
+      run: docker buildx build -f Dockerfile.ubuntu-xenial -t myoung34/github-runner:ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64 .
