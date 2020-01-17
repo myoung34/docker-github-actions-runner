@@ -1,5 +1,5 @@
 #!/bin/bash
-export AGENT_ALLOW_RUNASROOT=1
+export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
 _RUNNER_NAME=${RUNNER_NAME:-default}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
