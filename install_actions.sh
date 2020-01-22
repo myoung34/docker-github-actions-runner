@@ -1,13 +1,14 @@
-#!/bin/bash
-export GH_RUNNER_VERSION
+#!/bin/bash -x
+GH_RUNNER_VERSION=$1
+
 export ACTIONS_ARCH="x64"
 if [[ $(dpkg --print-architecture) == "armhf" ]]; then
   export ACTIONS_ARCH="arm"
 elif [[ $(dpkg --print-architecture) == "arm64" ]]; then
   export ACTIONS_ARCH="arm64"
 fi
-curl -O "https://githubassets.azureedge.net/runners/${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz"
-tar -zxf "actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz"
-rm -f "actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz"
+curl -L "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-x64-${GH_RUNNER_VERSION}.tar.gz" > actions.tar.gz
+tar -zxf actions.tar.gz
+rm -f actions.tar.gz
 ./bin/installdependencies.sh
 mkdir /_work
