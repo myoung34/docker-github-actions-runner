@@ -30,6 +30,17 @@ docker run -it \
   myoung34/github-runner:latest-arm
 ```
 
+```
+function run-server {
+    name=github-actions-$(echo $1 | sed 's/\//-/g')
+    docker rm -f $name
+    docker run -d --restart=always -e REPO_URL="https://github.com/$1" -e RUNNER_TOKEN="$2" -v /var/run/docker.sock:/var/run/docker.sock --name $name github-runner:latest
+}
+
+run-server your-account/your-repo        AARGHTHISISYOURGHACTIONSTOKEN
+run-server your-account/some-other-repo  ARGHANOTHERGITHUBACTIONSTOKEN
+```
+
 Nomad:
 
 ```
