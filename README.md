@@ -7,12 +7,12 @@ This has been tested and verified on:
 
  * x86_64
  * armhf
+ * armv7
+ * arm64
 
 ## Examples ##
 
 Manual:
-
-### X86_64 ###
 
 ```
 docker run -it \
@@ -21,14 +21,7 @@ docker run -it \
   myoung34/github-runner:latest
 ```
 
-### ARMHF (raspberry pi) ###
-
-```
-docker run -it \
-  -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
-  -e RUNNER_TOKEN="footoken" \
-  myoung34/github-runner:latest-arm
-```
+Or as an alias:
 
 ```
 function run-server {

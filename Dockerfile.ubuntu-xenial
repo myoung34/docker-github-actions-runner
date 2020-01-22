@@ -18,7 +18,7 @@ RUN apt-get update && \
   && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
-  && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+  && add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
   && apt-get update \
   && apt-get install -y docker-ce --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
