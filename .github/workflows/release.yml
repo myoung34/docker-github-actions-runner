@@ -22,7 +22,7 @@ jobs:
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
-      run: docker buildx build -f Dockerfile.ubuntu -t myoung34/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+      run: docker buildx build -f Dockerfile -t myoung34/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_bionic_deploy:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +37,8 @@ jobs:
         version: latest
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Copy Dockerfile
+      run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.ubuntu-bionic
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
@@ -55,6 +57,8 @@ jobs:
         version: latest
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Copy Dockerfile
+      run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM ubuntu:xenial/' Dockerfile.ubuntu-xenial
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build

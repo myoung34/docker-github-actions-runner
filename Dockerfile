@@ -18,9 +18,7 @@ RUN apt-get update && \
     build-essential \
     zlib1g-dev \
     gettext \
-    liblttng-ust-ctl4 \
     liblttng-ust0 \
-    liburcu6 \
     libcurl4-openssl-dev \
     inetutils-ping \
   && rm -rf /var/lib/apt/lists/* \
