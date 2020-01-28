@@ -2,7 +2,7 @@ FROM ubuntu:rolling
 LABEL maintainer="3vilpenguin@gmail.com"
 
 ARG GIT_VERSION="2.23.0"
-ENV DEBIAN_FRONTEND=noninteractive
+ARG GH_RUNNER_VERSION="2.165.0"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
@@ -44,8 +44,6 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
 WORKDIR /actions-runner
 COPY install_actions.sh /actions-runner
 
-# Put version here to prevent cache invalidation
-ENV GH_RUNNER_VERSION="2.165.0"
 RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} \
   && rm /actions-runner/install_actions.sh
