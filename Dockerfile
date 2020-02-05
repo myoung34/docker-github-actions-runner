@@ -3,6 +3,7 @@ LABEL maintainer="3vilpenguin@gmail.com"
 
 ARG GIT_VERSION="2.23.0"
 ARG GH_RUNNER_VERSION="2.165.1"
+ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
@@ -43,7 +44,7 @@ WORKDIR /actions-runner
 COPY install_actions.sh /actions-runner
 
 RUN chmod +x /actions-runner/install_actions.sh \
-  && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} \
+  && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
 WORKDIR /_work
