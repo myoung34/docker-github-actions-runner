@@ -45,7 +45,7 @@ job "github_runner" {
     driver = "docker"
 
     env {
-      REPO_URL = "https://github.com/myoung34/LEDSpicer"
+      REPO_URL = "https://github.com/your-account/your-repo"
       RUNNER_TOKEN = "footoken"
     }
 
@@ -58,6 +58,41 @@ job "github_runner" {
     }
   }
 }
+```
+
+Kubernetes:
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: actions-runner
+  namespace: runners
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: actions-runner
+  template:
+    metadata:
+      labels:
+        app: actions-runner
+    spec:
+      volumes:
+      - name: dockersock
+        hostPath:
+          path: /var/run/docker.sock
+      containers:
+      - name: runner
+        image: myoung34/github-runner:latest
+        env:
+        - name: RUNNER_TOKEN
+          value: footoken
+        - name: REPO_URL
+          value: https://github.com/your-account/your-repo
+        volumeMounts:
+        - name: dockersock
+          mountPath: /var/run/docker.sock
 ```
 
 ## Usage ##
