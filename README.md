@@ -95,7 +95,7 @@ spec:
           mountPath: /var/run/docker.sock
 ```
 
-## Usage ##
+## Usage From GH Actions Workflow ##
 
 ```
 name: Package
