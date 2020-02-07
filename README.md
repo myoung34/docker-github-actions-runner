@@ -18,20 +18,29 @@ Manual:
 docker run -it \
   -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
   -e RUNNER_TOKEN="footoken" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
   myoung34/github-runner:latest
 ```
 
-Or as an alias:
+Or as a shell function (as root):
 
 ```
-function run-server {
-    name=github-actions-$(echo $1 | sed 's/\//-/g')
+function github-runner {
+    name=github-runner-${1//\//-}
+    org=$(dirname $1)
+    repo=$(basename $1)
+    tag=${3:-latest}
     docker rm -f $name
-    docker run -d --restart=always -e REPO_URL="https://github.com/$1" -e RUNNER_TOKEN="$2" -v /var/run/docker.sock:/var/run/docker.sock --name $name github-runner:latest
+    docker run -d --restart=always \
+        -e REPO_URL="https://github.com/${org}/${repo}" \
+        -e RUNNER_TOKEN="$2" \
+        -e RUNNER_NAME="linux-${repo}" \
+        -v /var/run/docker.sock:/var/run/docker.sock \
+        --name $name ${org}/github-runner:${tag}
 }
 
-run-server your-account/your-repo        AARGHTHISISYOURGHACTIONSTOKEN
-run-server your-account/some-other-repo  ARGHANOTHERGITHUBACTIONSTOKEN
+github-runner your-account/your-repo       AARGHTHISISYOURGHACTIONSTOKEN
+github-runner your-account/some-other-repo ARGHANOTHERGITHUBACTIONSTOKEN ubuntu-xenial
 ```
 
 Nomad:

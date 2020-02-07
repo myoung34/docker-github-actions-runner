@@ -22,6 +22,9 @@ RUN apt-get update && \
     liblttng-ust0 \
     libcurl4-openssl-dev \
     inetutils-ping \
+    maven \
+  # https://bugs.launchpad.net/ubuntu/+source/nodejs/+bug/1794589
+  && [[ $(lsb_release -cs) == "bionic" ]] && ( apt-get install -y nodejs && curl -L https://www.npmjs.com/install.sh | sh ) || ( apt-get install -y npm ) \
   && rm -rf /var/lib/apt/lists/* \
   && c_rehash \
   && cd /tmp \
@@ -37,7 +40,7 @@ RUN apt-get update && \
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && [[ $(lsb_release -cs) == "eoan" ]] && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu disco stable" ) || ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" )\
   && apt-get update \
-  && apt-get install -y docker-ce --no-install-recommends \
+  && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /actions-runner
