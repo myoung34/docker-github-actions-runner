@@ -37,7 +37,7 @@ RUN apt-get update && \
 RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && [[ $(lsb_release -cs) == "eoan" ]] && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu disco stable" ) || ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" )\
   && apt-get update \
-  && apt-get install -y docker-ce --no-install-recommends \
+  && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /actions-runner
