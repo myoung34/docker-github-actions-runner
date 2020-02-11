@@ -22,9 +22,6 @@ RUN apt-get update && \
     liblttng-ust0 \
     libcurl4-openssl-dev \
     inetutils-ping \
-    maven \
-  # https://bugs.launchpad.net/ubuntu/+source/nodejs/+bug/1794589
-  && [[ $(lsb_release -cs) == "bionic" ]] && ( apt-get install -y nodejs && curl -L https://www.npmjs.com/install.sh | sh ) || ( apt-get install -y npm ) \
   && rm -rf /var/lib/apt/lists/* \
   && c_rehash \
   && cd /tmp \
