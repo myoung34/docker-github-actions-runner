@@ -15,10 +15,13 @@ This has been tested and verified on:
 Manual:
 
 ```
-docker run -it \
-  -e REPO_URL="https://github.com/myoung34/LEDSpicer" \
+docker run -d --restart always --name github-runner \
+  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e RUNNER_NAME="foo-runner" \
   -e RUNNER_TOKEN="footoken" \
+  -e RUNNER_WORKDIR="/tmp/github-runner" \
   -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp/github-runner:/tmp/github-runner \
   myoung34/github-runner:latest
 ```
 
@@ -35,7 +38,9 @@ function github-runner {
         -e REPO_URL="https://github.com/${org}/${repo}" \
         -e RUNNER_TOKEN="$2" \
         -e RUNNER_NAME="linux-${repo}" \
+        -e RUNNER_WORKDIR="/tmp/github-runner" \
         -v /var/run/docker.sock:/var/run/docker.sock \
+        -v /tmp/github-runner:/tmp/github-runner \
         --name $name ${org}/github-runner:${tag}
 }
 
@@ -55,14 +60,16 @@ job "github_runner" {
 
     env {
       REPO_URL = "https://github.com/your-account/your-repo"
-      RUNNER_TOKEN = "footoken"
+      RUNNER_TOKEN   = "footoken"
+      RUNNER_WORKDIR = "/tmp/github-runner"
     }
 
     config {
       privileged = true
       image = "myoung34/github-runner:latest"
       volumes = [
-        "/var/run/docker.sock:/var/run/docker.sock"
+        "/var/run/docker.sock:/var/run/docker.sock",
+        "/tmp/github-runner:/tmp/github-runner",
       ]
     }
   }
@@ -91,6 +98,10 @@ spec:
       - name: dockersock
         hostPath:
           path: /var/run/docker.sock
+      - name: workdir
+        hostPath:
+          path: /tmp/github-runner
+      containers:
       containers:
       - name: runner
         image: myoung34/github-runner:latest
@@ -99,9 +110,13 @@ spec:
           value: footoken
         - name: REPO_URL
           value: https://github.com/your-account/your-repo
+        - name: RUNNER_WORKDIR
+          value: /tmp/github-runner
         volumeMounts:
         - name: dockersock
           mountPath: /var/run/docker.sock
+        - name: workdir
+          mountPath: /tmp/github-runner
 ```
 
 ## Usage From GH Actions Workflow ##
