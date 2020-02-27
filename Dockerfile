@@ -22,6 +22,7 @@ RUN apt-get update && \
     liblttng-ust0 \
     libcurl4-openssl-dev \
     inetutils-ping \
+    jq \
   && rm -rf /var/lib/apt/lists/* \
   && c_rehash \
   && cd /tmp \
@@ -40,6 +41,9 @@ RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
+RUN curl -sL "https://github.com/docker/compose/releases/download/1.25.4/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+  && chmod +x /usr/local/bin/docker-compose
+
 WORKDIR /actions-runner
 COPY install_actions.sh /actions-runner
 
@@ -47,7 +51,6 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
-WORKDIR /_work
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
