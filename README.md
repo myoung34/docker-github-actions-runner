@@ -1,7 +1,7 @@
 Docker Github Actions Runner
 ============================
 
-This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners) with docker-in-docker
+This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
 This has been tested and verified on:
 
@@ -102,7 +102,6 @@ spec:
         hostPath:
           path: /tmp/github-runner
       containers:
-      containers:
       - name: runner
         image: myoung34/github-runner:latest
         env:
@@ -110,6 +109,10 @@ spec:
           value: footoken
         - name: REPO_URL
           value: https://github.com/your-account/your-repo
+        - name: RUNNER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         - name: RUNNER_WORKDIR
           value: /tmp/github-runner
         volumeMounts:
@@ -135,4 +138,19 @@ jobs:
     - uses: actions/checkout@v1
     - name: build packages
       run: make all
+```
+
+## Automatically Acquiring a Runner Token  ##
+
+A runner token can be automatically acquired at runtime if `ACCESS_TOKEN` (a GitHub personal access token) is a supplied. This uses the [GitHub Actions API](https://developer.github.com/v3/actions/self_hosted_runners/#create-a-registration-token). e.g.:
+
+```
+docker run -d --restart always --name github-runner \
+  -e ACCESS_TOKEN="footoken" \
+  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_WORKDIR="/tmp/github-runner" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp/github-runner:/tmp/github-runner \
+  myoung34/github-runner:latest
 ```
