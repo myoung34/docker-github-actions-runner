@@ -12,6 +12,10 @@ This has been tested and verified on:
 
 ## Examples ##
 
+### Note ###
+
+If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable` to prevent [permission denied](https://github.com/myoung34/docker-github-actions-runner/issues/9)
+
 Manual:
 
 ```
