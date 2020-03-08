@@ -16,7 +16,7 @@ This has been tested and verified on:
 
 If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable` to prevent [permission denied](https://github.com/myoung34/docker-github-actions-runner/issues/9)
 
-Manual:
+### Manual ###
 
 ```
 docker run -d --restart always --name github-runner \
@@ -29,7 +29,7 @@ docker run -d --restart always --name github-runner \
   myoung34/github-runner:latest
 ```
 
-Or as a shell function (as root):
+Or shell wrapper:
 
 ```
 function github-runner {
@@ -52,7 +52,7 @@ github-runner your-account/your-repo       AARGHTHISISYOURGHACTIONSTOKEN
 github-runner your-account/some-other-repo ARGHANOTHERGITHUBACTIONSTOKEN ubuntu-xenial
 ```
 
-Nomad:
+### Nomad ###
 
 ```
 job "github_runner" {
@@ -80,7 +80,7 @@ job "github_runner" {
 }
 ```
 
-Kubernetes:
+### Kubernetes ###
 
 ```
 apiVersion: apps/v1
