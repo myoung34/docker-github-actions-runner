@@ -9,6 +9,8 @@ This has been tested and verified on:
  * armhf
  * armv7
  * arm64
+ 
+**NOTE: Only one runner can use the same RUNNER_WORKDIR if it is shared storage.**
 
 ## Examples ##
 
@@ -25,7 +27,7 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner:/tmp/github-runner \
+  -v /tmp/github-runner-repo:/tmp/github-runner-repo \
   myoung34/github-runner:latest
 ```
 
@@ -44,7 +46,7 @@ function github-runner {
         -e RUNNER_NAME="linux-${repo}" \
         -e RUNNER_WORKDIR="/tmp/github-runner" \
         -v /var/run/docker.sock:/var/run/docker.sock \
-        -v /tmp/github-runner:/tmp/github-runner \
+        -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
         --name $name ${org}/github-runner:${tag}
 }
 
@@ -73,7 +75,7 @@ job "github_runner" {
       image = "myoung34/github-runner:latest"
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock",
-        "/tmp/github-runner:/tmp/github-runner",
+        "/tmp/github-runner-your-repo:/tmp/github-runner-your-repo",
       ]
     }
   }
@@ -104,7 +106,7 @@ spec:
           path: /var/run/docker.sock
       - name: workdir
         hostPath:
-          path: /tmp/github-runner
+          path: /tmp/github-runner-your-repo
       containers:
       - name: runner
         image: myoung34/github-runner:latest
@@ -118,12 +120,12 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: RUNNER_WORKDIR
-          value: /tmp/github-runner
+          value: /tmp/github-runner-your-repo
         volumeMounts:
         - name: dockersock
           mountPath: /var/run/docker.sock
         - name: workdir
-          mountPath: /tmp/github-runner
+          mountPath: /tmp/github-runner-your-repo
 ```
 
 ## Usage From GH Actions Workflow ##
@@ -155,6 +157,6 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_WORKDIR="/tmp/github-runner" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner:/tmp/github-runner \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
 ```
