@@ -2,7 +2,7 @@ FROM ubuntu:rolling
 LABEL maintainer="3vilpenguin@gmail.com"
 
 ARG GIT_VERSION="2.23.0"
-ARG GH_RUNNER_VERSION="2.165.2"
+ARG GH_RUNNER_VERSION="2.168.0"
 ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
