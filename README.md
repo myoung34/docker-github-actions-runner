@@ -25,9 +25,9 @@ docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_TOKEN="footoken" \
-  -e RUNNER_WORKDIR="/tmp/github-runner" \
+  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner-repo:/tmp/github-runner-repo \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
 ```
 
@@ -44,7 +44,7 @@ function github-runner {
         -e REPO_URL="https://github.com/${org}/${repo}" \
         -e RUNNER_TOKEN="$2" \
         -e RUNNER_NAME="linux-${repo}" \
-        -e RUNNER_WORKDIR="/tmp/github-runner" \
+        -e RUNNER_WORKDIR="/tmp/github-runner-${repo}" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
         --name $name ${org}/github-runner:${tag}
@@ -67,7 +67,7 @@ job "github_runner" {
     env {
       REPO_URL = "https://github.com/your-account/your-repo"
       RUNNER_TOKEN   = "footoken"
-      RUNNER_WORKDIR = "/tmp/github-runner"
+      RUNNER_WORKDIR = "/tmp/github-runner-your-repo"
     }
 
     config {
@@ -155,7 +155,7 @@ docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
-  -e RUNNER_WORKDIR="/tmp/github-runner" \
+  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
