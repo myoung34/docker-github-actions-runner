@@ -27,7 +27,7 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner-repo:/tmp/github-runner-repo \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
 ```
 
