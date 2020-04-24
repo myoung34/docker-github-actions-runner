@@ -21,6 +21,19 @@ If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable`
 ### Manual ###
 
 ```
+# org runner 
+docker run -d --restart always --name github-runner \
+  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_TOKEN="footoken" \
+  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
+  -e ORG_RUNNER="true" \
+  -e ORG_NAME="octokode" \
+  -e LABELS="my-label,other-label" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
+  myoung34/github-runner:latest
+# per repo
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
@@ -45,6 +58,9 @@ function github-runner {
         -e RUNNER_TOKEN="$2" \
         -e RUNNER_NAME="linux-${repo}" \
         -e RUNNER_WORKDIR="/tmp/github-runner-${repo}" \
+        -e ORG_RUNNER="true" \
+        -e ORG_NAME="octokode" \
+        -e LABELS="my-label,other-label" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
         --name $name ${org}/github-runner:${tag}
@@ -68,6 +84,9 @@ job "github_runner" {
       REPO_URL = "https://github.com/your-account/your-repo"
       RUNNER_TOKEN   = "footoken"
       RUNNER_WORKDIR = "/tmp/github-runner-your-repo"
+      ORG_RUNNER     = "true"
+      ORG_NAME       = "octokode"
+      LABELS         = "my-label,other-label"
     }
 
     config {
@@ -111,6 +130,12 @@ spec:
       - name: runner
         image: myoung34/github-runner:latest
         env:
+        - name: ORG_RUNNER
+          value: true
+        - name: ORG_NAME
+          value: octokode
+        - name: LABELS
+          value: my-label,other-label
         - name: RUNNER_TOKEN
           value: footoken
         - name: REPO_URL
@@ -156,6 +181,9 @@ docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
+  -e ORG_RUNNER="true" \
+  -e ORG_NAME="octokode" \
+  -e LABELS="my-label,other-label" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
