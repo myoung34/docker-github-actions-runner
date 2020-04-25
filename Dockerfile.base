@@ -4,6 +4,7 @@ LABEL maintainer="myoung34@my.apsu.edu"
 ARG GIT_VERSION="2.26.2"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
