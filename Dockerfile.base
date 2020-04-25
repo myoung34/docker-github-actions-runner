@@ -1,5 +1,5 @@
 FROM ubuntu:rolling
-LABEL maintainer="3vilpenguin@gmail.com"
+LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG GIT_VERSION="2.26.2"
 
