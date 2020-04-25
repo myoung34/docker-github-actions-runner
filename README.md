@@ -1,6 +1,8 @@
 Docker Github Actions Runner
 ============================
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/myoung34/github-runner.svg)](https://hub.docker.com/r/myoung34/github-runner)
+
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
 This has been tested and verified on:
