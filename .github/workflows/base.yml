@@ -41,7 +41,7 @@ jobs:
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile.base Dockerfile.base.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.ubuntu-bionic
+      run: cp Dockerfile.base Dockerfile.base.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.base.ubuntu-bionic
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
@@ -61,7 +61,7 @@ jobs:
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile Dockerfile.base.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM ubuntu:xenial/' Dockerfile.ubuntu-xenial
+      run: cp Dockerfile Dockerfile.base.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM ubuntu:xenial/' Dockerfile.base.ubuntu-xenial
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
