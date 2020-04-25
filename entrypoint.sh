@@ -37,5 +37,5 @@ if [[ -n "${ACCESS_TOKEN}" ]]; then
 fi
 
 echo "Configuring"
-./config.sh --url "${_SHORT_URL}" --token "${RUNNER_TOKEN}" --name "${_RUNNER_NAME}" --work "${_RUNNER_WORKDIR}" --labels "${_LABELS}"
+./config.sh --url "${_SHORT_URL}" --token "${RUNNER_TOKEN}" --name "${_RUNNER_NAME}" --work "${_RUNNER_WORKDIR}" --labels "${_LABELS}" --replace
 ./run.sh
