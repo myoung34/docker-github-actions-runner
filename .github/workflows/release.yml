@@ -2,6 +2,7 @@ name: GitHub Actions Runner in Docker - Release
 on:
   push:
     paths-ignore:
+      - Dockerfile.base
       - README.md
     tags:
       - '*'
@@ -44,7 +45,7 @@ jobs:
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.ubuntu-bionic
+      run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM myoung34/github-runner-base:ubuntu-bionic/' Dockerfile.ubuntu-bionic
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
@@ -66,7 +67,7 @@ jobs:
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM ubuntu:xenial/' Dockerfile.ubuntu-xenial
+      run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM myoung34/github-runner-base:ubuntu-xenial/' Dockerfile.ubuntu-xenial
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
