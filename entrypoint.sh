@@ -7,6 +7,7 @@ _RUNNER_NAME=${RUNNER_NAME:-default}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _ORG_RUNNER=${ORG_RUNNER:-false}
 _LABELS=${LABELS:-default}
+_SHORT_URL=${REPO_URL}
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
     URI=https://api.github.com
