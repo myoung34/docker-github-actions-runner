@@ -7,6 +7,7 @@ _RUNNER_NAME=${RUNNER_NAME:-default}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _ORG_RUNNER=${ORG_RUNNER:-false}
 _LABELS=${LABELS:-default}
+_SHORT_URL=${REPO_URL}
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
     URI=https://api.github.com
@@ -22,7 +23,6 @@ if [[ -n "${ACCESS_TOKEN}" ]]; then
     _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
 
     _FULL_URI="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
-    _SHORT_URL="${REPO_URL}"
     if [[ ${_ORG_RUNNER} == "true" ]]; then
       [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
       _FULL_URI="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
