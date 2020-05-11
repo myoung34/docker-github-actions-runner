@@ -47,4 +47,4 @@ echo "Configuring"
     --unattended \
     --replace
 
-./run.sh
+./bin/runsvc.sh
