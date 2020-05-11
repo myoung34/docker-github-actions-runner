@@ -28,7 +28,6 @@ if [[ -n "${ACCESS_TOKEN}" ]]; then
       _FULL_URI="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
       _SHORT_URL="${_PROTO}github.com/${ORG_NAME}"
     fi
-    echo curl -XPOST -fsSL -H "${AUTH_HEADER}" -H "${API_HEADER}" "${_FULL_URI}"
     RUNNER_TOKEN="$(curl -XPOST -fsSL \
       -H "${AUTH_HEADER}" \
       -H "${API_HEADER}" \
