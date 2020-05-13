@@ -1,15 +1,29 @@
 name: GitHub Actions Runner in Docker - Release
 on:
   push:
-    paths-ignore:
-      - Dockerfile.base
-      - README.md
     tags:
       - '*'
 
 jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
   ubuntu_latest_tag:
     runs-on: ubuntu-latest
+    needs: create-release
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
@@ -30,6 +44,7 @@ jobs:
       run: docker buildx build -f Dockerfile -t ${ORG}/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_bionic_tag:
     runs-on: ubuntu-latest
+    needs: create-release
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
@@ -52,6 +67,7 @@ jobs:
       run: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_xenial_tag:
     runs-on: ubuntu-latest
+    needs: create-release
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
