@@ -27,6 +27,7 @@ If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable`
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_NAME_PREFIX="myrunner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e ORG_RUNNER="true" \
@@ -39,6 +40,7 @@ docker run -d --restart always --name github-runner \
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_NAME_PREFIX="myrunner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -59,6 +61,7 @@ function github-runner {
         -e REPO_URL="https://github.com/${org}/${repo}" \
         -e RUNNER_TOKEN="$2" \
         -e RUNNER_NAME="linux-${repo}" \
+        -e RUNNER_NAME_PREFIX="${repo}" \
         -e RUNNER_WORKDIR="/tmp/github-runner-${repo}" \
         -e ORG_RUNNER="true" \
         -e ORG_NAME="octokode" \
@@ -83,6 +86,7 @@ services:
     environment:
       REPO_URL: https://github.com/example/repo
       RUNNER_NAME: example-name
+      RUNNER_NAME_PREFIX: foo
       RUNNER_TOKEN: someGithubTokenHere
       RUNNER_WORKDIR: /tmp/runner/work
       ORG_RUNNER: true
@@ -169,6 +173,8 @@ spec:
           value: footoken
         - name: REPO_URL
           value: https://github.com/your-account/your-repo
+        - name: RUNNER_NAME_PREFIX
+          value: foo
         - name: RUNNER_NAME
           valueFrom:
             fieldRef:
@@ -209,6 +215,7 @@ docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_NAME_PREFIX="myrunner" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e ORG_RUNNER="true" \
   -e ORG_NAME="octokode" \

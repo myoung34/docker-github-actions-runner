@@ -3,7 +3,7 @@
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
 
-_RUNNER_NAME=${RUNNER_NAME:-default}
+_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _ORG_RUNNER=${ORG_RUNNER:-false}
 _LABELS=${LABELS:-default}
