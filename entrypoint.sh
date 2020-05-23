@@ -46,4 +46,7 @@ echo "Configuring"
     --unattended \
     --replace
 
+unset RUNNER_TOKEN
+unset ACCESS_TOKEN
+
 ./bin/runsvc.sh
