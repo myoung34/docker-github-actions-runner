@@ -8,6 +8,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
+    awscli \
     curl \
     tar \
     apt-transport-https \
