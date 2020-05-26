@@ -8,7 +8,6 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 This has been tested and verified on:
 
  * x86_64
- * armhf
  * armv7
  * arm64
  
