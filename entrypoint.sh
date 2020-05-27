@@ -3,41 +3,26 @@
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
 
+deregister_runner() {
+  echo "Caught SIGTERM. Deregistering runner"
+  _TOKEN=$(bash /token.sh)
+  RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+  ./config.sh remove --token "${RUNNER_TOKEN}"
+  exit
+}
+
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
-_ORG_RUNNER=${ORG_RUNNER:-false}
 _LABELS=${LABELS:-default}
 _SHORT_URL=${REPO_URL}
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
-    URI=https://api.github.com
-    API_VERSION=v3
-    API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
-    AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
-
-    REPO_URL=${REPO_URL:-${URI}}
-    _PROTO="$(echo "${REPO_URL}" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
-    # shellcheck disable=SC2116
-    _URL="$(echo "${REPO_URL/${_PROTO}/}")"
-    _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
-    _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
-    _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
-
-    _FULL_URI="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
-    if [[ ${_ORG_RUNNER} == "true" ]]; then
-      [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
-      _FULL_URI="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
-      _SHORT_URL="${_PROTO}github.com/${ORG_NAME}"
-    fi
-    RUNNER_TOKEN="$(curl -XPOST -fsSL \
-      -H "${AUTH_HEADER}" \
-      -H "${API_HEADER}" \
-      "${_FULL_URI}" \
-    | jq -r '.token')"
+  _TOKEN=$(bash /token.sh)
+  RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+  _SHORT_URL=$(echo "${_TOKEN}" | jq -r .short_url)
 fi
 
 echo "Configuring"
-
 ./config.sh \
     --url "${_SHORT_URL}" \
     --token "${RUNNER_TOKEN}" \
@@ -48,6 +33,6 @@ echo "Configuring"
     --replace
 
 unset RUNNER_TOKEN
-unset ACCESS_TOKEN
+trap deregister_runner SIGINT SIGQUIT SIGTERM
 
 ./bin/runsvc.sh
