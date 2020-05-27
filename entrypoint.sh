@@ -15,6 +15,7 @@ if [[ -n "${ACCESS_TOKEN}" ]]; then
     API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
     AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
 
+    REPO_URL=${REPO_URL:-${URI}}
     _PROTO="$(echo "${REPO_URL}" | grep :// | sed -e's,^\(.*://\).*,\1,g')"
     # shellcheck disable=SC2116
     _URL="$(echo "${REPO_URL/${_PROTO}/}")"
