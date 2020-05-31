@@ -19,7 +19,7 @@ jobs:
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
+        buildx-version: latest
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Login
@@ -37,7 +37,7 @@ jobs:
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
+        buildx-version: latest
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
@@ -57,7 +57,7 @@ jobs:
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
+        buildx-version: latest
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
