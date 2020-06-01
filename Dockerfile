@@ -13,6 +13,8 @@ COPY install_actions.sh /actions-runner
 RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
+RUN mkdir /opt/hostedtoolcache \
+  && chown 1001:docker /opt/hostedtoolcache/
 
 COPY token.sh /
 RUN chmod +x /token.sh
