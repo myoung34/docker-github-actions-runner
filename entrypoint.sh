@@ -2,6 +2,7 @@
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
+export AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
