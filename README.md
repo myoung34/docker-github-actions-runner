@@ -11,7 +11,9 @@ This has been tested and verified on:
  * armv7
  * arm64
  
-**NOTE: Only one runner can use the same RUNNER_WORKDIR if it is shared storage.**
+**NOTE:**
+- **Only one runner can use the same RUNNER_WORKDIR if it is shared storage.**
+- **RUNNER_WORKDIR must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files.**
 
 ## Examples ##
 
