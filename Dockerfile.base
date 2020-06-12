@@ -5,8 +5,9 @@ ARG GIT_VERSION="2.26.2"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
-# hadolint ignore=DL3003
+# hadolint ignore=DL3003,DL3005
 RUN apt-get update && \
+  apt-get upgrade -y \
   apt-get install -y --no-install-recommends \
     awscli \
     curl \

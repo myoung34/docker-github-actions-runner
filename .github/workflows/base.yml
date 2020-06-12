@@ -1,5 +1,8 @@
 name: GitHub Actions Runner in Docker - Base
 on:
+on:
+  schedule:
+    - cron:  '0 0 * * *'
   push:
     paths:
       - Dockerfile.base

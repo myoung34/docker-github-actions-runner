@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  clair:
+    image: arminc/clair-local-scan:latest
+    ports:
+      - "6060:6060"
+    depends_on:
+      - postgres
+    networks:
+      - clairnet
+  postgres:
+    image: arminc/clair-db:latest
+    networks:
+      - clairnet
+networks:
+  clairnet:
+    driver: bridge

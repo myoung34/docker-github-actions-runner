@@ -1,0 +1,51 @@
+name: Container CVE Scan
+
+on: [push]
+
+jobs:
+  clair_ubuntu_latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get GitHub organization or user
+        run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      - name: Prep clair
+        run: docker-compose -f docker-compose-clair.yml up -d
+      - name: Download Clair-Scanner
+        run: curl -Ls https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner && chmod +x clair-scanner
+      - name: Build
+        run: docker build -f Dockerfile -t ${ORG}/github-runner:latest .
+      - name: Test
+        run: ./clair-scanner --ip $(ip -f inet addr show eth0 | grep -Po 'inet \K[\d.]+') ${ORG}/github-runner:latest
+  clair_ubuntu_bionic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get GitHub organization or user
+        run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-bionic/" Dockerfile.ubuntu-bionic
+      - name: Prep clair
+        run: docker-compose -f docker-compose-clair.yml up -d
+      - name: Download Clair-Scanner
+        run: curl -Ls https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner && chmod +x clair-scanner
+      - name: Build
+        run: docker build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:ubuntu-bionic .
+      - name: Test
+        run: ./clair-scanner --ip $(ip -f inet addr show eth0 | grep -Po 'inet \K[\d.]+')  ${ORG}/github-runner:ubuntu-bionic
+  clair_ubuntu_xenial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get GitHub organization or user
+        run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-xenial/" Dockerfile.ubuntu-xenial
+      - name: Prep clair
+        run: docker-compose -f docker-compose-clair.yml up -d
+      - name: Download Clair-Scanner
+        run: curl -Ls https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o clair-scanner && chmod +x clair-scanner
+      - name: Build
+        run: docker build -f Dockerfile.ubuntu-xenial -t ${ORG}/github-runner:ubuntu-xenial .
+      - name: Test
+        run: ./clair-scanner --ip $(ip -f inet addr show eth0 | grep -Po 'inet \K[\d.]+')  ${ORG}/github-runner:ubuntu-xenial
