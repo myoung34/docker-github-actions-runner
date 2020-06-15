@@ -26,10 +26,8 @@ If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable`
 ```
 # org runner 
 docker run -d --restart always --name github-runner \
-  -e REPO_URL="https://github.com/myoung34/repo" \
-  -e RUNNER_NAME="foo-runner" \
   -e RUNNER_NAME_PREFIX="myrunner" \
-  -e RUNNER_TOKEN="footoken" \
+  -e ACCESS_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e ORG_RUNNER="true" \
   -e ORG_NAME="octokode" \
@@ -41,7 +39,6 @@ docker run -d --restart always --name github-runner \
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
-  -e RUNNER_NAME_PREFIX="myrunner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -62,10 +59,7 @@ function github-runner {
         -e REPO_URL="https://github.com/${org}/${repo}" \
         -e RUNNER_TOKEN="$2" \
         -e RUNNER_NAME="linux-${repo}" \
-        -e RUNNER_NAME_PREFIX="${repo}" \
         -e RUNNER_WORKDIR="/tmp/github-runner-${repo}" \
-        -e ORG_RUNNER="true" \
-        -e ORG_NAME="octokode" \
         -e LABELS="my-label,other-label" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
@@ -87,11 +81,9 @@ services:
     environment:
       REPO_URL: https://github.com/example/repo
       RUNNER_NAME: example-name
-      RUNNER_NAME_PREFIX: foo
       RUNNER_TOKEN: someGithubTokenHere
       RUNNER_WORKDIR: /tmp/runner/work
-      ORG_RUNNER: true
-      ORG_NAME: example-github-org
+      ORG_RUNNER: false
       LABELS: linux,x64,gpu
     security_opt:
       # needed on SELinux systems to allow docker container to manage other docker containers
@@ -115,12 +107,12 @@ job "github_runner" {
     driver = "docker"
 
     env {
-      REPO_URL = "https://github.com/your-account/your-repo"
-      RUNNER_TOKEN   = "footoken"
-      RUNNER_WORKDIR = "/tmp/github-runner-your-repo"
-      ORG_RUNNER     = "true"
-      ORG_NAME       = "octokode"
-      LABELS         = "my-label,other-label"
+      ACCESS_TOKEN       = "footoken"
+      RUNNER_NAME_PREFIX = "myrunner" \
+      RUNNER_WORKDIR     = "/tmp/github-runner-your-repo"
+      ORG_RUNNER         = "true"
+      ORG_NAME           = "octokode"
+      LABELS             = "my-label,other-label"
     }
 
     config {
@@ -214,9 +206,7 @@ A runner token can be automatically acquired at runtime if `ACCESS_TOKEN` (a Git
 ```
 docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
-  -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
-  -e RUNNER_NAME_PREFIX="myrunner" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e ORG_RUNNER="true" \
   -e ORG_NAME="octokode" \
