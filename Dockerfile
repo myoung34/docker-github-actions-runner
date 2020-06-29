@@ -16,6 +16,7 @@ RUN chmod +x /actions-runner/install_actions.sh \
 
 COPY token.sh /
 RUN chmod +x /token.sh
+
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
