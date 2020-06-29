@@ -11,6 +11,7 @@ RUN apt-get update && \
     awscli \
     curl \
     tar \
+    unzip \
     apt-transport-https \
     ca-certificates \
     sudo \
