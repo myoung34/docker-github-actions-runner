@@ -83,7 +83,7 @@ services:
       RUNNER_NAME: example-name
       RUNNER_TOKEN: someGithubTokenHere
       RUNNER_WORKDIR: /tmp/runner/work
-      ORG_RUNNER: false
+      ORG_RUNNER: 'false'
       LABELS: linux,x64,gpu
     security_opt:
       # needed on SELinux systems to allow docker container to manage other docker containers
