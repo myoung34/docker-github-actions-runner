@@ -6,6 +6,9 @@ on:
     branches:
       - master
       - develop
+  schedule:
+    - cron:  '0 22 * * *'
+
 
 jobs:
   ubuntu_base_latest_deploy:
