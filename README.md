@@ -5,15 +5,29 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
-This has been tested and verified on:
+## Docker Artifacts ##
 
- * x86_64
- * armv7
- * arm64
- 
-**NOTE:**
-- **Only one runner can use the same RUNNER_WORKDIR if it is shared storage.**
-- **RUNNER_WORKDIR must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files.**
+| Container Base | Supported Architectures | Tag Regex | Docker Tags | Description |
+| --- | --- | --- | --- | --- |
+| ubuntu eoan | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. |
+| ubuntu bionic | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | 
+| ubuntu xenial | `x86_64`,`armv7`,`arm64` |  `/\d\.\d{3}\.\d+-ubuntu-xenial/` | [ubuntu-xenial](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-xenial) | This is the latest build from xenial (Rebuilt nightly and on master merges). Tags with `-ubuntu-xenial` are included and created on [upstream tags](https://github.com/actions/runner/tags). |
+
+These containers are built via Github actions that [copy the dockerfile](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47), changing the `FROM` and building to provide simplicity.
+
+## Environment Variables ##
+
+| Environment Variable | Description |
+| --- | --- |
+| `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
+| `RUNNER_NAME_PREFIX` | A prefix for a randomly generated name (followed by a random 13 digit string). You must not also provide `RUNNER_NAME`. Defaults to `github-runner` |
+| `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN` |
+| `ORG_RUNNER` | Only valid if using `ACCESS_TOKEN`. This will set the runner to an org runner. Default is 'false'. Valid values are 'true' or 'false'. If this is set to true you must also set `ORG_NAME` and makes `REPO_URL` unneccesary |
+| `ORG_NAME` | The organization name for the runner to register under. Requires `ORG_RUNNER` to be 'true'. No default value. |
+| `LABELS` | A comma separated string to indicate the labels. Default is 'default' |
+| `REPO_URL` | If using a non-organization runner this is the full repository url to register under such as 'https://github.com/myoung34/repo' |
+| `RUNNER_TOKEN` | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred. |
+| `RUNNER_WORKDIR` | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files. |
 
 ## Examples ##
 
