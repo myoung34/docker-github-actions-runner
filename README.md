@@ -229,3 +229,17 @@ docker run -d --restart always --name github-runner \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
 ```
+
+## Create GitHub personal access token  ##
+
+Creating GitHub personal access token (PAT) for using by self-hosted runner make sure the following scopes are selected:
+
+* repo (all)
+* admin:org (all) **_(mandatory for organization-wide runner)_**
+* admin:public_key - read:public_key
+* admin:repo_hook - read:repo_hook
+* admin:org_hook
+* notifications
+* workflow
+ 
+Also, when creating a PAT for self-hosted runner which will process events from several repositories of the particular organization, create the PAT using organization owner account. Otherwise your new PAT will not have sufficient privileges for all repositories.
