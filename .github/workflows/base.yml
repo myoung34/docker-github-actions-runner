@@ -69,3 +69,23 @@ jobs:
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
       run: docker buildx build -f Dockerfile.base.ubuntu-xenial -t ${ORG}/github-runner-base:ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+  ubuntu_base_focal_deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Get GitHub organization or user
+      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        buildx-version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Copy Dockerfile
+      run: cp Dockerfile.base Dockerfile.base.ubuntu-focal; sed -i.bak 's/FROM.*/FROM ubuntu:focal/' Dockerfile.base.ubuntu-focal
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Build
+      run: docker buildx build -f Dockerfile.base.ubuntu-focal -t ${ORG}/github-runner-base:ubuntu-focal --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
