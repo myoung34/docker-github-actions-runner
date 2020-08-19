@@ -16,6 +16,10 @@ _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _LABELS=${LABELS:-default}
 _SHORT_URL=${REPO_URL}
 
+if [[ ${ORG_RUNNER} == "true" ]]; then
+  _SHORT_URL="https://github.com/${ORG_NAME}"
+fi
+
 if [[ -n "${ACCESS_TOKEN}" ]]; then
   _TOKEN=$(bash /token.sh)
   RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
