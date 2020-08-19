@@ -1,4 +1,5 @@
 FROM ubuntu:eoan
+
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG GIT_VERSION="2.26.2"
