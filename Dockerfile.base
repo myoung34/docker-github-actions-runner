@@ -25,6 +25,7 @@ RUN apt-get update && \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq \
+    dumb-init \
   && c_rehash \
   && cd /tmp \
   && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \

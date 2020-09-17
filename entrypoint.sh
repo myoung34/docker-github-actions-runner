@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/dumb-init /bin/bash
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
