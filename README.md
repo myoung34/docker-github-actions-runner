@@ -7,12 +7,12 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ## Docker Artifacts ##
 
-| Container Base | Supported Architectures | Tag Regex | Docker Tags | Description |
-| --- | --- | --- | --- | --- |
-| ubuntu focal | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. Tags without an OS name *before* 9/17/2020 are `eoan` |
-| ubuntu eoan | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is deprecated as of 9/17/2020 and will no longer receive tags or be latest. Tags without an OS name before 9/17/2020 are eoan|
-| ubuntu bionic | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | 
-| ubuntu xenial | `x86_64`,`armv7`,`arm64` |  `/\d\.\d{3}\.\d+-ubuntu-xenial/` | [ubuntu-xenial](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-xenial) | This is the latest build from xenial (Rebuilt nightly and on master merges). Tags with `-ubuntu-xenial` are included and created on [upstream tags](https://github.com/actions/runner/tags). |
+| Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
+| --- | --- | --- | --- | --- | --- |
+| ubuntu focal | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. | Tags without an OS name *before* 9/17/2020 are `eoan` |
+| ubuntu eoan | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+/` | | | This is deprecated as of 9/17/2020 and will no longer receive tags or be latest. Tags without an OS name before 9/17/2020 are eoan|
+| ubuntu bionic | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
+| ubuntu xenial | `x86_64`,`armv7`,`arm64` |  `/\d\.\d{3}\.\d+-ubuntu-xenial/` | [ubuntu-xenial](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-xenial) | This is the latest build from xenial (Rebuilt nightly and on master merges). Tags with `-ubuntu-xenial` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 
 These containers are built via Github actions that [copy the dockerfile](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47), changing the `FROM` and building to provide simplicity.
 
