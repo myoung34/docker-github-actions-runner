@@ -39,7 +39,6 @@ RUN apt-get update && \
   && make \
   && make install \
   && cd / \
-  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${DOCKER_KEY} \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
   && [[ $(lsb_release -cs) == "focal" ]] && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu focal stable" ) || ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" ) \
   && apt-get update \
