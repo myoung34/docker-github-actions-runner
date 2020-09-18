@@ -1,12 +1,13 @@
-FROM ubuntu:eoan
+FROM ubuntu:focal
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG GIT_VERSION="2.26.2"
+ARG DUMB_INIT_VERSION="1.2.2"
 ENV DOCKER_COMPOSE_VERSION="1.26.2"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
-# hadolint ignore=DL3003
+# hadolint ignore=DL3003,DL4001
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
     awscli \
@@ -25,9 +26,12 @@ RUN apt-get update && \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq \
-    dumb-init \
+    wget \
   && c_rehash \
   && cd /tmp \
+  && wget --quiet https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64.deb \
+  && dpkg -i dumb-init_*.deb \
+  && rm dumb-init_*.deb \
   && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
   && tar zxf git.tgz \
   && cd git-${GIT_VERSION} \
@@ -36,7 +40,7 @@ RUN apt-get update && \
   && make install \
   && cd / \
   && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - \
-  && [[ $(lsb_release -cs) == "eoan" ]] && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu disco stable" ) || ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" ) \
+  && [[ $(lsb_release -cs) == "focal" ]] && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu disco stable" ) || ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends \
   && curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
