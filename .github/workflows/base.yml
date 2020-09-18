@@ -68,4 +68,4 @@ jobs:
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
-      run: docker buildx build -f Dockerfile.base.ubuntu-xenial -t ${ORG}/github-runner-base:ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+      run: docker buildx build -f Dockerfile.base.ubuntu-xenial -t ${ORG}/github-runner-base:ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
