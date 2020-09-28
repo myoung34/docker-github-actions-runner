@@ -30,6 +30,7 @@ RUN apt-get update && \
     jq \
     wget \
     dirmngr \
+    openssh-client \
   && c_rehash \
   && cd /tmp \
   && [[ $(lsb_release -cs) == "xenial" ]] && ( wget --quiet "https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_$(uname -i | sed 's/x86_64/amd64/g').deb" && dpkg -i dumb-init_*.deb && rm dumb-init_*.deb ) || ( apt-get install -y --no-install-recommends dumb-init ) \
