@@ -2,6 +2,9 @@
 FROM myoung34/github-runner-base:latest
 LABEL maintainer="myoung34@my.apsu.edu"
 
+ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
+RUN mkdir -p /opt/hostedtoolcache
+
 ARG GH_RUNNER_VERSION="2.273.5"
 ARG TARGETPLATFORM
 
