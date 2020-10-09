@@ -91,7 +91,6 @@ version: '2.3'
 
 services:
   worker:
-    build: .
     image: myoung34/github-runner:latest
     environment:
       REPO_URL: https://github.com/example/repo
