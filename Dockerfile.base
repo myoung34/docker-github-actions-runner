@@ -1,11 +1,11 @@
 FROM ubuntu:focal
 LABEL maintainer="myoung34@my.apsu.edu"
 
-ARG GIT_VERSION="2.26.2"
+ARG GIT_VERSION="2.29.0"
 ARG DUMB_INIT_VERSION="1.2.2"
 ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
-ENV DOCKER_COMPOSE_VERSION="1.26.2"
+ENV DOCKER_COMPOSE_VERSION="1.27.4"
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
