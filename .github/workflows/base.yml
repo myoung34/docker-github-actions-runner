@@ -34,7 +34,7 @@ jobs:
         with:
           push: true
           tags: ${{ steps.org.outputs.ORG }}/github-runner-base:latest
-          platforms: linux/amd64,linux/arm64,linux/386
+          platforms: linux/amd64,linux/arm64
           file: ./Dockerfile.base
 
   ubuntu_base_bionic_deploy:
@@ -65,7 +65,7 @@ jobs:
         with:
           push: true
           tags: ${{ steps.org.outputs.ORG }}/github-runner-base:ubuntu-bionic
-          platforms: linux/amd64,linux/arm64,linux/386
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           file: ./Dockerfile.base.ubuntu-bionic
 
   ubuntu_base_xenial_deploy:
@@ -96,5 +96,5 @@ jobs:
         with:
           push: true
           tags: ${{ steps.org.outputs.ORG }}/github-runner-base:ubuntu-xenial
-          platforms: linux/amd64,linux/arm64,linux/386
+          platforms: linux/amd64,linux/arm64
           file: ./Dockerfile.base.ubuntu-xenial
