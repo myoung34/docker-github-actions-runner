@@ -21,103 +21,70 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
-
   ubuntu_latest_tag:
     runs-on: ubuntu-latest
     needs: create-release
     steps:
-    - name: Checkout
+    - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-      id: tag
-      shell: bash
+      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
     - name: Get GitHub organization or user
-      run: echo ::set-output name=ORG::$(dirname ${GITHUB_REPOSITORY})
-      id: org
-      shell: bash
+      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
-        install: true
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64
-        file: ./Dockerfile
-
+        buildx-version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Build
+      run: docker buildx build -f Dockerfile -t ${ORG}/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
   ubuntu_bionic_tag:
     runs-on: ubuntu-latest
     needs: create-release
     steps:
-    - name: Checkout
+    - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-      id: tag
-      shell: bash
+      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
     - name: Get GitHub organization or user
-      run: echo ::set-output name=ORG::$(dirname ${GITHUB_REPOSITORY})
-      id: org
-      shell: bash
+      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
-        install: true
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
+        buildx-version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak "s/FROM.*/FROM ${{ steps.org.outputs.ORG }}\/github-runner-base:ubuntu-bionic/" Dockerfile.ubuntu-bionic
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64,linux/arm/v7
-        file: ./Dockerfile.ubuntu-bionic
-
+      run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-bionic/" Dockerfile.ubuntu-bionic
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_xenial_tag:
     runs-on: ubuntu-latest
     needs: create-release
     steps:
-    - name: Checkout
+    - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-output name=TAG::${GITHUB_REF#refs/tags/}
-      id: tag
-      shell: bash
+      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
     - name: Get GitHub organization or user
-      run: echo ::set-output name=ORG::$(dirname ${GITHUB_REPOSITORY})
-      id: org
-      shell: bash
-    - name: Set up Docker
-      uses: docker/setup-buildx-action@v1
+      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
       with:
-        version: latest
-        install: true
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
+        buildx-version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak "s/FROM.*/FROM ${{ steps.org.outputs.ORG }}\/github-runner-base:ubuntu-xenial/" Dockerfile.ubuntu-xenial
-    - name: Build and push
-      uses: docker/build-push-action@v2
-      with:
-        push: true
-        tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64
-        file: ./Dockerfile.ubuntu-xenial
+      run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-xenial/" Dockerfile.ubuntu-xenial
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Build
+      run: docker buildx build -f Dockerfile.ubuntu-xenial -t ${ORG}/github-runner:${TAG}-ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
