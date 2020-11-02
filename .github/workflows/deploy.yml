@@ -59,6 +59,8 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.ubuntu-bionic; sed -i.bak "s/FROM.*/FROM ${{ steps.org.outputs.ORG }}\/github-runner-base:ubuntu-bionic/" Dockerfile.ubuntu-bionic
+      - name: Debug Dockerfile
+        run: head -n 5 ./Dockerfile.ubuntu-bionic
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -88,6 +90,8 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.ubuntu-xenial; sed -i.bak "s/FROM.*/FROM ${{ steps.org.outputs.ORG }}\/github-runner-base:ubuntu-xenial/" Dockerfile.ubuntu-xenial
+      - name: Debug Dockerfile
+        run: head -n 5 ./Dockerfile.ubuntu-xenial
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
