@@ -51,7 +51,7 @@ jobs:
       with:
         push: true
         tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64,linux/386
+        platforms: linux/amd64,linux/arm64
         file: ./Dockerfile
 
   ubuntu_bionic_tag:
@@ -85,7 +85,7 @@ jobs:
       with:
         push: true
         tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64,linux/386
+        platforms: linux/amd64,linux/arm64,linux/arm/v7
         file: ./Dockerfile.ubuntu-bionic
 
   ubuntu_xenial_tag:
@@ -119,5 +119,5 @@ jobs:
       with:
         push: true
         tags: ${{ steps.org.outputs.ORG }}/github-runner:${{ step.tag.outputs.TAG }}
-        platforms: linux/amd64,linux/arm64,linux/386
+        platforms: linux/amd64,linux/arm64
         file: ./Dockerfile.ubuntu-xenial
