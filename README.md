@@ -178,7 +178,7 @@ spec:
         image: myoung34/github-runner:latest
         env:
         - name: ORG_RUNNER
-          value: true
+          value: "true"
         - name: ORG_NAME
           value: octokode
         - name: LABELS
