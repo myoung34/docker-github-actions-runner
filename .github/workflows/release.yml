@@ -28,9 +28,9 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
+      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
-      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
@@ -49,9 +49,9 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
+      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
-      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
@@ -72,9 +72,9 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo ::set-env name=TAG::${GITHUB_REF#refs/tags/}
+      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
-      run: echo ::set-env name=ORG::$(dirname ${GITHUB_REPOSITORY})
+      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
       id: buildx
       uses: crazy-max/ghaction-docker-buildx@v1
