@@ -17,8 +17,8 @@ _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _SHORT_URL=${REPO_URL}
 
-if [[ ${ORG_RUNNER} == "true" ]]; then
-  _SHORT_URL="https://github.com/${ORG_NAME}"
+if [[ -n "${RUNNER_ORG}" ]]; then
+  _SHORT_URL="https://github.com/${RUNNER_ORG}"
 fi
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then

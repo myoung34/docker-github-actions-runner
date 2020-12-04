@@ -1,0 +1,78 @@
+---
+"on":
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - "Dockerfile"
+      - .github/workflows/build-runner.yml
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfile"
+      - .github/workflows/build-runner.yml
+
+name: Runner
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build Docker Image
+    env:
+      RUNNER_VERSION: 2.274.2
+      DOCKER_VERSION: 19.03.13
+      DOCKERHUB_USERNAME: ministryofjustice
+      DOCKERHUB_REPOSITORY: actions-runner
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
+          install: true
+
+      - name: Build Image
+        if: ${{ github.event_name == 'pull_request' }}
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: false
+          load: false
+          build-args: |
+            RUNNER_VERSION=${RUNNER_VERSION:?}
+            DOCKER_VERSION=${DOCKER_VERSION:?}
+      - name: Login to DockerHub
+        if: ${{ github.event_name == 'push' }}
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+      - name: Build and push
+        if: ${{ github.event_name == 'push' }}
+        id: docker_build_and_push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            RUNNER_VERSION=${RUNNER_VERSION:?}
+            DOCKER_VERSION=${DOCKER_VERSION:?}
+          tags: |
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:latest
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPOSITORY }}:v${{ env.RUNNER_VERSION }}
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }} ${{ steps.docker_build_and_push.outputs.digest}}
