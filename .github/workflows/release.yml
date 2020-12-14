@@ -28,7 +28,7 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+      run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
@@ -49,7 +49,7 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+      run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
@@ -72,7 +72,7 @@ jobs:
     - name: Copy Repo Files
       uses: actions/checkout@master
     - name: get version
-      run: echo 'TAG=' ${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
+      run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
     - name: Get GitHub organization or user
       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
     - name: Set up Docker Buildx
