@@ -128,7 +128,7 @@ job "github_runner" {
 
     env {
       ACCESS_TOKEN       = "footoken"
-      RUNNER_NAME_PREFIX = "myrunner" \
+      RUNNER_NAME_PREFIX = "myrunner"
       RUNNER_WORKDIR     = "/tmp/github-runner-your-repo"
       RUNNER_GROUP       = "my-group"
       ORG_RUNNER         = "true"
@@ -137,8 +137,11 @@ job "github_runner" {
     }
 
     config {
-      privileged = true
       image = "myoung34/github-runner:latest"
+      
+      privileged  = true
+      userns_mode = "host"
+
       volumes = [
         "/var/run/docker.sock:/var/run/docker.sock",
         "/tmp/github-runner-your-repo:/tmp/github-runner-your-repo",
