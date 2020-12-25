@@ -6,6 +6,9 @@ ARG DUMB_INIT_VERSION="1.2.2"
 ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
 ENV DOCKER_COMPOSE_VERSION="1.27.4"
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
@@ -31,6 +34,9 @@ RUN apt-get update && \
     wget \
     dirmngr \
     openssh-client \
+    locales \
+  && locale-gen en_US.UTF-8 \
+  && dpkg-reconfigure locales \
   && c_rehash \
   && cd /tmp \
   && [[ $(lsb_release -cs) == "xenial" ]] && ( wget --quiet "https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_$(uname -i | sed 's/x86_64/amd64/g').deb" && dpkg -i dumb-init_*.deb && rm dumb-init_*.deb ) || ( apt-get install -y --no-install-recommends dumb-init ) \
