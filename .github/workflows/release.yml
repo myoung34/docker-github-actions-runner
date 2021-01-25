@@ -41,7 +41,12 @@ jobs:
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
-      run: docker buildx build -f Dockerfile -t ${ORG}/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
+      uses: nick-invision/retry@v2
+      with:
+        max_attempts: 3
+        retry_on: error
+        timeout_minutes: 60
+        command: docker buildx build -f Dockerfile -t ${ORG}/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
   ubuntu_bionic_tag:
     runs-on: ubuntu-latest
     needs: create-release
@@ -64,7 +69,12 @@ jobs:
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
-      run: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+      uses: nick-invision/retry@v2
+      with:
+        max_attempts: 3
+        retry_on: error
+        timeout_minutes: 60
+        command: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_xenial_tag:
     runs-on: ubuntu-latest
     needs: create-release
@@ -87,4 +97,9 @@ jobs:
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
-      run: docker buildx build -f Dockerfile.ubuntu-xenial -t ${ORG}/github-runner:${TAG}-ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
+      uses: nick-invision/retry@v2
+      with:
+        max_attempts: 3
+        retry_on: error
+        timeout_minutes: 60
+        command: docker buildx build -f Dockerfile.ubuntu-xenial -t ${ORG}/github-runner:${TAG}-ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
