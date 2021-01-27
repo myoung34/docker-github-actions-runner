@@ -45,7 +45,7 @@ jobs:
       with:
         max_attempts: 3
         retry_on: error
-        timeout_minutes: 60
+        timeout_minutes: 120
         command: docker buildx build -f Dockerfile -t ${ORG}/github-runner:${TAG} --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
   ubuntu_bionic_tag:
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
       with:
         max_attempts: 3
         retry_on: error
-        timeout_minutes: 60
+        timeout_minutes: 120
         command: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:${TAG}-ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
   ubuntu_xenial_tag:
     runs-on: ubuntu-latest
@@ -101,5 +101,5 @@ jobs:
       with:
         max_attempts: 3
         retry_on: error
-        timeout_minutes: 60
+        timeout_minutes: 120
         command: docker buildx build -f Dockerfile.ubuntu-xenial -t ${ORG}/github-runner:${TAG}-ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
