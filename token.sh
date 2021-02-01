@@ -1,8 +1,15 @@
 #!/bin/bash
 
 _ORG_RUNNER=${ORG_RUNNER:-false}
+_GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
-URI=https://api.github.com
+# If URL is not github.com then use the enterprise api endpoint
+if [[ ${GITHUB_HOST} = "github.com" ]]; then
+    URI="https://api.${_GITHUB_HOST}"
+else
+    URI="https://${_GITHUB_HOST}/api/v3"
+fi
+
 API_VERSION=v3
 API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
@@ -19,7 +26,7 @@ _FULL_URL="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
 if [[ ${_ORG_RUNNER} == "true" ]]; then
   [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
   _FULL_URL="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
-  _SHORT_URL="${_PROTO}github.com/${ORG_NAME}"
+  _SHORT_URL="${_PROTO}${_GITHUB_HOST}/${ORG_NAME}"
 else
   _SHORT_URL=$REPO_URL
 fi
