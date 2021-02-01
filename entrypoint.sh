@@ -16,9 +16,10 @@ _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _SHORT_URL=${REPO_URL}
+_GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
 if [[ ${ORG_RUNNER} == "true" ]]; then
-  _SHORT_URL="https://github.com/${ORG_NAME}"
+  _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
 fi
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
