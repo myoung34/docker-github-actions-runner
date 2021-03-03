@@ -17,9 +17,7 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
-COPY token.sh /
-RUN chmod +x /token.sh
+COPY token.sh entrypoint.sh /
+RUN chmod +x /token.sh /entrypoint.sh
 
-COPY entrypoint.sh /
-RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
