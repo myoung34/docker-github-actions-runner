@@ -25,6 +25,7 @@ RUN apt-get update && \
     software-properties-common \
     build-essential \
     zlib1g-dev \
+    zstd \
     gettext \
     liblttng-ust0 \
     libcurl4-openssl-dev \
