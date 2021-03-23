@@ -7,11 +7,18 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ## Notes ##
 
+### Docker Support ###
+
 Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet. 
 For more information:
 
 * https://github.com/actions/runner/issues/406
 * https://github.com/actions/runner/issues/367
+
+### Docker-Compose on ARM ###
+
+Please note `docker-compose` does not currently work on ARM ([see issue](https://github.com/docker/compose/issues/6831)) so it is not installed on ARM based builds here.
+A workaround exists, please see [here](https://github.com/myoung34/docker-github-actions-runner/issues/72#issuecomment-804723656)
 
 ## Docker Artifacts ##
 

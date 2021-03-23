@@ -47,4 +47,4 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM
 fi
 
-./bin/runsvc.sh
+$@ 
