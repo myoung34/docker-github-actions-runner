@@ -11,6 +11,8 @@ deregister_runner() {
   exit
 }
 
+_DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
+
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _LABELS=${LABELS:-default}
@@ -40,6 +42,9 @@ echo "Configuring"
     --replace
 
 unset RUNNER_TOKEN
-trap deregister_runner SIGINT SIGQUIT SIGTERM
+
+if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
+  trap deregister_runner SIGINT SIGQUIT SIGTERM
+fi
 
 ./bin/runsvc.sh
