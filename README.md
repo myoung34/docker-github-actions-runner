@@ -5,6 +5,14 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
+## Notes ##
+
+Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet. 
+For more information:
+
+* https://github.com/actions/runner/issues/406
+* https://github.com/actions/runner/issues/367
+
 ## Docker Artifacts ##
 
 | Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
