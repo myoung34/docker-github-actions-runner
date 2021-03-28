@@ -8,35 +8,39 @@ ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 ENV DOCKER_COMPOSE_VERSION="1.27.4"
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8 
+ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003,DL4001
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-    awscli \
-    curl \
-    tar \
-    unzip \
     apt-transport-https \
-    ca-certificates \
-    sudo \
-    gnupg-agent \
-    software-properties-common \
+    awscli \
     build-essential \
-    zlib1g-dev \
-    zstd \
+    ca-certificates \
+    curl \
+    dirmngr \
+    g++-multilib \
+    gcc-multilib \
     gettext \
-    liblttng-ust0 \
-    libcurl4-openssl-dev \
+    gnupg-agent \
     inetutils-ping \
     jq \
-    wget \
-    dirmngr \
-    openssh-client \
+    libcurl4-openssl-dev \
+    liblttng-ust0 \
+    liblzma-dev \
     locales \
+    openssh-client \
+    patch \
     python3-pip \
-    jq \
+    ruby-dev \
+    software-properties-common \
+    sudo \
+    tar \
+    unzip \
+    wget \
+    zlib1g-dev \
+    zstd \
   && pip3 install --no-cache-dir awscliv2 \
   && locale-gen en_US.UTF-8 \
   && dpkg-reconfigure locales \
