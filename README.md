@@ -197,6 +197,8 @@ spec:
       - name: runner
         image: myoung34/github-runner:latest
         env:
+        - name: ACCESS_TOKEN
+          value: foo-access-token
         - name: ORG_RUNNER
           value: "true"
         - name: ORG_NAME
