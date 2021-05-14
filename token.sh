@@ -1,6 +1,7 @@
 #!/bin/bash
 
 _ORG_RUNNER=${ORG_RUNNER:-false}
+_ENTERPRISE_RUNNER=${ENTERPRISE_RUNNER:-false}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
 # If URL is not github.com then use the enterprise api endpoint
@@ -27,6 +28,10 @@ if [[ ${_ORG_RUNNER} == "true" ]]; then
   [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
   _FULL_URL="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
   _SHORT_URL="${_PROTO}${_GITHUB_HOST}/${ORG_NAME}"
+elif [[ ${_ENTERPRISE_RUNNER} == "true" ]]; then
+  [[ -z ${ENTERPRISE_NAME} ]] && ( echo "ENTERPRISE_NAME required for enterprise runners"; exit 1 )
+  _FULL_URL="${URI}/enterprises/${ENTERPRISE_NAME}/actions/runners/registration-token"
+  _SHORT_URL="${_PROTO}${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
 else
   _SHORT_URL=$REPO_URL
 fi

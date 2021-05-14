@@ -22,6 +22,8 @@ _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
 if [[ ${ORG_RUNNER} == "true" ]]; then
   _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
+elif [[ ${ENTERPRISE_RUNNER} == "true" ]]; then
+  _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
 fi
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
