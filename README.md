@@ -38,10 +38,9 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
 | `RUNNER_NAME_PREFIX` | A prefix for a randomly generated name (followed by a random 13 digit string). You must not also provide `RUNNER_NAME`. Defaults to `github-runner` |
 | `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN` |
-| `ORG_RUNNER` | Only valid if using `ACCESS_TOKEN`. This will set the runner to an org runner. Default is 'false'. Valid values are 'true' or 'false'. If this is set to true you must also set `ORG_NAME` and makes `REPO_URL` unneccesary |
-| `ORG_NAME` | The organization name for the runner to register under. Requires `ORG_RUNNER` to be 'true'. No default value. |
-| `ENTERPRISE_RUNNER` | Only valid if using `ACCESS_TOKEN`. This will set the runner to an enterprise runner. Default is 'false'. Valid values are 'true' or 'false'. If this is set to true you must also set `ENTERPRISE_NAME` and makes `REPO_URL` unneccesary |
-| `ENTERPRISE_NAME` | The enterprise name for the runner to register under. Requires `ENTERPRISE_RUNNER` to be 'true'. No default value. |
+| `RUNNER_SCOPE` | The scope the runner will be registered on. Valid values are `repo`, `org` and `ent`. For 'org' and 'enterprise', `ACCESS_TOKEN` is required and `REPO_URL` is unneccesary. If 'org', requires `ORG_NAME`; if 'enterprise', requires `ENTERPRISE_NAME`. Default is 'repo'. |
+| `ORG_NAME` | The organization name for the runner to register under. Requires `RUNNER_SCOPE` to be 'org'. No default value. |
+| `ENTERPRISE_NAME` | The enterprise name for the runner to register under. Requires `RUNNER_SCOPE` to be 'enterprise'. No default value. |
 | `LABELS` | A comma separated string to indicate the labels. Default is 'default' |
 | `REPO_URL` | If using a non-organization runner this is the full repository url to register under such as 'https://github.com/myoung34/repo' |
 | `RUNNER_TOKEN` | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred. |
@@ -65,7 +64,7 @@ docker run -d --restart always --name github-runner \
   -e ACCESS_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e RUNNER_GROUP="my-group" \
-  -e ORG_RUNNER="true" \
+  -e RUNNER_SCOPE="org" \
   -e ORG_NAME="octokode" \
   -e LABELS="my-label,other-label" \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -122,7 +121,7 @@ services:
       RUNNER_TOKEN: someGithubTokenHere
       RUNNER_WORKDIR: /tmp/runner/work
       RUNNER_GROUP: my-group
-      ORG_RUNNER: 'false'
+      RUNNER_SCOPE: 'repo'
       LABELS: linux,x64,gpu
     security_opt:
       # needed on SELinux systems to allow docker container to manage other docker containers
@@ -150,7 +149,7 @@ job "github_runner" {
       RUNNER_NAME_PREFIX = "myrunner"
       RUNNER_WORKDIR     = "/tmp/github-runner-your-repo"
       RUNNER_GROUP       = "my-group"
-      ORG_RUNNER         = "true"
+      RUNNER_SCOPE       = "org"
       ORG_NAME           = "octokode"
       LABELS             = "my-label,other-label"
     }
@@ -201,8 +200,8 @@ spec:
         env:
         - name: ACCESS_TOKEN
           value: foo-access-token
-        - name: ORG_RUNNER
-          value: "true"
+        - name: RUNNER_SCOPE
+          value: "org"
         - name: ORG_NAME
           value: octokode
         - name: LABELS
@@ -256,7 +255,7 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e RUNNER_GROUP="my-group" \
-  -e ORG_RUNNER="true" \
+  -e RUNNER_SCOPE="org" \
   -e ORG_NAME="octokode" \
   -e LABELS="my-label,other-label" \
   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -287,7 +286,7 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e RUNNER_GROUP="my-group" \
-  -e ENTERPRISE_RUNNER="true" \
+  -e RUNNER_SCOPE="enterprise" \
   -e ENTERPRISE_NAME="my-enterprise" \
   -e LABELS="my-label,other-label" \
   -v /var/run/docker.sock:/var/run/docker.sock \

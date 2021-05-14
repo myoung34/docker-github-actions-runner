@@ -17,19 +17,42 @@ _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/ura
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
-_SHORT_URL=${REPO_URL}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
-if [[ ${ORG_RUNNER} == "true" ]]; then
-  _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
-elif [[ ${ENTERPRISE_RUNNER} == "true" ]]; then
-  _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
+# ensure backwards compatibility
+if [[ -z $RUNNER_SCOPE ]]; then
+  if [[ ${ORG_RUNNER} == "true" ]]; then
+    export RUNNER_SCOPE="org"
+  else
+    export RUNNER_SCOPE="repo"
+  fi
 fi
+
+RUNNER_SCOPE="${RUNNER_SCOPE,,}" # to lowercase
+
+case ${RUNNER_SCOPE} in
+  org*)
+    [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
+    _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
+    RUNNER_SCOPE="org"
+    ;;
+
+  ent*)
+    [[ -z ${ENTERPRISE_NAME} ]] && ( echo "ENTERPRISE_NAME required for enterprise runners"; exit 1 )
+    _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
+    RUNNER_SCOPE="enterprise"
+    ;;
+
+  *)
+    [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
+    _SHORT_URL=${REPO_URL}
+    RUNNER_SCOPE="repo"
+    ;;
+esac
 
 if [[ -n "${ACCESS_TOKEN}" ]]; then
   _TOKEN=$(bash /token.sh)
   RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
-  _SHORT_URL=$(echo "${_TOKEN}" | jq -r .short_url)
 fi
 
 echo "Configuring"
