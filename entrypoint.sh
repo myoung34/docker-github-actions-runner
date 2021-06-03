@@ -22,6 +22,7 @@ _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 # ensure backwards compatibility
 if [[ -z $RUNNER_SCOPE ]]; then
   if [[ ${ORG_RUNNER} == "true" ]]; then
+    echo 'ORG_RUNNER is now deprecated. Please use RUNNER_SCOPE="org" instead.'
     export RUNNER_SCOPE="org"
   else
     export RUNNER_SCOPE="repo"
@@ -72,4 +73,5 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM
 fi
 
+# shellcheck disable=SC2068
 $@ 
