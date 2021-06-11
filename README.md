@@ -277,7 +277,7 @@ Creating GitHub personal access token (PAT) for using by self-hosted runner make
 
 Also, when creating a PAT for self-hosted runner which will process events from several repositories of the particular organization, create the PAT using organization owner account. Otherwise your new PAT will not have sufficient privileges for all repositories.
 
-## Run a runner on enterprise scrope  ##
+## Run a runner on enterprise scope  ##
 
 ```shell
 docker run -d --restart always --name github-runner \
