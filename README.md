@@ -99,7 +99,7 @@ function github-runner {
         -e LABELS="my-label,other-label" \
         -v /var/run/docker.sock:/var/run/docker.sock \
         -v /tmp/github-runner-${repo}:/tmp/github-runner-${repo} \
-        --name $name ${org}/github-runner:${tag}
+        --name $name myoung34/github-runner:latest
 }
 
 github-runner your-account/your-repo       AARGHTHISISYOURGHACTIONSTOKEN
