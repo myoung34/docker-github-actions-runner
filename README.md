@@ -47,6 +47,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_GROUP` | Name of the runner group to add this runner to (defaults to the default runner group) |
 | `GITHUB_HOST` | Optional URL of the Github Enterprise server e.g github.mycompany.com. Defaults to `github.com`. |
 | `DISABLE_AUTOMATIC_DEREGISTRATION` | Optional flag to disable signal catching for deregistration. Default is `false`. Any value other than exactly `false` is considered `true`. See [here](https://github.com/myoung34/docker-github-actions-runner/issues/94) |
+| `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | An optional path *inside a docker container* to mount the directory with the files of the registered runner. It allows avoiding reregistration each the start of the runner. Default is `/actions-runner-files` . |
 
 ## Examples ##
 
@@ -78,6 +79,22 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_GROUP="my-group" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
+  myoung34/github-runner:latest
+```
+
+With the reusage of the registered runner assuming `CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/actions-runner-files` (can be propogated to all other approaches):
+
+```shell
+# per repo
+docker run -d --restart always --name github-runner \
+  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_TOKEN="footoken" \
+  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
+  -e RUNNER_GROUP="my-group" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
+  -v /path/on/host/system:/actions-runner-files
   myoung34/github-runner:latest
 ```
 
