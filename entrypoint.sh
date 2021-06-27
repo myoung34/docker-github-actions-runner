@@ -52,14 +52,15 @@ case ${RUNNER_SCOPE} in
 esac
 
 # Loading the files from the mounted directory
-if [ -d ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR} ]; then
-  cp -p -r ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/. "/actions-runner"
+if [ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]; then
+  cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
 fi
 
 if [ -f "/actions-runner/.runner" ]; then
   echo "The runner has already been configured"
   unset ACCESS_TOKEN
   unset RUNNER_TOKEN
+  # shellcheck disable=SC2068
   $@ 
   exit 0
 fi
@@ -83,8 +84,9 @@ echo "Configuring"
 unset RUNNER_TOKEN
 
 # Saving the files in another directory for the possibility to mount them from the host next time
-if [ -d ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR} ]; then
-  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}
+if [ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]; then
+  # Quoting (even with double-quotes) the regexp brokes the copying
+  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
