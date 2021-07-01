@@ -14,7 +14,6 @@ deregister_runner() {
 run_runner() {
   # shellcheck disable=SC2068
   $@ 
-fi
 }
 
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
