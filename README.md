@@ -82,10 +82,11 @@ docker run -d --restart always --name github-runner \
   myoung34/github-runner:latest
 ```
 
-With the reusage of the registered runner assuming `CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/actions-runner-files` (can be propogated to all other approaches):
+Adding the reusage of the registered runner (can be propogated to all other approaches):
 
 ```shell
 # per repo
+export CONFIGURED_ACTIONS_RUNNER_FILES_DIR="/actions-runner-files"
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
@@ -94,11 +95,11 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_GROUP="my-group" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
-  -v /path/on/host/system:/actions-runner-files
+  -v /path/on/host/system:${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}
   myoung34/github-runner:latest
 ```
 
-Or shell wrapper:
+Shell wrapper:
 
 ```shell
 function github-runner {
