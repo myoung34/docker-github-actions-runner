@@ -9,7 +9,7 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ### Docker Support ###
 
-Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet. 
+Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet.
 For more information:
 
 * https://github.com/actions/runner/issues/406
@@ -27,6 +27,7 @@ A workaround exists, please see [here](https://github.com/myoung34/docker-github
 | ubuntu focal | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. | Tags without an OS name *before* 9/17/2020 are `eoan`. `armv7` support stopped 9/18/2020 due to inconsistent docker-ce packaging |
 | ubuntu bionic | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | ubuntu xenial | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-ubuntu-xenial/` | [ubuntu-xenial](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-xenial) | This is the latest build from xenial (Rebuilt nightly and on master merges). Tags with `-ubuntu-xenial` are included and created on [upstream tags](https://github.com/actions/runner/tags). | `armv7` support stopped 9/18/2020 due to lack of support for [dumb-init](https://github.com/Yelp/dumb-init/releases) |
+| debian buster | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-buster/` | [debian-buster](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-buster) | This is the latest build from buster (Rebuilt nightly and on master merges). Tags with `-debian-buster` are included and created on [upstream tags](https://github.com/actions/runner/tags). | `armv7` support should be possible but not added on our side. |
 
 These containers are built via Github actions that [copy the dockerfile](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47), changing the `FROM` and building to provide simplicity.
 
