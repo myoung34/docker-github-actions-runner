@@ -17,6 +17,8 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
+ENV CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/actions-runner-files
+
 COPY token.sh entrypoint.sh /
 RUN chmod +x /token.sh /entrypoint.sh
 

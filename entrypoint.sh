@@ -11,6 +11,10 @@ deregister_runner() {
   exit
 }
 
+execute_docker_command() {
+  "$@" 
+}
+
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
@@ -51,6 +55,24 @@ case ${RUNNER_SCOPE} in
     ;;
 esac
 
+# If the variable is not set, set it with the default value
+if [ -z "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]; then
+  CONFIGURED_ACTIONS_RUNNER_FILES_DIR="/actions-runner-files"
+fi
+
+# Loading the files from the mounted directory
+if [ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]; then
+  cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+fi
+
+if [ -f "/actions-runner/.runner" ]; then
+  echo "The runner has already been configured"
+  unset ACCESS_TOKEN
+  unset RUNNER_TOKEN
+  execute_docker_command "$@"
+  exit 0
+fi
+
 if [[ -n "${ACCESS_TOKEN}" ]]; then
   _TOKEN=$(bash /token.sh)
   RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
@@ -69,9 +91,14 @@ echo "Configuring"
 
 unset RUNNER_TOKEN
 
+# Saving the files in another directory for the possibility to mount them from the host next time
+if [ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]; then
+  # Quoting (even with double-quotes) the regexp brokes the copying
+  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+fi
+
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM
 fi
 
-# shellcheck disable=SC2068
-$@ 
+execute_docker_command "$@"
