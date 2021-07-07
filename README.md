@@ -86,16 +86,16 @@ Adding the reusage of the registered runner (can be propogated to all other appr
 
 ```shell
 # per repo
-export CONFIGURED_ACTIONS_RUNNER_FILES_DIR="/actions-runner-files"
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
   -e RUNNER_TOKEN="footoken" \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e RUNNER_GROUP="my-group" \
+  -e CONFIGURED_ACTIONS_RUNNER_FILES_DIR="/actions-runner-files"
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
-  -v /path/on/host/system:${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}
+  -v /path/on/host/system:/actions-runner-files
   myoung34/github-runner:latest
 ```
 
