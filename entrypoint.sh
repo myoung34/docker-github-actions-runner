@@ -11,9 +11,8 @@ deregister_runner() {
   exit
 }
 
-run_runner() {
-  # shellcheck disable=SC2068
-  $@ 
+execute_docker_command() {
+  "$@" 
 }
 
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
@@ -70,7 +69,7 @@ if [ -f "/actions-runner/.runner" ]; then
   echo "The runner has already been configured"
   unset ACCESS_TOKEN
   unset RUNNER_TOKEN
-  execute_docker_command $@ 
+  execute_docker_command "$@"
   exit 0
 fi
 
@@ -102,4 +101,4 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM
 fi
 
-execute_docker_command $@ 
+execute_docker_command "$@"
