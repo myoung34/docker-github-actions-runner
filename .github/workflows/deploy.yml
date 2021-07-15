@@ -59,3 +59,29 @@ jobs:
         retry_on: error
         timeout_minutes: 120
         command: docker buildx build -f Dockerfile.ubuntu-bionic -t ${ORG}/github-runner:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+
+  debian_buster_deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@master
+    - name: Get GitHub organization or user
+      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: crazy-max/ghaction-docker-buildx@v1
+      with:
+        buildx-version: latest
+    - name: Available platforms
+      run: echo ${{ steps.buildx.outputs.platforms }}
+    - name: Copy Dockerfile
+      run: cp Dockerfile Dockerfile.debian-buster; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-buster/" Dockerfile.debian-buster
+    - name: Login
+      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+    - name: Build
+      uses: nick-invision/retry@v2
+      with:
+        max_attempts: 3
+        retry_on: error
+        timeout_minutes: 120
+        command: docker buildx build -f Dockerfile.debian-buster -t ${ORG}/github-runner:debian-buster --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
