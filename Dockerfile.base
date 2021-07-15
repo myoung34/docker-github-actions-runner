@@ -21,7 +21,7 @@ RUN apt-get update && \
     apt-transport-https \
     ca-certificates \
     sudo \
-    gnupg-agent \
+    gpg-agent \
     gnupg \
     software-properties-common \
     build-essential \
