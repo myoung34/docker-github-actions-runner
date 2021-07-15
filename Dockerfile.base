@@ -38,12 +38,12 @@ RUN apt-get update && \
     locales \
     python3-pip \
     jq \
+    dumb-init \
   && pip3 install --no-cache-dir awscliv2 \
   && locale-gen en_US.UTF-8 \
   && dpkg-reconfigure locales \
   && c_rehash \
   && cd /tmp \
-  && [[ $(lsb_release -cs) == "xenial" ]] && ( wget --quiet "https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_$(uname -i | sed 's/x86_64/amd64/g').deb" && dpkg -i dumb-init_*.deb && rm dumb-init_*.deb ) || ( apt-get install -y --no-install-recommends dumb-init ) \
   && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
   && tar zxf git.tgz \
   && cd git-${GIT_VERSION} \
