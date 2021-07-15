@@ -59,28 +59,3 @@ jobs:
         retry_on: error
         timeout_minutes: 120
         command: docker buildx build -f Dockerfile.base.ubuntu-bionic -t ${ORG}/github-runner-base:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
-  ubuntu_base_xenial_deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Get GitHub organization or user
-      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-    - name: Available platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
-    - name: Copy Dockerfile
-      run: cp Dockerfile.base Dockerfile.base.ubuntu-xenial; sed -i.bak 's/FROM.*/FROM ubuntu:xenial/' Dockerfile.base.ubuntu-xenial
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Build
-      uses: nick-invision/retry@v2
-      with:
-        max_attempts: 3
-        retry_on: error
-        timeout_minutes: 120
-        command: docker buildx build -f Dockerfile.base.ubuntu-xenial -t ${ORG}/github-runner-base:ubuntu-xenial --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
