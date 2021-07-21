@@ -81,6 +81,7 @@ jobs:
     strategy:
       matrix:
         release: [buster, sid]
+      fail-fast: false
     needs: create-release
     steps:
     - name: Copy Repo Files

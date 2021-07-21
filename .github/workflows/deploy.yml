@@ -65,6 +65,7 @@ jobs:
     strategy:
       matrix:
         release: [buster, sid]
+      fail-fast: false
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
