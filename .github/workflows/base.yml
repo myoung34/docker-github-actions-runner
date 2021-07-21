@@ -60,8 +60,11 @@ jobs:
         timeout_minutes: 120
         command: docker buildx build -f Dockerfile.base.ubuntu-bionic -t ${ORG}/github-runner-base:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
 
-  debian_base_buster_deploy:
+  debian_base_deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [buster, sid]
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@master
@@ -75,7 +78,7 @@ jobs:
     - name: Available platforms
       run: echo ${{ steps.buildx.outputs.platforms }}
     - name: Copy Dockerfile
-      run: cp Dockerfile.base Dockerfile.base.debian-buster; sed -i.bak 's/FROM.*/FROM debian:buster/' Dockerfile.base.debian-buster
+      run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
     - name: Login
       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
     - name: Build
@@ -84,4 +87,4 @@ jobs:
         max_attempts: 3
         retry_on: error
         timeout_minutes: 120
-        command: docker buildx build -f Dockerfile.base.debian-buster -t ${ORG}/github-runner-base:debian-buster --output "type=image,push=true" --platform linux/amd64,linux/arm64,linux/arm/v7 .
+        command: docker buildx build -f Dockerfile.base.debian-${{ matrix.release }} -t ${ORG}/github-runner-base:debian-${{ matrix.release }} --output "type=image,push=true" --platform linux/amd64,linux/arm64,linux/arm/v7 .
