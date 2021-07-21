@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: [buster, sid]
+        release: [buster, bullseye, sid]
       fail-fast: false
     steps:
     - name: Copy Repo Files
