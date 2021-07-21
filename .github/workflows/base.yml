@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - Dockerfile.base
+      - .github/workflows/base.yml
     branches:
       - master
       - develop
