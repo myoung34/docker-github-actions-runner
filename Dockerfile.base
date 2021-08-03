@@ -38,6 +38,7 @@ RUN apt-get update && \
     locales \
     python3-pip \
     dumb-init \
+  && update-alternatives --install /usr/bin/python python /usr/bin/python3 10 \
   && pip3 install --no-cache-dir awscliv2 \
   && locale-gen en_US.UTF-8 \
   && dpkg-reconfigure locales \
