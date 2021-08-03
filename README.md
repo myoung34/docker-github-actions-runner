@@ -17,11 +17,6 @@ For more information:
 
 Also, some GitHub Actions Workflow features, like [Job Services](https://docs.github.com/en/actions/guides/about-service-containers), won't be usable and [will result in an error](https://github.com/myoung34/docker-github-actions-runner/issues/61).
 
-### Docker-Compose on ARM ###
-
-Please note `docker-compose` does not currently work on ARM ([see issue](https://github.com/docker/compose/issues/6831)) so it is not installed on ARM based builds here.
-A workaround exists, please see [here](https://github.com/myoung34/docker-github-actions-runner/issues/72#issuecomment-804723656)
-
 ## Docker Artifacts ##
 
 | Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
