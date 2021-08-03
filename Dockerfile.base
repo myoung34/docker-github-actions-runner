@@ -1,7 +1,12 @@
 FROM ubuntu:focal
 LABEL maintainer="myoung34@my.apsu.edu"
 
+# TODO: Ubuntu focal (20.04) has git v2.25, but the minimum needed for GitHub
+# Actions runners is v2.29.  For now, we build git from source.  When updating
+# to hirsute (21.04) or later, we can remove the instructions to build from
+# source in favor of the regular Ubuntu git package.
 ARG GIT_VERSION="2.29.0"
+
 ARG DUMB_INIT_VERSION="1.2.2"
 ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
