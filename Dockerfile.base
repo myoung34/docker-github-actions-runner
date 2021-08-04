@@ -61,7 +61,6 @@ RUN apt-get update && \
   && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(lsb_release -is | awk '{print tolower($0)}') $(lsb_release -cs) stable" ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends --allow-unauthenticated \
-  && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose ) \
-  && chmod +x /usr/local/bin/docker-compose \
+  && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/*
