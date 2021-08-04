@@ -42,6 +42,7 @@ RUN apt-get update && \
     openssh-client \
     locales \
     python3-pip \
+    python2 \
     dumb-init \
   && pip3 install --no-cache-dir awscliv2 \
   && locale-gen en_US.UTF-8 \
