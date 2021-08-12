@@ -5,7 +5,7 @@ LABEL maintainer="myoung34@my.apsu.edu"
 ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 RUN mkdir -p /opt/hostedtoolcache
 
-ARG GH_RUNNER_VERSION="2.280.1"
+ARG GH_RUNNER_VERSION="2.280.2"
 ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
