@@ -17,8 +17,8 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
-COPY token.sh entrypoint.sh /
-RUN chmod +x /token.sh /entrypoint.sh
+COPY token.sh entrypoint.sh ephemeral-runner.sh /
+RUN chmod +x /token.sh /entrypoint.sh /ephemeral-runner.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["/actions-runner/bin/runsvc.sh"]
