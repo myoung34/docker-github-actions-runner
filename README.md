@@ -318,7 +318,7 @@ docker run -d --restart always --name github-runner \
 
 ## Ephemeral mode
 
-GitHub's hosted runners are completely ephemeral.  You can `sudo rm -rf /` without breaking all future jobs.
+GitHub's hosted runners are completely ephemeral.  You can remove all its data without breaking all future jobs.
 
 To achieve the same resilience in a self-hosted runner:
   1. override the command for your runner with `/ephemeral-runner.sh` (which will terminate after one job executes)
