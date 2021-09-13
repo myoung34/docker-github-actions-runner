@@ -1,7 +1,12 @@
 FROM ubuntu:focal
 LABEL maintainer="myoung34@my.apsu.edu"
 
+# TODO: Ubuntu focal (20.04) has git v2.25, but the minimum needed for GitHub
+# Actions runners is v2.29.  For now, we build git from source.  When updating
+# to hirsute (21.04) or later, we can remove the instructions to build from
+# source in favor of the regular Ubuntu git package.
 ARG GIT_VERSION="2.29.0"
+
 ARG DUMB_INIT_VERSION="1.2.2"
 ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
@@ -37,7 +42,7 @@ RUN apt-get update && \
     openssh-client \
     locales \
     python3-pip \
-    jq \
+    python \
     dumb-init \
   && pip3 install --no-cache-dir awscliv2 \
   && locale-gen en_US.UTF-8 \
@@ -61,7 +66,6 @@ RUN apt-get update && \
   && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/${distro} ${version} stable" ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends --allow-unauthenticated \
-  && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose ) \
-  && chmod +x /usr/local/bin/docker-compose \
+  && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/*

@@ -52,6 +52,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_GROUP` | Name of the runner group to add this runner to (defaults to the default runner group) |
 | `GITHUB_HOST` | Optional URL of the Github Enterprise server e.g github.mycompany.com. Defaults to `github.com`. |
 | `DISABLE_AUTOMATIC_DEREGISTRATION` | Optional flag to disable signal catching for deregistration. Default is `false`. Any value other than exactly `false` is considered `true`. See [here](https://github.com/myoung34/docker-github-actions-runner/issues/94) |
+| `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 
 ## Examples ##
 
@@ -86,7 +87,24 @@ docker run -d --restart always --name github-runner \
   myoung34/github-runner:latest
 ```
 
-Or shell wrapper:
+Adding the reusage of the registered runner (can be propogated to all other approaches):
+
+```shell
+# per repo
+docker run -d --restart always --name github-runner \
+  -e REPO_URL="https://github.com/myoung34/repo" \
+  -e RUNNER_NAME="foo-runner" \
+  -e RUNNER_TOKEN="footoken" \
+  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
+  -e RUNNER_GROUP="my-group" \
+  -e CONFIGURED_ACTIONS_RUNNER_FILES_DIR="/actions-runner-files" \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
+  -v /tmp/foo:/actions-runner-files \
+  myoung34/github-runner:latest
+```
+
+Shell wrapper:
 
 ```shell
 function github-runner {
@@ -296,4 +314,57 @@ docker run -d --restart always --name github-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
+```
+
+## Ephemeral mode
+
+GitHub's hosted runners are completely ephemeral.  You can remove all its data without breaking all future jobs.
+
+To achieve the same resilience in a self-hosted runner:
+  1. override the command for your runner with `/ephemeral-runner.sh` (which will terminate after one job executes)
+  2. don't mount a local folder into `RUNNER_WORKDIR` (to ensure no filesystem persistence)
+  3. run the container with `--rm` (to delete it after termination)
+  4. wrap the container execution in a system service that restarts (to start a fresh container after each job)
+
+Here's an example service definition for systemd:
+
+```
+# Install with:
+#   sudo install -m 644 ephemeral-github-actions-runner.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable ephemeral-github-actions-runner
+# Run with:
+#   sudo systemctl start ephemeral-github-actions-runner
+# Stop with:
+#   sudo systemctl stop ephemeral-github-actions-runner
+# See live logs with:
+#   journalctl -f -u ephemeral-github-actions-runner.service --no-hostname --no-tail
+
+[Unit]
+Description=Ephemeral GitHub Actions Runner Container
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=-/usr/bin/docker pull myoung34/github-runner:latest
+ExecStart=/usr/bin/docker run --rm --env-file /etc/ephemeral-github-actions-runner.env --name %n myoung34/ephemeral-github-actions-runner:latest /ephemeral-runner.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+And an example of the corresponding env file that the service reads from:
+
+```
+# Install with:
+#   sudo install -m 600 ephemeral-github-actions-runner.env /etc/
+REPO_URL=https://github.com/your-org/your-repo
+RUNNER_NAME=your-runner-name-here
+ACCESS_TOKEN=foo-access-token
+RUNNER_WORKDIR=/tmp/runner/work
+LABELS=any-custom-labels-go-here
 ```
