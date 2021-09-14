@@ -53,7 +53,7 @@ esac
 
 configure_runner() {
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    echo "Obtaining the token of the runnet"
+    echo "Obtaining the token of the runner"
     _TOKEN=$(bash /token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
