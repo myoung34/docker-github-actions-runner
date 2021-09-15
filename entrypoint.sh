@@ -3,10 +3,17 @@
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
 
+# Un-export these, so that they must be passed explicitly to the environment of
+# any command that needs them.  This may help prevent leaks.
+export -n ACCESS_TOKEN
+export -n RUNNER_TOKEN
+
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
-  _TOKEN=$(bash /token.sh)
-  RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+  if [[ -n "${ACCESS_TOKEN}" ]]; then
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+  fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
   exit
 }
@@ -53,8 +60,8 @@ esac
 
 configure_runner() {
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    echo "Obtaining the token of the runner"
-    _TOKEN=$(bash /token.sh)
+    echo "Obtaining the token of the runnet"
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
 
@@ -100,9 +107,6 @@ fi
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM
 fi
-
-unset ACCESS_TOKEN
-unset RUNNER_TOKEN
 
 # Container's command (CMD) execution
 "$@"
