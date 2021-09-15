@@ -21,4 +21,4 @@ COPY token.sh entrypoint.sh ephemeral-runner.sh /
 RUN chmod +x /token.sh /entrypoint.sh /ephemeral-runner.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["/actions-runner/bin/runsvc.sh"]
+CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
