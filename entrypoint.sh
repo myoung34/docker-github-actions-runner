@@ -105,7 +105,7 @@ if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
 fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  trap deregister_runner SIGINT SIGQUIT SIGTERM
+  trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
 # Container's command (CMD) execution
