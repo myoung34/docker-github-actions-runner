@@ -28,9 +28,9 @@ A workaround exists, please see [here](https://github.com/myoung34/docker-github
 | --- | --- | --- | --- | --- | --- |
 | ubuntu focal | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+/` | [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. | Tags without an OS name *before* 9/17/2020 are `eoan`. `armv7` support stopped 9/18/2020 due to inconsistent docker-ce packaging |
 | ubuntu bionic | `x86_64`,`armv7`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
-| debian buster | `x86_64`,`arm64`,`armv7` |  `/\d\.\d{3}\.\d+-debian-buster/` | [debian-buster](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-buster) | This is the latest build from buster (Rebuilt nightly and on master merges). Tags with `-debian-buster` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
-| debian bullseye | `x86_64`,`arm64`,`armv7` |  `/\d\.\d{3}\.\d+-debian-bullseye/` | [debian-bullseye](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-bullseye) | This is the latest build from bullseye (Rebuilt nightly and on master merges). Tags with `-debian-bullseye` are included and created on [upstream tags](https://github.com/actions/runner/tags). | Debian Bullseye will be the next stable release of Debian Linux. |
-| debian sid | `x86_64`,`arm64`,`admv7` |  `/\d\.\d{3}\.\d+-debian-sid/` | [debian-sid](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-sid) | This is the latest build from sid (Rebuilt nightly and on master merges). Tags with `-debian-sid` are included and created on [upstream tags](https://github.com/actions/runner/tags). | Debian sid is considered unstable by Debian. |
+| debian buster | `x86_64`,`arm64`,`armv7` |  `/\d\.\d{3}\.\d+-debian-buster/` | [debian-buster](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-buster) | This is the latest build from buster (Rebuilt nightly and on master merges). Tags with `-debian-buster` are included and created on [upstream tags](https://github.com/actions/runner/tags). | Buster is Debians current old-stable release. |
+| debian bullseye | `x86_64`,`arm64`,`armv7` |  `/\d\.\d{3}\.\d+-debian-bullseye/` | [debian-bullseye](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-bullseye) | This is the latest build from bullseye (Rebuilt nightly and on master merges). Tags with `-debian-bullseye` are included and created on [upstream tags](https://github.com/actions/runner/tags). | Bullseye is Debians current stable release. |
+| debian sid | `x86_64`,`arm64`,`admv7` |  `/\d\.\d{3}\.\d+-debian-sid/` | [debian-sid](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-sid) | This is the latest build from sid (Rebuilt nightly and on master merges). Tags with `-debian-sid` are included and created on [upstream tags](https://github.com/actions/runner/tags). | Sid is considered unstable by Debian. |
 | ubuntu xenial | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-ubuntu-xenial/` | [ubuntu-xenial](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-xenial) | This is the latest build from xenial (Rebuilt nightly and on master merges). Tags with `-ubuntu-xenial` are included and created on [upstream tags](https://github.com/actions/runner/tags). | This is deprecated as of 7/15/2021 and will no longer receive tags. |
 
 These containers are built via Github actions that [copy the dockerfile](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47), changing the `FROM` and building to provide simplicity.
@@ -314,4 +314,57 @@ docker run -d --restart always --name github-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
+```
+
+## Ephemeral mode
+
+GitHub's hosted runners are completely ephemeral.  You can remove all its data without breaking all future jobs.
+
+To achieve the same resilience in a self-hosted runner:
+  1. override the command for your runner with `/ephemeral-runner.sh` (which will terminate after one job executes)
+  2. don't mount a local folder into `RUNNER_WORKDIR` (to ensure no filesystem persistence)
+  3. run the container with `--rm` (to delete it after termination)
+  4. wrap the container execution in a system service that restarts (to start a fresh container after each job)
+
+Here's an example service definition for systemd:
+
+```
+# Install with:
+#   sudo install -m 644 ephemeral-github-actions-runner.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable ephemeral-github-actions-runner
+# Run with:
+#   sudo systemctl start ephemeral-github-actions-runner
+# Stop with:
+#   sudo systemctl stop ephemeral-github-actions-runner
+# See live logs with:
+#   journalctl -f -u ephemeral-github-actions-runner.service --no-hostname --no-tail
+
+[Unit]
+Description=Ephemeral GitHub Actions Runner Container
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+ExecStartPre=-/usr/bin/docker stop %n
+ExecStartPre=-/usr/bin/docker rm %n
+ExecStartPre=-/usr/bin/docker pull myoung34/github-runner:latest
+ExecStart=/usr/bin/docker run --rm --env-file /etc/ephemeral-github-actions-runner.env --name %n myoung34/ephemeral-github-actions-runner:latest /ephemeral-runner.sh
+
+[Install]
+WantedBy=multi-user.target
+```
+
+And an example of the corresponding env file that the service reads from:
+
+```
+# Install with:
+#   sudo install -m 600 ephemeral-github-actions-runner.env /etc/
+REPO_URL=https://github.com/your-org/your-repo
+RUNNER_NAME=your-runner-name-here
+ACCESS_TOKEN=foo-access-token
+RUNNER_WORKDIR=/tmp/runner/work
+LABELS=any-custom-labels-go-here
 ```

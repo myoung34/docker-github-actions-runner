@@ -12,13 +12,14 @@ ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
 ENV DOCKER_COMPOSE_VERSION="1.27.4"
 ENV LANG=en_US.UTF-8
-ENV LANGUAGE=en_US:en
-ENV LC_ALL=en_US.UTF-8 
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003,DL4001
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
     awscli \
     curl \
     tar \
@@ -45,8 +46,6 @@ RUN apt-get update && \
     python \
     dumb-init \
   && pip3 install --no-cache-dir awscliv2 \
-  && locale-gen en_US.UTF-8 \
-  && dpkg-reconfigure locales \
   && c_rehash \
   && cd /tmp \
   && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
@@ -56,9 +55,14 @@ RUN apt-get update && \
   && make \
   && make install \
   && cd / \
+  # Determine the Distro name (Debian, Ubuntu, etc)
+  && distro=$(lsb_release -is | awk '{print tolower($0)}') \
+  # Determine the Distro version (bullseye, xenial, etc)
+  # Note: sid is aliased to bullseye, because Docker doesn't have a matching apt repo
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${DOCKER_KEY} \
-  && curl -fsSL https://download.docker.com/linux/$(lsb_release -is | awk '{print tolower($0)}')/gpg | apt-key add - \
-  && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/$(lsb_release -is | awk '{print tolower($0)}') $(lsb_release -cs) stable" ) \
+  && curl -fsSL https://download.docker.com/linux/${distro}/gpg | apt-key add - \
+  && version=$(lsb_release -cs | awk '{gsub("sid", "bullseye"); print $0}') \
+  && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/${distro} ${version} stable" ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends --allow-unauthenticated \
   && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) \
