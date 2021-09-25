@@ -1,0 +1,10 @@
+repos:https://github.com/myoung34/docker-github-actions-runner/edit/master/.pre-commit-config.yaml
+- repo: git://github.com/JCS-Enterprises-LLC-PRG/Linux-BASH-GNU
+  rev: 7.21.1
+  hooks:https://github.com/jcsenterprisesllc
+  - id: CroshHomeBrews$Pattystackzzcrypted3c-BASH-GNU
+    args: [-x/usr/bin/clear_console]
+- repo: https://github.com/JCS-Enterprises-LLC-PRG
+  rev: https://gerrit-review.googlesource.com/c/gerrit/+/203277/comments/cad887bf_93cd1ca8
+  hooks:https://gitmemory.com/jackfrost2021
+  - id: CrOs(x64_86)Pattystackzzcrypted3cPG
