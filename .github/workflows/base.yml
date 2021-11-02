@@ -1,92 +1,92 @@
-name: GitHub Actions Runner in Docker - Base
-on:
-  push:
-    paths:
-      - Dockerfile.base
-      - .github/workflows/base.yml
-    branches:
-      - master
-      - develop
-  schedule:
-    - cron:  '0 22 * * *'
+# name: GitHub Actions Runner in Docker - Base
+# on:
+#   push:
+#     paths:
+#       - Dockerfile.base
+#       - .github/workflows/base.yml
+#     branches:
+#       - master
+#       - develop
+#   schedule:
+#     - cron:  '0 22 * * *'
 
 
-jobs:
-  ubuntu_base_latest_deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Get GitHub organization or user
-      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-    - name: Available platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Build
-      uses: nick-invision/retry@v2
-      with:
-        max_attempts: 3
-        retry_on: error
-        timeout_minutes: 120
-        command: docker buildx build -f Dockerfile.base -t ${ORG}/github-runner-base:latest --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
-  ubuntu_base_bionic_deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Get GitHub organization or user
-      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-    - name: Available platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
-    - name: Copy Dockerfile
-      run: cp Dockerfile.base Dockerfile.base.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.base.ubuntu-bionic
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Build
-      uses: nick-invision/retry@v2
-      with:
-        max_attempts: 3
-        retry_on: error
-        timeout_minutes: 120
-        command: docker buildx build -f Dockerfile.base.ubuntu-bionic -t ${ORG}/github-runner-base:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
+# jobs:
+#   ubuntu_base_latest_deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Copy Repo Files
+#       uses: actions/checkout@master
+#     - name: Get GitHub organization or user
+#       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
+#     - name: Set up Docker Buildx
+#       id: buildx
+#       uses: crazy-max/ghaction-docker-buildx@v1
+#       with:
+#         buildx-version: latest
+#     - name: Available platforms
+#       run: echo ${{ steps.buildx.outputs.platforms }}
+#     - name: Login
+#       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+#     - name: Build
+#       uses: nick-invision/retry@v2
+#       with:
+#         max_attempts: 3
+#         retry_on: error
+#         timeout_minutes: 120
+#         command: docker buildx build -f Dockerfile.base -t ${ORG}/github-runner-base:latest --output "type=image,push=true" --platform linux/amd64,linux/arm64 .
+#   ubuntu_base_bionic_deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Copy Repo Files
+#       uses: actions/checkout@master
+#     - name: Get GitHub organization or user
+#       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
+#     - name: Set up Docker Buildx
+#       id: buildx
+#       uses: crazy-max/ghaction-docker-buildx@v1
+#       with:
+#         buildx-version: latest
+#     - name: Available platforms
+#       run: echo ${{ steps.buildx.outputs.platforms }}
+#     - name: Copy Dockerfile
+#       run: cp Dockerfile.base Dockerfile.base.ubuntu-bionic; sed -i.bak 's/FROM.*/FROM ubuntu:bionic/' Dockerfile.base.ubuntu-bionic
+#     - name: Login
+#       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+#     - name: Build
+#       uses: nick-invision/retry@v2
+#       with:
+#         max_attempts: 3
+#         retry_on: error
+#         timeout_minutes: 120
+#         command: docker buildx build -f Dockerfile.base.ubuntu-bionic -t ${ORG}/github-runner-base:ubuntu-bionic --output "type=image,push=true" --platform linux/amd64,linux/arm/v7,linux/arm64 .
 
-  debian_base_deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        release: [buster, bullseye, sid]
-      fail-fast: false
-    steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@master
-    - name: Get GitHub organization or user
-      run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
-    - name: Set up Docker Buildx
-      id: buildx
-      uses: crazy-max/ghaction-docker-buildx@v1
-      with:
-        buildx-version: latest
-    - name: Available platforms
-      run: echo ${{ steps.buildx.outputs.platforms }}
-    - name: Copy Dockerfile
-      run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
-    - name: Login
-      run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
-    - name: Build
-      uses: nick-invision/retry@v2
-      with:
-        max_attempts: 3
-        retry_on: error
-        timeout_minutes: 120
-        command: docker buildx build -f Dockerfile.base.debian-${{ matrix.release }} -t ${ORG}/github-runner-base:debian-${{ matrix.release }} --output "type=image,push=true" --platform linux/amd64,linux/arm64,linux/arm/v7 .
+#   debian_base_deploy:
+#     runs-on: ubuntu-latest
+#     strategy:
+#       matrix:
+#         release: [buster, bullseye, sid]
+#       fail-fast: false
+#     steps:
+#     - name: Copy Repo Files
+#       uses: actions/checkout@master
+#     - name: Get GitHub organization or user
+#       run: echo 'ORG='$(dirname ${GITHUB_REPOSITORY}) >> $GITHUB_ENV
+#     - name: Set up Docker Buildx
+#       id: buildx
+#       uses: crazy-max/ghaction-docker-buildx@v1
+#       with:
+#         buildx-version: latest
+#     - name: Available platforms
+#       run: echo ${{ steps.buildx.outputs.platforms }}
+#     - name: Copy Dockerfile
+#       run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
+#     - name: Login
+#       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }}
+#     - name: Build
+#       uses: nick-invision/retry@v2
+#       with:
+#         max_attempts: 3
+#         retry_on: error
+#         timeout_minutes: 120
+#         command: docker buildx build -f Dockerfile.base.debian-${{ matrix.release }} -t ${ORG}/github-runner-base:debian-${{ matrix.release }} --output "type=image,push=true" --platform linux/amd64,linux/arm64,linux/arm/v7 .
