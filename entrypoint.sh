@@ -81,7 +81,7 @@ configure_runner() {
       --labels "${_LABELS}" \
       --runnergroup "${_RUNNER_GROUP}" \
       --unattended \
-      --replace "${_EPHEMERAL}"
+      --replace ${_EPHEMERAL}
 }
 
 
