@@ -352,7 +352,7 @@ Restart=always
 ExecStartPre=-/usr/bin/docker stop %n
 ExecStartPre=-/usr/bin/docker rm %n
 ExecStartPre=-/usr/bin/docker pull myoung34/github-runner:latest
-ExecStart=/usr/bin/docker run --rm --env-file /etc/ephemeral-github-actions-runner.env --name %n myoung34/ephemeral-github-actions-runner:latest /ephemeral-runner.sh
+ExecStart=/usr/bin/docker run --rm --env-file /etc/ephemeral-github-actions-runner.env --name %n myoung34/github-runner:latest /ephemeral-runner.sh
 
 [Install]
 WantedBy=multi-user.target
@@ -368,4 +368,5 @@ RUNNER_NAME=your-runner-name-here
 ACCESS_TOKEN=foo-access-token
 RUNNER_WORKDIR=/tmp/runner/work
 LABELS=any-custom-labels-go-here
+EPHEMERAL=true
 ```
