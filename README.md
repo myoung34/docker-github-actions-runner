@@ -7,6 +7,10 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ## Notes ##
 
+### Auto Update Issues ###
+
+There is a [known issue with auto updates in docker](https://github.com/actions/runner/issues/246). If one is running a version that has an update it will try to auto update and fail. The only current workaround is to run `latest` which in theory is always up to date and wont update/throttle.
+
 ### Docker Support ###
 
 Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet.
