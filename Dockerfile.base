@@ -16,7 +16,7 @@ ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
-# hadolint ignore=DL3003,DL4001
+# hadolint ignore=DL3003,DL4001,SC2086
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
@@ -34,7 +34,6 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     zlib1g-dev \
     zstd \
     gettext \
-    liblttng-ust0 \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq \
@@ -43,8 +42,10 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     openssh-client \
     locales \
     python3-pip \
-    python \
+    python3 \
     dumb-init \
+  && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
+  && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
   && pip3 install --no-cache-dir awscliv2 \
   && c_rehash \
   && cd /tmp \
