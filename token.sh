@@ -12,6 +12,7 @@ fi
 API_VERSION=v3
 API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
+CONTENT_LENGTH_HEADER="Content-Length: 0"
 
 case ${RUNNER_SCOPE} in
   org*)
@@ -34,6 +35,7 @@ case ${RUNNER_SCOPE} in
 esac
 
 RUNNER_TOKEN="$(curl -XPOST -fsSL \
+  -H "${CONTENT_LENGTH_HEADER}" \
   -H "${AUTH_HEADER}" \
   -H "${API_HEADER}" \
   "${_FULL_URL}" \
