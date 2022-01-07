@@ -374,3 +374,16 @@ RUNNER_WORKDIR=/tmp/runner/work
 LABELS=any-custom-labels-go-here
 EPHEMERAL=true
 ```
+
+## Proxy Support
+
+To run the github runners behind a proxy, you need to pass the [proxy parameters required for the GitHub Runner](https://docs.github.com/en/actions/hosting-your-own-runners/using-a-proxy-server-with-self-hosted-runners) as environment variables. 
+Note: The `http://` as prefix is required by the GitHub Runner.
+
+```shell
+docker run -d --restart always --name github-runner \
+  -e https_proxy="http://myproxy:3128" \
+  -e http_proxy="http://myproxy:3128" \
+  -e RUNNER_NAME_PREFIX="myrunner" \
+  # ...
+  myoung34/github-runner:latest
