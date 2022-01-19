@@ -1,12 +1,6 @@
 FROM ubuntu:focal
 LABEL maintainer="myoung34@my.apsu.edu"
 
-# TODO: Ubuntu focal (20.04) has git v2.25, but the minimum needed for GitHub
-# Actions runners is v2.29.  For now, we build git from source.  When updating
-# to hirsute (21.04) or later, we can remove the instructions to build from
-# source in favor of the regular Ubuntu git package.
-ARG GIT_VERSION="2.29.0"
-
 ARG DUMB_INIT_VERSION="1.2.2"
 ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
@@ -19,9 +13,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003,DL4001,SC2086
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update \
-  && apt-get install -y --no-install-recommends \
+  && apt-get install -y --no-install-recommends software-properties-common curl \
+  && add-apt-repository -y ppa:git-core/ppa \
+  && apt-get update
+RUN apt-get install -y --no-install-recommends \
     awscli \
-    curl \
     tar \
     unzip \
     apt-transport-https \
@@ -44,17 +40,11 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     python3-pip \
     python3 \
     dumb-init \
+    git \
   && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
   && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
   && pip3 install --no-cache-dir awscliv2 \
   && c_rehash \
-  && cd /tmp \
-  && curl -sL https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.gz -o git.tgz \
-  && tar zxf git.tgz \
-  && cd git-${GIT_VERSION} \
-  && ./configure --prefix=/usr \
-  && make \
-  && make install \
   && cd / \
   # Determine the Distro name (Debian, Ubuntu, etc)
   && distro=$(lsb_release -is | awk '{print tolower($0)}') \
