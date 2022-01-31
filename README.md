@@ -5,6 +5,13 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
+## Quicks start for self-hosted runners for Organisations
+
+1. Make sure you have a `self-hosted` group in your org. Create or rename default in `https://github.com/organizations/<your org>/settings/actions/runner-groups`.
+2. Create PAT for account that will have access to the org in settings https://github.com/settings/tokens
+3. Create a directory `/tmp/github-runner-your-repo` on the docker host and run [Manual Org Runner](#manual-org-runner), change dir if you want perm location. 
+4. Check docker logs to ensure runner has connected.
+
 ## Notes ##
 
 ### Auto Update Issues ###
@@ -65,10 +72,9 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 
 If you're using a RHEL based OS with SELinux, add `--security-opt=label=disable` to prevent [permission denied](https://github.com/myoung34/docker-github-actions-runner/issues/9)
 
-### Manual ###
+### Manual Org Runner ###
 
 ```shell
-# org runner
 docker run -d --restart always --name github-runner \
   -e RUNNER_NAME_PREFIX="myrunner" \
   -e ACCESS_TOKEN="footoken" \
@@ -80,7 +86,11 @@ docker run -d --restart always --name github-runner \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
   myoung34/github-runner:latest
-# per repo
+```
+
+### Manual per Repo Runner ###
+
+```
 docker run -d --restart always --name github-runner \
   -e REPO_URL="https://github.com/myoung34/repo" \
   -e RUNNER_NAME="foo-runner" \
