@@ -9,7 +9,7 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 1. Make sure you have a `self-hosted` group in your org. Create or rename default in `https://github.com/organizations/<your org>/settings/actions/runner-groups`.
 2. Create PAT for account that will have access to the org in settings https://github.com/settings/tokens
-3. Create a direcotry on the docker host and run [Manual Org Runner](#manual-org-runner)
+3. Create a directory `/tmp/github-runner-your-repo` on the docker host and run [Manual Org Runner](#manual-org-runner), change dir if you want perm location. 
 4. Check docker logs to ensure runner has connected.
 
 ## Notes ##
