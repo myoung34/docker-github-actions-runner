@@ -115,5 +115,8 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
+extra_flags=""
+[[ -n "$DISABLE_AUTO_UPDATE" ]] && extra_flags="--disableupdate" || :
+
 # Container's command (CMD) execution
-"$@"
+"$@" "${extra_flags}"

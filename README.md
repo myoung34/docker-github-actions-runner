@@ -14,10 +14,6 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ## Notes ##
 
-### Auto Update Issues ###
-
-There is a [known issue with auto updates in docker](https://github.com/actions/runner/issues/246). If one is running a version that has an update it will try to auto update and fail. The only current workaround is to run `latest` which in theory is always up to date and wont update/throttle.
-
 ### Docker Support ###
 
 Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet.
@@ -65,6 +61,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `DISABLE_AUTOMATIC_DEREGISTRATION` | Optional flag to disable signal catching for deregistration. Default is `false`. Any value other than exactly `false` is considered `true`. See [here](https://github.com/myoung34/docker-github-actions-runner/issues/94) |
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
+| `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
 
 ## Examples ##
 
@@ -81,6 +78,7 @@ docker run -d --restart always --name github-runner \
   -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
   -e RUNNER_GROUP="my-group" \
   -e RUNNER_SCOPE="org" \
+  -e DISABLE_AUTO_UPDATE="true" \
   -e ORG_NAME="octokode" \
   -e LABELS="my-label,other-label" \
   -v /var/run/docker.sock:/var/run/docker.sock \
