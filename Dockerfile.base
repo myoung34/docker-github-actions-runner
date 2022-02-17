@@ -13,6 +13,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=DL3003,DL4001,SC2086
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && sed -e 's/Defaults	env_reset/Defaults	env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers
   && apt-get update \
   && apt-get install -y --no-install-recommends gnupg \
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
