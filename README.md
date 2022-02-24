@@ -5,7 +5,7 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
-## Quicks start for self-hosted runners for Organisations
+## Quick start for self-hosted runners for Organisations
 
 1. Make sure you have a `self-hosted` group in your org. Create or rename default in `https://github.com/organizations/<your org>/settings/actions/runner-groups`.
 2. Create PAT for account that will have access to the org in settings https://github.com/settings/tokens
