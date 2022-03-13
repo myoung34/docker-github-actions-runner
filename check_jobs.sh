@@ -4,7 +4,7 @@
 
 if [ -z "$1" ]; then exit 1; fi
 
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-./_work}
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _JOBS_ACCEPTANCE_TIMEOUT=$1
 
 while [ 1 ]; do
