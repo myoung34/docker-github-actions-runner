@@ -10,7 +10,7 @@ _JOBS_ACCEPTANCE_TIMEOUT=$1
 while [ 1 ]; do
   if [ ! -e ${_RUNNER_WORKDIR}/_temp/_github_workflow ]; then
     _DURATION=`expr $(date +%s) - $(date +%s -r /tmp)`
-    [[ $_DURATION -ge ${_JOBS_ACCEPTANCE_TIMEOUT} ]] && break
+    [[ ${_DURATION} -ge ${_JOBS_ACCEPTANCE_TIMEOUT} ]] && break
   fi
   sleep 10
 done
