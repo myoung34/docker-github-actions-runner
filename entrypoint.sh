@@ -118,5 +118,9 @@ fi
 extra_flags=""
 [[ -n "$DISABLE_AUTO_UPDATE" ]] && extra_flags="--disableupdate" || :
 
+if [ -n "${JOBS_ACCEPTANCE_TIMEOUT}" ]; then
+  /check_jobs.sh ${JOBS_ACCEPTANCE_TIMEOUT} &
+fi
+
 # Container's command (CMD) execution
 "$@" "${extra_flags}"

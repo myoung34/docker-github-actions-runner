@@ -62,6 +62,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
+| `JOBS_ACCEPTANCE_TIMEOUT` | Optional environment variable to terminate the runner when the job is not received for a certain period of time. Set the number of seconds to time out. If the job is not accepted within the specified number of seconds, the runner will exit. Defaults to `""`. |
 
 ## Examples ##
 
