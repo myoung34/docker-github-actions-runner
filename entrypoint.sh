@@ -72,6 +72,13 @@ configure_runner() {
     _EPHEMERAL=""
   fi
 
+  if [ -n "${DISABLE_AUTO_UPDATE}" ]; then
+    echo "Disable auto update option is enabled"
+    _AUTO_UPDATE="--disableupdate"
+  else
+    _AUTO_UPDATE=""
+  fi
+
   echo "Configuring"
   ./config.sh \
       --url "${_SHORT_URL}" \
@@ -81,7 +88,9 @@ configure_runner() {
       --labels "${_LABELS}" \
       --runnergroup "${_RUNNER_GROUP}" \
       --unattended \
-      --replace ${_EPHEMERAL}
+      --replace \
+      ${_EPHEMERAL} \
+      ${_AUTO_UPDATE}
 }
 
 
@@ -115,8 +124,5 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
-extra_flags=""
-[[ -n "$DISABLE_AUTO_UPDATE" ]] && extra_flags="--disableupdate" || :
-
 # Container's command (CMD) execution
-"$@" "${extra_flags}"
+exec "$@"
