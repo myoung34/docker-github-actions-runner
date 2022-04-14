@@ -204,6 +204,10 @@ job "github_runner" {
 }
 ```
 
+With Nomad, it's also easy to achieve an "on-demand" Self-hosted Runner deployment model that auto-scales horizontally, which most high-load CI/CD pipelines should take into account to save operational costs. See [smaeda-ks/nomad-github-runners-autoscaler-demo](https://github.com/smaeda-ks/nomad-github-runners-autoscaler-demo) for more details.
+
+The idea is to utilize GitHub [Webhooks](https://docs.github.com/en/developers/webhooks-and-events/webhooks/about-webhooks) and trigger Nomad [Parameterized Jobs](https://learn.hashicorp.com/tutorials/nomad/job-spec-parameterized?in=nomad/job-specifications) that spin up ephemeral runners. This follows GitHub's [recommended pattern](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners).
+
 ### Kubernetes ###
 
 ```yml
