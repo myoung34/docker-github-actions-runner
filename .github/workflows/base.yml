@@ -34,7 +34,7 @@ jobs:
           file: Dockerfile.base
           pull: true
           push: true
-          tags: ${ORG}/github-runner-base:latest
+          tags: ${{ env.ORG }}/github-runner-base:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -64,7 +64,7 @@ jobs:
           file: Dockerfile.base.ubuntu-bionic
           pull: true
           push: true
-          tags: ${ORG}/github-runner-base:ubuntu-bionic
+          tags: ${{ env.ORG }}/github-runner-base:ubuntu-bionic
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -98,7 +98,7 @@ jobs:
           file: Dockerfile.base.debian-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${ORG}/github-runner-base:debian-${{ matrix.release }}
+          tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
           cache-from: type=gha
           cache-to: type=gha,mode=max
