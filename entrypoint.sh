@@ -125,4 +125,4 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
 fi
 
 # Container's command (CMD) execution
-exec "$@"
+"$@"
