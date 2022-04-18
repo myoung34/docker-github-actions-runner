@@ -14,6 +14,11 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 
 ## Notes ##
 
+### Security ###
+
+It is known that currently tokens (ACCESS_TOKEN / RUNNER_TOKEN ) are not safe from exfiltration.
+If you are using this runner make sure that any workflow changes are gated by a verification process (in the actions settings) so that malicious PR's cannot exfiltrate these.
+
 ### Docker Support ###
 
 Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet.
