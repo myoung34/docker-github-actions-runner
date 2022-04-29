@@ -10,10 +10,9 @@ export -n RUNNER_TOKEN
 
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
-  if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
-  fi
+  export ACCESS_TOKEN
+  RUNNER_TOKEN=$(python3 /get_runner_token.py) || (echo "Error generating runner token" ; exit 1)
+  export -n ACCESS_TOKEN
   ./config.sh remove --token "${RUNNER_TOKEN}"
   exit
 }
@@ -59,11 +58,11 @@ case ${RUNNER_SCOPE} in
 esac
 
 configure_runner() {
-  if [[ -n "${ACCESS_TOKEN}" ]]; then
-    echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
-  fi
+
+  echo "Obtaining the token of the runner"
+  export ACCESS_TOKEN
+  RUNNER_TOKEN=$(python3 /get_runner_token.py) || (echo "Error generating runner token" ; exit 1)
+  export -n ACCESS_TOKEN
 
   if [ -n "${EPHEMERAL}" ]; then
     echo "Ephemeral option is enabled"

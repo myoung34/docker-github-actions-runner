@@ -20,8 +20,12 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh
 
-COPY token.sh entrypoint.sh ephemeral-runner.sh /
-RUN chmod +x /token.sh /entrypoint.sh /ephemeral-runner.sh
+COPY get_runner_token.py requirements.txt entrypoint.sh ephemeral-runner.sh /
+RUN chmod +x /get_runner_token.py /entrypoint.sh /ephemeral-runner.sh
+
+# Install Pip packages
+RUN pip3 install -r /requirements.txt
+
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
