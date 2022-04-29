@@ -24,7 +24,7 @@ COPY get_runner_token.py requirements.txt entrypoint.sh ephemeral-runner.sh /
 RUN chmod +x /get_runner_token.py /entrypoint.sh /ephemeral-runner.sh
 
 # Install Pip packages
-RUN pip3 install -r /requirements.txt
+RUN pip3 install --no-cache-dir -r /requirements.txt
 
 
 ENTRYPOINT ["/entrypoint.sh"]
