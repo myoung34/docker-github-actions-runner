@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "*** Starting ephemeral runner. ***"
-/actions-runner/run.sh --ephemeral
+/actions-runner/run.sh
 rv=$?
 
 # See exit code constants in the runner source here:
