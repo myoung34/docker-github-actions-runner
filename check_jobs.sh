@@ -2,7 +2,6 @@
 # Check jobs acceptance timeout.
 # If jobs cannot be confirmed, listening will be terminated.
 
-if [ -z "$1" ]; then exit 1; fi
 
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _JOBS_ACCEPTANCE_TIMEOUT=$1
