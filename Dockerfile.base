@@ -42,6 +42,8 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     python3 \
     dumb-init \
     podman \
+    buildah \
+    skopeo \
   && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
   && echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu $([[ $(grep -E '^ID=' /etc/os-release | sed 's/.*=//g') == "ubuntu" ]] && (grep VERSION_CODENAME /etc/os-release | sed 's/.*=//g') || echo bionic) main>/etc/apt/sources.list.d/git-core.list \
   && apt-get update \
