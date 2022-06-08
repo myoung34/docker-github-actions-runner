@@ -5,9 +5,9 @@ Docker Github Actions Runner
 
 This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
-## Quick start for self-hosted runners for Organisations
+## Quick-Start (Examples and Usage) ##
 
-See [the quick start guide](https://github.com/myoung34/docker-github-actions-runner/wiki/Quick-Start)
+Please see [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
 
 ## Notes ##
 
@@ -68,11 +68,3 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
-
-## Examples and Usage ##
-
-Please see [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
-
-## Proxy Support
-
-Please see [the wiki page here](https://github.com/myoung34/docker-github-actions-runner/wiki/Proxy-Support)
