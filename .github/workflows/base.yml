@@ -103,6 +103,6 @@ jobs:
           pull: true
           push: true
           tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }}
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
