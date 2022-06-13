@@ -1,9 +1,8 @@
-FROM ubuntu:focal
+FROM ubuntu:jammy
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG DUMB_INIT_VERSION="1.2.2"
 ARG GIT_CORE_PPA_KEY="A1715D88E1DF1F24"
-ARG DOCKER_KEY="7EA0A9C3F273FCD8"
 
 ENV DOCKER_COMPOSE_VERSION="1.27.4"
 ENV LANG=en_US.UTF-8
@@ -18,6 +17,8 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
+    gnupg \
+    lsb-release \
     curl \
     tar \
     unzip \
@@ -41,6 +42,8 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     python3-setuptools \
     python3 \
     dumb-init \
+    nodejs \
+    rsync \
   && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
   && echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu $([[ $(grep -E '^ID=' /etc/os-release | sed 's/.*=//g') == "ubuntu" ]] && (grep VERSION_CODENAME /etc/os-release | sed 's/.*=//g') || echo bionic) main>/etc/apt/sources.list.d/git-core.list \
   && apt-get update \
@@ -52,12 +55,15 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && distro=$(lsb_release -is | awk '{print tolower($0)}') \
   # Determine the Distro version (bullseye, xenial, etc)
   # Note: sid is aliased to bullseye, because Docker doesn't have a matching apt repo
-  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${DOCKER_KEY} \
-  && curl -fsSL https://download.docker.com/linux/${distro}/gpg | apt-key add - \
+  && mkdir -p /etc/apt/keyrings \
+  && ( curl -fsSL https://download.docker.com/linux/${distro}/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
   && version=$(lsb_release -cs | awk '{gsub("sid", "bullseye"); print $0}') \
-  && ( add-apt-repository "deb [arch=$(dpkg --print-architecture)] https://download.docker.com/linux/${distro} ${version} stable" ) \
+  && ( echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${distro} ${version} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends --allow-unauthenticated \
-  && [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) \
+  && ( [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) ) \
+  && ( [[ $(lsb_release --codename | cut -f2) == "focal" ]] && ( echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/Release.key" | apt-key add - && apt-get update) || : ) \
+  && ( [[ $(lsb_release --codename | cut -f2) == "focal" || $(lsb_release --codename | cut -f2) == "jammy" ||  $(lsb_release --codename | cut -f2) == "sid" ||  $(lsb_release --codename | cut -f2) == "bullseye" ]] && apt-get install -y --no-install-recommends podman buildah skopeo || : ) \
+  && ( [[ $(lsb_release --codename | cut -f2) == "jammy" ]] && echo "Ubuntu Jammy is marked as beta. Please see https://github.com/actions/virtual-environments/issues/5490" || : ) \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/*
