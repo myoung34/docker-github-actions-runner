@@ -125,7 +125,7 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
 fi
 
 if [[ -n "${JOBS_ACCEPTANCE_TIMEOUT}" ]]; then
-  /check_jobs.sh ${JOBS_ACCEPTANCE_TIMEOUT} &
+  /check_jobs.sh "${JOBS_ACCEPTANCE_TIMEOUT}" &
 fi
 
 # Container's command (CMD) execution
