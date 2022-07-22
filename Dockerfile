@@ -20,5 +20,10 @@ RUN chmod +x /actions-runner/install_actions.sh \
 COPY token.sh entrypoint.sh /
 RUN chmod +x /token.sh /entrypoint.sh
 
+RUN useradd github -m -u 1001 \
+    && usermod -aG docker github \
+    && chown github /_work/ /opt/hostedtoolcache/
+USER github
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
