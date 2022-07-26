@@ -18,13 +18,7 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && rm /actions-runner/install_actions.sh
 
 COPY token.sh entrypoint.sh /
-RUN chmod +x /token.sh /entrypoint.sh \
-    && groupadd -g 121 runner \
-    && useradd -mr -d /home/runner -u 1001 -g 121 runner \
-    && usermod -aG sudo runner \
-    && usermod -aG docker runner \
-    && chown runner /_work/ /opt/hostedtoolcache/
-USER runner
+RUN chmod +x /token.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
