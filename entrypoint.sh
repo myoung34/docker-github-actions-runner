@@ -93,7 +93,8 @@ configure_runner() {
       ${_AUTO_UPDATE}
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
-  /usr/bin/chown -R runner ${_RUNNER_WORKDIR} /opt/hostedtoolcache/ /actions-runner
+  
+  [[ $(id -u) -eq 0 ]] && /usr/bin/chown -R runner ${_RUNNER_WORKDIR} /opt/hostedtoolcache/ /actions-runner || :
 }
 
 
@@ -128,4 +129,5 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
 fi
 
 # Container's command (CMD) execution as runner user
-/usr/sbin/gosu runner "$@"
+
+[[ $(id -u) -eq 0 ]] && ( /usr/sbin/gosu runner "$@" ) || ( "$@" )
