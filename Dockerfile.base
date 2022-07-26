@@ -44,6 +44,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     dumb-init \
     nodejs \
     rsync \
+    gosu \
   && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
   && echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu $([[ $(grep -E '^ID=' /etc/os-release | sed 's/.*=//g') == "ubuntu" ]] && (grep VERSION_CODENAME /etc/os-release | sed 's/.*=//g') || echo bionic) main>/etc/apt/sources.list.d/git-core.list \
   && apt-get update \
@@ -66,4 +67,11 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( [[ $(lsb_release --codename | cut -f2) == "focal" || $(lsb_release --codename | cut -f2) == "jammy" ||  $(lsb_release --codename | cut -f2) == "sid" ||  $(lsb_release --codename | cut -f2) == "bullseye" ]] && apt-get install -y --no-install-recommends podman buildah skopeo || : ) \
   && ( [[ $(lsb_release --codename | cut -f2) == "jammy" ]] && echo "Ubuntu Jammy is marked as beta. Please see https://github.com/actions/virtual-environments/issues/5490" || : ) \
   && rm -rf /var/lib/apt/lists/* \
-  && rm -rf /tmp/*
+  && rm -rf /tmp/* \
+  && groupadd -g 121 runner \
+  && useradd -mr -d /home/runner -u 1001 -g 121 runner \
+  && usermod -aG sudo runner \
+  && usermod -aG docker runner \
+  && mkdir -p /_work/ /opt/hostedtoolcache/ \
+  && chown runner /_work/ /opt/hostedtoolcache/
+

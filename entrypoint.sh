@@ -91,6 +91,9 @@ configure_runner() {
       --replace \
       ${_EPHEMERAL} \
       ${_AUTO_UPDATE}
+
+  [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
+  /usr/bin/chown -R runner ${_RUNNER_WORKDIR} /opt/hostedtoolcache/ /actions-runner
 }
 
 
@@ -124,5 +127,5 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
-# Container's command (CMD) execution
-"$@"
+# Container's command (CMD) execution as runner user
+/usr/sbin/gosu runner "$@"
