@@ -153,4 +153,5 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && groupadd -g 121 runner \
   && useradd -mr -d /home/runner -u 1001 -g 121 runner \
   && usermod -aG sudo runner \
-  && usermod -aG docker runner
+  && usermod -aG docker runner \
+  && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
