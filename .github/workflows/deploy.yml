@@ -9,6 +9,12 @@ on:
       - develop
   schedule:
     - cron:  '59 23 * * *'
+  workflow_dispatch:
+
+env:
+  DOCKER_REGISTRY: quay.io
+  DOCKER_IMAGE_BASE: quay.io/hmpps/browser-testing-github-actions-runner-base
+  DOCKER_IMAGE: quay.io/hmpps/browser-testing-github-actions-runner
 
 jobs:
   ubuntu_latest_deploy:
@@ -23,10 +29,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Update Dockerfile FROM org
-        run: sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:latest/" Dockerfile        
+        run: sed -i.bak "s|FROM.*|FROM ${{ env.DOCKER_IMAGE_BASE }}:latest|" Dockerfile
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Build and push
@@ -36,7 +43,7 @@ jobs:
           file: Dockerfile
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner:latest
+          tags: ${{ env.DOCKER_IMAGE }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -57,10 +64,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
+        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s|FROM.*|FROM ${{ env.DOCKER_IMAGE_BASE }}:ubuntu-${{ matrix.release }}|" Dockerfile.ubuntu-${{ matrix.release }}
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Build and push
@@ -70,7 +78,7 @@ jobs:
           file: Dockerfile.ubuntu-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{env.ORG}}/github-runner:ubuntu-${{ matrix.release }}
+          tags: ${{ env.DOCKER_IMAGE }}:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -91,10 +99,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
+        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s|FROM.*|FROM ${{ env.DOCKER_IMAGE_BASE }}:debian-${{ matrix.release }}|" Dockerfile.debian-${{ matrix.release }}
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
+          registry: ${{ env.DOCKER_REGISTRY }}
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Build and push
@@ -104,7 +113,7 @@ jobs:
           file: Dockerfile.debian-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner:debian-${{ matrix.release }}
+          tags: ${{ env.DOCKER_IMAGE }}:debian-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
