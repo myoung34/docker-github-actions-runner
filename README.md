@@ -1,3 +1,27 @@
+GitHub Actions Runner Image for Web Browser Testing
+===================================================
+
+This is a fork of https://github.com/myoung34/docker-github-actions-runner, with some additional dependencies installed
+in the base image. It is intended to be used for end-to-end testing
+of [hmpps-probation-integration-services](https://github.com/ministryofjustice/hmpps-probation-integration-services)
+with Playwright.
+
+The additional Playwright dependencies can be found by running: `npx playwright install-deps --dry-run`.
+These have been added to [Dockerfile.base](./Dockerfile.base).
+
+Due to the
+[security requirements](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/deploying-an-app/prerequisite.html#prerequisite-for-deployment-on-the-cloud-platform)
+for running on MOJ Cloud Platform (i.e. lack of sudo or root access), we are unable to install these dependencies at
+runtime.
+
+If you don't need to install web browser-specific dependencies in your GitHub Actions runner, or you are able to run as
+root, then you don't need this. Instead, you should use the excellent https://github.com/myoung34/docker-github-actions-runner project. 
+ 
+
+The original README follows:
+
+---
+
 Docker Github Actions Runner
 ============================
 
