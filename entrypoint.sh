@@ -25,6 +25,7 @@ _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
+_RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 
 # ensure backwards compatibility
 if [[ -z $RUNNER_SCOPE ]]; then
@@ -130,4 +131,9 @@ fi
 
 # Container's command (CMD) execution as runner user
 
-[[ $(id -u) -eq 0 ]] && ( /usr/sbin/gosu runner "$@" ) || ( "$@" )
+
+if [[ ${_RUN_AS_ROOT} == "true" ]]; then
+  [[ $(id -u) -eq 0 ]] && ( "$@" ) || ( echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overriden and is not running as root"; exit 1 )
+else
+  [[ $(id -u) -eq 0 ]] && ( /usr/sbin/gosu runner "$@" ) || ( "$@" )
+fi

@@ -52,6 +52,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 
 | Environment Variable | Description |
 | --- | --- |
+| `RUN_AS_ROOT` | Boolean to run as root. If `true`: will run as root. If `True` and the user is overriden it will error. If any other value it will run as the `runner` user and allow an optional override. Default is `true` |
 | `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
 | `RUNNER_NAME_PREFIX` | A prefix for a randomly generated name (followed by a random 13 digit string). You must not also provide `RUNNER_NAME`. Defaults to `github-runner` |
 | `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN` |
