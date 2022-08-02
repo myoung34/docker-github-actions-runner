@@ -16,6 +16,9 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get install -y --no-install-recommends gnupg \
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
   && apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates curl \
+  && ( curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - ) \
+  && ( cd ~ && apt-get install -y --no-install-recommends nodejs && export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true && npm install playwright && npx playwright install-deps && rm -rf node_modules/ && npm cache clean --force ) \
   && apt-get install -y --no-install-recommends \
     gnupg \
     lsb-release \
@@ -45,88 +48,6 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     nodejs \
     rsync \
     gosu \
-    fonts-liberation \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libatspi2.0-0 \
-    libcairo2 \
-    libcups2 \
-    libdbus-1-3 \
-    libdrm2 \
-    libegl1 \
-    libgbm1 \
-    libglib2.0-0 \
-    libgtk-3-0 \
-    libnspr4 \
-    libnss3 \
-    libpango-1.0-0 \
-    libx11-6 \
-    libx11-xcb1 \
-    libxcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxext6 \
-    libxfixes3 \
-    libxrandr2 \
-    libxshmfence1 \
-    xvfb \
-    fonts-noto-color-emoji \
-    ttf-unifont \
-    libfontconfig \
-    libfreetype6 \
-    xfonts-cyrillic \
-    xfonts-scalable \
-    fonts-ipafont-gothic \
-    fonts-wqy-zenhei \
-    fonts-tlwg-loma-otf \
-    ttf-ubuntu-font-family \
-    ffmpeg \
-    libcairo-gobject2 \
-    libdbus-glib-1-2 \
-    libfontconfig1 \
-    libgdk-pixbuf2.0-0 \
-    libpangocairo-1.0-0 \
-    libpangoft2-1.0-0 \
-    libxcb-shm0 \
-    libxcursor1 \
-    libxi6 \
-    libxrender1 \
-    libxt6 \
-    libxtst6 \
-    gstreamer1.0-libav \
-    gstreamer1.0-plugins-bad \
-    gstreamer1.0-plugins-base \
-    gstreamer1.0-plugins-good \
-    libenchant1c2a \
-    libepoxy0 \
-    libevdev2 \
-    libgl1 \
-    libgles2 \
-    libgstreamer-gl1.0-0 \
-    libgstreamer1.0-0 \
-    libharfbuzz-icu0 \
-    libharfbuzz0b \
-    libhyphen0 \
-    libicu66 \
-    libjpeg-turbo8 \
-    libnotify4 \
-    libopengl0 \
-    libopenjp2-7 \
-    libopus0 \
-    libpng16-16 \
-    libsecret-1-0 \
-    libsoup2.4-1 \
-    libvpx6 \
-    libwayland-client0 \
-    libwayland-egl1 \
-    libwayland-server0 \
-    libwebp6 \
-    libwebpdemux2 \
-    libwoff1 \
-    libxkbcommon0 \
-    libxml2 \
-    libxslt1.1 \
   && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
   && echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu $([[ $(grep -E '^ID=' /etc/os-release | sed 's/.*=//g') == "ubuntu" ]] && (grep VERSION_CODENAME /etc/os-release | sed 's/.*=//g') || echo bionic) main>/etc/apt/sources.list.d/git-core.list \
   && apt-get update \

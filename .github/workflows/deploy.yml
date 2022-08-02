@@ -82,38 +82,3 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  debian_deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        release: [bullseye, sid]
-      fail-fast: false
-    steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s|FROM.*|FROM ${{ env.DOCKER_IMAGE_BASE }}:debian-${{ matrix.release }}|" Dockerfile.debian-${{ matrix.release }}
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          registry: ${{ env.DOCKER_REGISTRY }}
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile.debian-${{ matrix.release }}
-          pull: true
-          push: true
-          tags: ${{ env.DOCKER_IMAGE }}:debian-${{ matrix.release }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
