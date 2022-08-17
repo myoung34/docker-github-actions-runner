@@ -37,6 +37,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     libcurl4-openssl-dev \
     inetutils-ping \
     jq \
+    yq \
     wget \
     dirmngr \
     openssh-client \
