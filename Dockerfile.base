@@ -5,6 +5,7 @@ ARG DUMB_INIT_VERSION="1.2.2"
 ARG GIT_CORE_PPA_KEY="A1715D88E1DF1F24"
 
 ENV DOCKER_COMPOSE_VERSION="1.27.4"
+ENV GIT_LFS_VERSION="3.2.0"
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
@@ -52,6 +53,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
   && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
   && ( ( curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install awscli ) \
+  && ( curl "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-$(dpkg --print-architecture)-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz && cd /tmp && tar -xzf lfs.tar.gz && cd git-lfs-${GIT_LFS_VERSION} && ./install.sh ) \
   # Determine the Distro name (Debian, Ubuntu, etc)
   && distro=$(lsb_release -is | awk '{print tolower($0)}') \
   # Determine the Distro version (bullseye, xenial, etc)
