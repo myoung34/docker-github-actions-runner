@@ -139,7 +139,6 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
     echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
     exit 1
   fi
-    echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root. Currently running as $(whoami)"
     exit 1
   fi
 else
