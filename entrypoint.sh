@@ -140,5 +140,9 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
     exit 1
   fi
 else
-  [[ $(id -u) -eq 0 ]] && ( /usr/sbin/gosu runner "$@" ) || ( "$@" )
+  if [[ $(id -u) -eq 0 ]]; then
+    /usr/sbin/gosu runner "$@"
+  else
+    "$@"
+  fi
 fi
