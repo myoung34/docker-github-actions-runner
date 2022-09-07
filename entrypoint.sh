@@ -94,7 +94,7 @@ configure_runner() {
       ${_AUTO_UPDATE}
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
-  
+
   [[ $(id -u) -eq 0 ]] && /usr/bin/chown -R runner ${_RUNNER_WORKDIR} /opt/hostedtoolcache/ /actions-runner || :
 }
 
@@ -133,7 +133,16 @@ fi
 
 
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
-  [[ $(id -u) -eq 0 ]] && ( "$@" ) || ( echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overriden and is not running as root"; exit 1 )
+  if [[ $(id -u) -eq 0 ]]; then
+    "$@"
+  else
+    echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
+    exit 1
+  fi
 else
-  [[ $(id -u) -eq 0 ]] && ( /usr/sbin/gosu runner "$@" ) || ( "$@" )
+  if [[ $(id -u) -eq 0 ]]; then
+    /usr/sbin/gosu runner "$@"
+  else
+    "$@"
+  fi
 fi
