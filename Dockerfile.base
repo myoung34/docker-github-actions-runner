@@ -11,7 +11,7 @@ ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
-# hadolint ignore=DL3003,DL4001,SC2086
+# hadolint ignore=SC2086,DL3015
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update \
   && apt-get install -y --no-install-recommends gnupg \
@@ -54,7 +54,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( apt-get install -y --no-install-recommends git || apt-get install -t stable -y --no-install-recommends git || apt-get install -y --no-install-recommends git=1:2.33.1-0ppa1~ubuntu18.04.1 git-man=1:2.33.1-0ppa1~ubuntu18.04.1 ) \
   && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
   && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
-  && ( ( curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install awscli ) \
+  && ( ( curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install --no-cache-dir awscli ) \
   && ( curl -s "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz && tar -xzf /tmp/lfs.tar.gz -C /tmp && /tmp/git-lfs-${GIT_LFS_VERSION}/install.sh && rm -rf /tmp/lfs.tar.gz  /tmp/git-lfs-${GIT_LFS_VERSION}) \
   # Determine the Distro name (Debian, Ubuntu, etc)
   && distro=$(lsb_release -is | awk '{print tolower($0)}') \
@@ -70,7 +70,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" ]] && ( echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -L "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/Release.key" | apt-key add - && apt-get update) || : ) \
   && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" || "${LSB_RELEASE_CODENAME}" == "jammy" || "${LSB_RELEASE_CODENAME}" == "sid" || "${LSB_RELEASE_CODENAME}" == "bullseye" ]] && apt-get install -y --no-install-recommends podman buildah skopeo || : ) \
   && ( [[ "${LSB_RELEASE_CODENAME}" == "jammy" ]] && echo "Ubuntu Jammy is marked as beta. Please see https://github.com/actions/virtual-environments/issues/5490" || : ) \
-  && GH_CLI_INSTALL_FILE="/tmp/gh-$$.deb" && curl -sSLo "${GH_CLI_INSTALL_FILE}" "https://github.com$(curl -sSL "https://github.com/cli/cli/releases/latest" | grep -Po "(?<=href=\")/cli/cli/releases/download/[^\"]*${DPKG_ARCH}[.]deb(?=\")")" && apt -y install "${GH_CLI_INSTALL_FILE}" \
+  && GH_CLI_INSTALL_FILE="/tmp/gh-$$.deb" && curl -sSLo "${GH_CLI_INSTALL_FILE}" "https://github.com$(curl -sSL "https://github.com/cli/cli/releases/latest" | grep -Po "(?<=href=\")/cli/cli/releases/download/[^\"]*${DPKG_ARCH}[.]deb(?=\")")" && apt-get -y install "${GH_CLI_INSTALL_FILE}" \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
   && groupadd -g 121 runner \
