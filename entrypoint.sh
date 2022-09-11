@@ -1,4 +1,5 @@
 #!/usr/bin/dumb-init /bin/bash
+# shellcheck shell=bash
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=$PATH:/actions-runner
@@ -26,6 +27,7 @@ _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
+_EPHEMERAL=""
 
 # ensure backwards compatibility
 if [[ -z $RUNNER_SCOPE ]]; then
@@ -66,11 +68,10 @@ configure_runner() {
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
 
+  # shellcheck disable=SC2153
   if [ -n "${EPHEMERAL}" ]; then
     echo "Ephemeral option is enabled"
     _EPHEMERAL="--ephemeral"
-  else
-    _EPHEMERAL=""
   fi
 
   if [ -n "${DISABLE_AUTO_UPDATE}" ]; then
@@ -95,7 +96,6 @@ configure_runner() {
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
 
-  [[ $(id -u) -eq 0 ]] && /usr/bin/chown -R runner ${_RUNNER_WORKDIR} /opt/hostedtoolcache/ /actions-runner || :
 }
 
 
@@ -141,6 +141,8 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
+    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /opt/hostedtoolcache/ /actions-runner
     /usr/sbin/gosu runner "$@"
   else
     "$@"
