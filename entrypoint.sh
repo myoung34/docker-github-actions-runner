@@ -91,8 +91,8 @@ configure_runner() {
       --runnergroup "${_RUNNER_GROUP}" \
       --unattended \
       --replace \
-      ${_EPHEMERAL} \
-      ${_AUTO_UPDATE}
+      "${_EPHEMERAL}" \
+      "${_AUTO_UPDATE}"
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
 
