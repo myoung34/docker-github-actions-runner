@@ -11,7 +11,7 @@ ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
-# hadolint ignore=SC2086,DL3015
+# hadolint ignore=SC2086,DL3015,DL3008,DL3013
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update \
   && apt-get install -y --no-install-recommends gnupg \
