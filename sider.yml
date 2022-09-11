@@ -1,0 +1,4 @@
+linter:
+  actionlint:
+    ignore:
+      - ".*Quote this to prevent word splitting.*"
