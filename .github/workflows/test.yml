@@ -4,8 +4,8 @@ on:
 name: "Trigger: Push action"
 
 jobs:
-  shellcheck:
-    name: Shellcheck
+  tests:
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
