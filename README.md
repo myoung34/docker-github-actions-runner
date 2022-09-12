@@ -8,6 +8,7 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 ## Quick-Start (Examples and Usage) ##
 
 Please see [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
+Please read [the contributing guidelines](https://github.com/myoung34/docker-github-actions-runner/blob/master/CONTRIBUTING.md)
 
 ## Notes ##
 
