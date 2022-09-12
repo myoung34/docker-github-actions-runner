@@ -1,9 +1,13 @@
 repos:
-- repo: git://github.com/detailyang/pre-commit-shell
-  rev: 1.0.2
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.3.0
   hooks:
-  - id: shell-lint
-    args: [-e, SC1008]
+  - id: check-yaml
+  - id: end-of-file-fixer
+  - id: trailing-whitespace
+  - id: check-case-conflict
+  - id: check-merge-conflict
+  - id: detect-private-key
 - repo: https://github.com/stratasan/hadolint-pre-commit
   rev: cdefcb096e520a6daa9552b1d4636f5f1e1729cd
   hooks:

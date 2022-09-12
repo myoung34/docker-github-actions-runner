@@ -4,7 +4,7 @@ If you believe you have found a security vulnerability, please report it to me a
 
 ## Reporting Security Issues
 
-**Please do not report security vulnerabilities through public GitHub issues.** Instead, please report them to me directly at [myoung34@my.apsu.edu](mailto:myoung34@my.apsu.edu).  
+**Please do not report security vulnerabilities through public GitHub issues.** Instead, please report them to me directly at [myoung34@my.apsu.edu](mailto:myoung34@my.apsu.edu).
 
 If you'd like to communicate securely, my keybase is [here](https://keybase.io/3vilpenguin)
 
