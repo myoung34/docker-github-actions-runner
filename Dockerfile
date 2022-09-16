@@ -22,5 +22,4 @@ COPY token.sh entrypoint.sh /
 RUN chmod +x /token.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
