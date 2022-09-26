@@ -4,9 +4,9 @@ on:
     tags:
       - '*'
 
-permissions: 
-  contents: read
-  packages: write 
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   create-release:
