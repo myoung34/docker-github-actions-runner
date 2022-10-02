@@ -27,7 +27,6 @@ _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
-_EPHEMERAL=""
 
 # ensure backwards compatibility
 if [[ -z $RUNNER_SCOPE ]]; then
@@ -62,6 +61,7 @@ case ${RUNNER_SCOPE} in
 esac
 
 configure_runner() {
+  ARGS=()
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
     _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
@@ -71,14 +71,12 @@ configure_runner() {
   # shellcheck disable=SC2153
   if [ -n "${EPHEMERAL}" ]; then
     echo "Ephemeral option is enabled"
-    _EPHEMERAL="--ephemeral"
+    ARGS+=("--ephemeral")
   fi
 
   if [ -n "${DISABLE_AUTO_UPDATE}" ]; then
     echo "Disable auto update option is enabled"
-    _AUTO_UPDATE="--disableupdate"
-  else
-    _AUTO_UPDATE=""
+    ARGS+=("--disableupdate")
   fi
 
   echo "Configuring"
@@ -91,8 +89,7 @@ configure_runner() {
       --runnergroup "${_RUNNER_GROUP}" \
       --unattended \
       --replace \
-      "${_EPHEMERAL}" \
-      "${_AUTO_UPDATE}"
+      "${ARGS[@]}"
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
 
