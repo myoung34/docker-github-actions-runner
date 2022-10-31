@@ -59,7 +59,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && distro=$(lsb_release -is | awk '{print tolower($0)}') \
   && mkdir -p /etc/apt/keyrings \
   && ( curl -fsSL https://download.docker.com/linux/${distro}/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
-  && version=$(lsb_release -cs | sed 's/sid\|n\/a/bullseye/g') \
+  && version=$(lsb_release -cs | sed 's/bookworm\|n\/a/bullseye/g') \
   && ( echo "deb [arch=${DPKG_ARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${distro} ${version} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
   && apt-get update \
   && apt-get install -y docker-ce docker-ce-cli containerd.io --no-install-recommends --allow-unauthenticated \
