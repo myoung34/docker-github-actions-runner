@@ -18,6 +18,8 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
+    clang \
+    libclang1 \
     gnupg \
     lsb-release \
     curl \
