@@ -14,10 +14,8 @@ Please read [the contributing guidelines](https://github.com/myoung34/docker-git
 
 ### Security ###
 
-It is known that currently tokens (ACCESS_TOKEN / RUNNER_TOKEN / APP_ID / APP_PRIVATE_KEY ) are not safe from exfiltration.
+It is known that environment variables are not safe from exfiltration.
 If you are using this runner make sure that any workflow changes are gated by a verification process (in the actions settings) so that malicious PR's cannot exfiltrate these.
-
-If using APP_ID and APP_PRIVATE_KEY, you can prevent those from being accessible within the container, see the [note on Github App runner](#a-note-on-github-app-runner).
 
 ### Docker Support ###
 
@@ -58,7 +56,9 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUN_AS_ROOT` | Boolean to run as root. If `true`: will run as root. If `True` and the user is overridden it will error. If any other value it will run as the `runner` user and allow an optional override. Default is `true` |
 | `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
 | `RUNNER_NAME_PREFIX` | A prefix for a randomly generated name (followed by a random 13 digit string). You must not also provide `RUNNER_NAME`. Defaults to `github-runner` |
-| `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN`, or a valid `APP_ID` and `APP_PRIVATE_KEY` pair. |
+| `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN` |
+| `APP_ID` | The github application ID. Must be paired with `APP_PRIVATE_KEY` and should not be used with `ACCESS_TOKEN` or `RUNNER_TOKEN` |
+| `APP_PRIVATE_KEY` | The github application private key. Must be paired with `APP_ID` and should not be used with `ACCESS_TOKEN` or `RUNNER_TOKEN` |
 | `RUNNER_SCOPE` | The scope the runner will be registered on. Valid values are `repo`, `org` and `ent`. For 'org' and 'enterprise', `ACCESS_TOKEN` is required and `REPO_URL` is unnecessary. If 'org', requires `ORG_NAME`; if 'enterprise', requires `ENTERPRISE_NAME`. Default is 'repo'. |
 | `ORG_NAME` | The organization name for the runner to register under. Requires `RUNNER_SCOPE` to be 'org'. No default value. |
 | `ENTERPRISE_NAME` | The enterprise name for the runner to register under. Requires `RUNNER_SCOPE` to be 'enterprise'. No default value. |
@@ -72,62 +72,3 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
-| `APP_ID` | If using a GitHub app to authenticate the runner, this is the ID of such GitHub app. `APP_PRIVATE_KEY` must also be set. |
-| `APP_PRIVATE_KEY` | If using a Github app to authenticate the runner, this is the content of the secret key, in PEM format to use by the app. `APP_ID` must also be set. Avoid using this directly and rather [fetch a temporary access token out-of-band](#fetching-a-temporary-access-token)|
-
-## A note on Github App runner ##
-
-### Fetching a temporary access token ###
-
-By using the environment variable `APP_ID` and `APP_PRIVATE_KEY`, it is possible
-to use the container to fetch a temporary access token for the GitHub app by running:
-
-```
-docker run \
-  -e APP_ID="12345" \
-  -e APP_PRIVATE_KEY="$(</path/to/privatekey.pem)" \
-  --entrypoint /app_token.sh \
-  myoung34/github-runner:latest
-```
-
-
-When running a runner using a GitHub app to authenticate, both `APP_ID` and `APP_PRIVATE_KEY` needs to be provided.
-Under the hood, those credentials will be used to fetch a temporary access token.
-
-It is possible to pass them directly to the docker environment and have the container
-do all the magic with a command similar to:
-
-```
-docker run -d --restart always --name github-runner \
-  -e REPO_URL="https://github.com/myoung34/repo" \
-  -e RUNNER_NAME="foo-runner" \
-  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
-  -e RUNNER_GROUP="my-group" \
-  -e APP_ID="12345" \
-  -e APP_PRIVATE_KEY="$(</path/to/privatekey.pem)" \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
-  myoung34/github-runner:latest
-```
-
-but this would make the private key possibly accessible from within the container,
-opening for possible exfiltration
-
-Instead you can generate an `ACCESS_TOKEN` out-of-band and pass this to the
-runner container as in:
-
-```
-docker run -d --restart always --name github-runner \
-  -e REPO_URL="https://github.com/myoung34/repo" \
-  -e RUNNER_NAME="foo-runner" \
-  -e RUNNER_WORKDIR="/tmp/github-runner-your-repo" \
-  -e RUNNER_GROUP="my-group" \
-  -e ACCESS_TOKEN="$(docker run \
-    -e APP_ID="12345" \
-    -e APP_PRIVATE_KEY="$(</path/to/privatekey.pem)" \
-    --entrypoint /app_token.sh \
-    myoung34/github-runner:latest)" \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /tmp/github-runner-your-repo:/tmp/github-runner-your-repo \
-  myoung34/github-runner:latest
-```
