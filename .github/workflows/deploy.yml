@@ -10,9 +10,9 @@ on:
   schedule:
     - cron:  '59 23 * * *'
 
-permissions: 
+permissions:
   contents: read
-  packages: write 
+  packages: write
 
 jobs:
   ubuntu_latest_deploy:

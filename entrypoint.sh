@@ -8,6 +8,8 @@ export PATH=$PATH:/actions-runner
 # any command that needs them.  This may help prevent leaks.
 export -n ACCESS_TOKEN
 export -n RUNNER_TOKEN
+export -n APP_ID
+export -n APP_PRIVATE_KEY
 
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
@@ -62,6 +64,18 @@ esac
 
 configure_runner() {
   ARGS=()
+  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]]; then
+    if [[ -n "${ACCESS_TOKEN}" ]] || [[ -n "${RUNNER_TOKEN}" ]]; then
+      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID and APP_PRIVATE_KEY." >&2
+      exit 1
+    fi
+    echo "Obtaining access token for app_id ${APP_ID}"
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY}" bash /app_token.sh)
+  elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]]; then
+    echo "ERROR: Both APP_ID and APP_PRIVATE_KEY must be specified." >&2
+    exit 1
+  fi
+
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
     _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
