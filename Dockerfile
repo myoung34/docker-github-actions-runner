@@ -21,5 +21,9 @@ RUN chmod +x /actions-runner/install_actions.sh \
 COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
 
+# For this step to work, first download aleo parameters using:
+# `aws s3 cp s3://entropy-releases/vm-parameters/ .aleo/resources/ --recursive`
+ADD .aleo/resources/ /root/.aleo/resources/
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
