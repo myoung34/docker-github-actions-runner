@@ -23,6 +23,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     curl \
     tar \
     unzip \
+    zip \
     apt-transport-https \
     ca-certificates \
     sudo \
