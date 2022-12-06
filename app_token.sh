@@ -4,6 +4,7 @@
 # Environment variable that need to be set up:
 # * APP_ID, the GitHub's app ID
 # * APP_PRIVATE_KEY, the content of GitHub app's private key in PEM format.
+# * APP_LOGIN, the login name used to install GitHub's app
 #
 # https://github.com/orgs/community/discussions/24743#discussioncomment-3245300
 #
@@ -66,7 +67,7 @@ rs256_sign() {
 request_access_token() {
     jwt_payload=$(build_jwt_payload)
     encoded_jwt_parts=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${jwt_payload}")
-    encoded_mac=$(echo -n "$encoded_jwt_parts" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
+    encoded_mac=$(echo -n "${encoded_jwt_parts}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
     generated_jwt="${encoded_jwt_parts}.${encoded_mac}"
 
     auth_header="Authorization: Bearer ${generated_jwt}"
@@ -74,9 +75,9 @@ request_access_token() {
     app_installations_response=$(curl -sX GET \
         -H "${auth_header}" \
         -H "${API_HEADER}" \
-        ${APP_INSTALLATIONS_URI} \
+        "${APP_INSTALLATIONS_URI}" \
     )
-    access_token_url=$(echo "$app_installations_response" | jq --raw-output '.[] | select (.app_id  == '"${APP_ID}"') .access_tokens_url')
+    access_token_url=$(echo "${app_installations_response}" | jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
     curl -sX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
         -H "${auth_header}" \
