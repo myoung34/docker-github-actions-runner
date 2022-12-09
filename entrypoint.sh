@@ -47,6 +47,9 @@ case ${RUNNER_SCOPE} in
     [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
     _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
     RUNNER_SCOPE="org"
+    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+      APP_LOGIN=${ORG_NAME}
+    fi
     ;;
 
   ent*)
@@ -59,6 +62,10 @@ case ${RUNNER_SCOPE} in
     [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
     _SHORT_URL=${REPO_URL}
     RUNNER_SCOPE="repo"
+    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+      APP_LOGIN=${REPO_URL%/*}
+      APP_LOGIN=${APP_LOGIN##*/}
+    fi
     ;;
 esac
 
