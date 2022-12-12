@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 
 export RUNNER_ALLOW_RUNASROOT=1
-export PATH=$PATH:/actions-runner
+export PATH=${PATH}:/actions-runner
 
 # Un-export these, so that they must be passed explicitly to the environment of
 # any command that needs them.  This may help prevent leaks.
@@ -31,7 +31,7 @@ _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 
 # ensure backwards compatibility
-if [[ -z $RUNNER_SCOPE ]]; then
+if [[ -z ${RUNNER_SCOPE} ]]; then
   if [[ ${ORG_RUNNER} == "true" ]]; then
     echo 'ORG_RUNNER is now deprecated. Please use RUNNER_SCOPE="org" instead.'
     export RUNNER_SCOPE="org"
@@ -47,6 +47,9 @@ case ${RUNNER_SCOPE} in
     [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
     _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
     RUNNER_SCOPE="org"
+    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+      APP_LOGIN=${ORG_NAME}
+    fi
     ;;
 
   ent*)
@@ -59,20 +62,26 @@ case ${RUNNER_SCOPE} in
     [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
     _SHORT_URL=${REPO_URL}
     RUNNER_SCOPE="repo"
+    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+      APP_LOGIN=${REPO_URL%/*}
+      APP_LOGIN=${APP_LOGIN##*/}
+    fi
     ;;
 esac
 
 configure_runner() {
   ARGS=()
-  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]]; then
+  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
     if [[ -n "${ACCESS_TOKEN}" ]] || [[ -n "${RUNNER_TOKEN}" ]]; then
-      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID and APP_PRIVATE_KEY." >&2
+      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID, APP_PRIVATE_KEY and APP_LOGIN." >&2
       exit 1
     fi
-    echo "Obtaining access token for app_id ${APP_ID}"
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY}" bash /app_token.sh)
-  elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]]; then
-    echo "ERROR: Both APP_ID and APP_PRIVATE_KEY must be specified." >&2
+    echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
+    nl="
+"
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+  elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
+    echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
     exit 1
   fi
 
