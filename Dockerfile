@@ -21,13 +21,22 @@ RUN chmod +x /actions-runner/install_actions.sh \
 COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
 
-# Install R for Related workloads
+# Install R dependencies for related workloads
 RUN apt-get update -y && apt-get install -y \
-r-base r-base-dev \
 build-essential libcurl4-openssl-dev gfortran liblapack-dev \
-libopenblas-dev libxml2-dev libpng-dev zlib1g-dev cmake
+libopenblas-dev libxml2-dev libpng-dev zlib1g-dev cmake \
+libreadline-dev libx11-dev libx11-doc \
+libgdal-dev libproj-dev libgeos-dev libudunits2-dev libnode-dev libcairo2-dev libnetcdf-dev \
+libmagick++-dev libjq-dev libv8-dev libprotobuf-dev protobuf-compiler libsodium-dev imagemagick libgit2-dev \
+libopenblas-base gobjc++ texinfo texlive-latex-base latex2html texlive-fonts-extra
 
-# Make sure renv is installed
+# Install R v4.2.2 from source
+RUN wget https://cran.r-project.org/src/base/R-4/R-4.2.2.tar.gz && tar -xvzf R-4.2.2.tar.gz && cd R-4.2.2 && ./configure --with-blas="openblas" && sudo make -j`nproc` && sudo make install
+
+# Cleanup the install
+RUN sudo make clean
+
+# Make sure renv is installed before the runner starts
 RUN Rscript -e 'install.packages("renv")'
 
 ENTRYPOINT ["/entrypoint.sh"]
