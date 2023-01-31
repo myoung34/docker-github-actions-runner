@@ -24,9 +24,13 @@ deregister_runner() {
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
+
+# In some cases this file does not exist
 if [[ -f "/etc/hostname" ]]; then
-  # In some cases this file does not exist
-  _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
+  # in some cases it can also be empty
+  if [[ $(stat --printf="%s" /etc/hostname) -eq 0 ]]; then
+    _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
+  fi
 fi
 
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work-${_RUNNER_NAME}}
