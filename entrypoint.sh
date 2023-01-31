@@ -23,13 +23,21 @@ deregister_runner() {
 
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 
-_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
+_RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
 
-# In some cases this file does not exist
-if [[ -f "/etc/hostname" ]]; then
-  # in some cases it can also be empty
-  if [[ $(stat --printf="%s" /etc/hostname) -eq 0 ]]; then
-    _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
+_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
+if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
+  # In some cases this file does not exist
+  if [[ -f "/etc/hostname" ]]; then
+    # in some cases it can also be empty
+    if [[ $(stat --printf="%s" /etc/hostname) -ne 0 ]]; then
+      _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
+      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${_RUNNER_NAME}"
+    else
+      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname."
+    fi
+  else
+    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname does not exist. Not using /etc/hostname."
   fi
 fi
 

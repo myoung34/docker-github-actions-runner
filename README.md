@@ -55,7 +55,8 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | --- | --- |
 | `RUN_AS_ROOT` | Boolean to run as root. If `true`: will run as root. If `True` and the user is overridden it will error. If any other value it will run as the `runner` user and allow an optional override. Default is `true` |
 | `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
-| `RUNNER_NAME_PREFIX` | A prefix for runner name (followed by docker container id if /etc/hostname if exists, else a random 13 digit string). You must not also provide `RUNNER_NAME`. Defaults to `github-runner`                                                                                                                                                              |
+| `RUNNER_NAME_PREFIX` | A prefix for runner name (See `RANDOM_RUNNER_SUFFIX` for how the full name is generated). Note: will be overridden by `RUNNER_NAME` if provided. Defaults to `github-runner` |
+| `RANDOM_RUNNER_SUFFIX` | Boolean to use a randomized runner name suffix (preceeded by `RUNNER_NAME_PREFIX`). Will use a 13 character random string by default. If set to a value other than true it will attempt to use the contents of `/etc/hostname` or fall back to a random string if the file does not exist or is empty. Note: will be overridden by `RUNNER_NAME` if provided. Defaults to `true`. |
 | `ACCESS_TOKEN` | A [github PAT](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token) to use to generate `RUNNER_TOKEN` dynamically at container start. Not using this requires a valid `RUNNER_TOKEN` |
 | `APP_ID` | The github application ID. Must be paired with `APP_PRIVATE_KEY` and should not be used with `ACCESS_TOKEN` or `RUNNER_TOKEN` |
 | `APP_PRIVATE_KEY` | The github application private key. Must be paired with `APP_ID` and should not be used with `ACCESS_TOKEN` or `RUNNER_TOKEN` |
