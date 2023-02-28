@@ -1,6 +1,9 @@
 #!/usr/bin/dumb-init /bin/bash
 # shellcheck shell=bash
 
+# Start dockerd inside runner container to support DIND
+dockerd-entrypoint.sh &
+
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
 

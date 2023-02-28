@@ -47,6 +47,18 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     nodejs \
     rsync \
     gosu \
+    libc6 \
+    btrfs-progs \
+    e2fsprogs \
+    iptables \
+    iptables-persistent \
+    openssl \
+    uidmap \
+    xfsprogs \
+    lxc \
+    xz-utils \
+    pigz \
+    zfsutils-linux \
   && DPKG_ARCH="$(dpkg --print-architecture)" \
   && LSB_RELEASE_CODENAME="$(lsb_release --codename | cut -f2)" \
   && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
@@ -78,3 +90,28 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && usermod -aG sudo runner \
   && usermod -aG docker runner \
   && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+
+COPY modprobe.sh /usr/local/bin/modprobe
+COPY docker-entrypoint.sh /usr/local/bin/
+
+ENV DOCKER_TLS_CERTDIR=/certs
+
+RUN mkdir /certs /certs/client && chmod 1777 /certs /certs/client
+
+# set up subuid/subgid so that "--userns-remap=default" works out-of-the-box
+RUN set -eux; \
+	addgroup --system dockremap; \
+	adduser --system --ingroup dockremap dockremap; \
+	echo 'dockremap:165536:65536' >> /etc/subuid; \
+	echo 'dockremap:165536:65536' >> /etc/subgid
+
+ENV DIND_COMMIT 1f32e3c95d72a29b3eaacba156ed675dba976cb5
+
+RUN set -eux; \
+	wget -O /usr/local/bin/dind "https://raw.githubusercontent.com/docker/docker/${DIND_COMMIT}/hack/dind"; \
+	chmod +x /usr/local/bin/dind
+
+VOLUME /var/lib/docker
+EXPOSE 2375 2376
+
+COPY dockerd-entrypoint.sh /usr/local/bin/
