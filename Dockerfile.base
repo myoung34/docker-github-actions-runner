@@ -92,7 +92,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 COPY modprobe.sh /usr/local/bin/modprobe
-COPY docker-entrypoint.sh /usr/local/bin/
+COPY docker-entrypoint.sh dockerd-entrypoint.sh /usr/local/bin/
 
 ENV DOCKER_TLS_CERTDIR=/certs
 
@@ -113,5 +113,3 @@ RUN set -eux; \
 
 VOLUME /var/lib/docker
 EXPOSE 2375 2376
-
-COPY dockerd-entrypoint.sh /usr/local/bin/
