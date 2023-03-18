@@ -2,7 +2,7 @@
 # shellcheck shell=bash
 
 export RUNNER_ALLOW_RUNASROOT=1
-export PATH=${PATH}:/actions-runner
+export PATH=${PATH}:${RUNNER_DIR}
 
 # Un-export these, so that they must be passed explicitly to the environment of
 # any command that needs them.  This may help prevent leaks.
@@ -32,7 +32,7 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
     # in some cases it can also be empty
     if [[ $(stat --printf="%s" /etc/hostname) -ne 0 ]]; then
       _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(cat /etc/hostname)}
-      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${_RUNNER_NAME}"
+      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting ${CHOWN_USER} name to ${_RUNNER_NAME}"
     else
       echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname."
     fi
@@ -136,30 +136,30 @@ configure_runner() {
 }
 
 
-# Opt into runner reusage because a value was given
+# Opt into runner re-usage because a value was given
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
-  echo "Runner reusage is enabled"
+  echo "Runner re-usage is enabled"
 
   # directory exists, copy the data
   if [[ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     echo "Copying previous data"
-    cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+    cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "${RUNNER_DIR}"
   fi
 
-  if [ -f "/actions-runner/.runner" ]; then
+  if [ -f "${RUNNER_DIR}/.runner" ]; then
     echo "The runner has already been configured"
   else
     configure_runner
   fi
 else
-  echo "Runner reusage is disabled"
+  echo "Runner re-usage is disabled"
   configure_runner
 fi
 
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
-  echo "Reusage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  echo "Re-usage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   # Quoting (even with double-quotes) the regexp brokes the copying
-  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" ${RUNNER_DIR}/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
@@ -178,11 +178,11 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
+    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R "${CHOWN_USER}" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    /usr/bin/chown -R "${CHOWN_USER}" "${_RUNNER_WORKDIR}" ${RUNNER_DIR}
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
-    /usr/bin/chown runner /opt/hostedtoolcache/
-    /usr/sbin/gosu runner "$@"
+    /usr/bin/chown "${CHOWN_USER}" "${CACHE_HOSTED_TOOLS_DIRECTORY}"
+    /usr/sbin/gosu "${CHOWN_USER}" "$@"
   else
     "$@"
   fi
