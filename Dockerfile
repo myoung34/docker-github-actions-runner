@@ -1,8 +1,6 @@
-ARG BASE_IMAGE="myoung34/github-runner-base:latest"
+ARG BASE_IMAGE="derskythe/github-runner-base:latest"
 FROM ${BASE_IMAGE} AS base
 # hadolint ignore=DL3007
-
-LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG CACHE_HOSTED_TOOLS_DIRECTORY="/opt/hostedtoolcache"
 ENV CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}

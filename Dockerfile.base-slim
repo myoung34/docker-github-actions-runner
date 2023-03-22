@@ -1,0 +1,66 @@
+ARG BUILD_IMAGE=debian:bullseye-slim
+FROM ${BUILD_IMAGE}
+
+ARG DUMB_INIT_VERSION=1.2.2
+ARG DOCKER_COMPOSE_VERSION=1.27.4
+ARG LSB_RELEASE_CODENAME=bullseye
+ARG DOCKER_CODENAME=bullseye
+ARG DISTRO=debian
+ARG TARGETARCH
+
+ENV DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION}
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+# hadolint ignore=SC2086,DL3015,DL3008,DL3013
+RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && apt-get update -qq \
+  && apt-get install -y --no-install-recommends gnupg -qq \
+  && apt-get update -qq \
+  && apt-get install -y --no-install-recommends -qq \
+    gnupg \
+    lsb-release \
+    curl \
+    tar \
+    unzip \
+    zip \
+    apt-transport-https \
+    ca-certificates \
+    gpg-agent \
+    software-properties-common \
+    build-essential \
+    zlib1g-dev \
+    zstd \
+    gettext \
+    libcurl4-openssl-dev \
+    inetutils-ping \
+    jq \
+    wget \
+    dirmngr \
+    openssh-client \
+    locales \
+    python3-pip \
+    python3-setuptools \
+    python3 \
+    dumb-init \
+    nodejs \
+    rsync \
+    git \
+  && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
+  && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
+  && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
+  && mkdir -p /etc/apt/keyrings \
+  && ( curl -fsSL "https://download.docker.com/linux/${DISTRO}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
+  && ( echo "deb [arch=${TARGETARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${DISTRO} ${DOCKER_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
+  && apt-get update -qq \
+  && apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin containerd.io --no-install-recommends --allow-unauthenticated \
+  && ( [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) ) \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" ]] && ( echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -sSL "https://build.opensuse.org/projects/devel:kubic/public_key" | apt-key add -; echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -sSL "https://build.opensuse.org/projects/devel:kubic/public_key" | apt-key add - && apt-get update -qq) || : ) \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" || "${LSB_RELEASE_CODENAME}" == "jammy" || "${LSB_RELEASE_CODENAME}" == "sid" || "${LSB_RELEASE_CODENAME}" == "bullseye" ]] && apt-get install -y --no-install-recommends podman buildah skopeo || : ) \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "jammy" ]] && echo "Ubuntu Jammy is marked as beta. Please see https://github.com/actions/virtual-environments/issues/5490" || : ) \
+  && GH_CLI_VERSION=$(curl -sSL -H "Accept: application/vnd.github+json"   https://api.github.com/repos/cli/cli/releases/latest | jq -r '.tag_name' | sed 's/^v//g') \
+  && GH_CLI_DOWNLOAD_URL=$(curl -sSL -H "Accept: application/vnd.github+json"   https://api.github.com/repos/cli/cli/releases/latest | jq ".assets[] | select(.name == \"gh_${GH_CLI_VERSION}_linux_${TARGETARCH}.deb\")" | jq -r '.browser_download_url') \
+  && curl -sSLo /tmp/ghcli.deb ${GH_CLI_DOWNLOAD_URL} && apt-get -y install /tmp/ghcli.deb \
+  && rm -rf /tmp/ghcli.deb /var/lib/apt/lists/* /tmp/*

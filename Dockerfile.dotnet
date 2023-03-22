@@ -1,0 +1,60 @@
+ARG BASE_IMAGE="derskythe/github-runner-base-slim:latest"
+FROM ${BASE_IMAGE} AS base
+# hadolint ignore=DL3007
+
+ENV CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}
+ARG GH_RUNNER_VERSION="2.303.0"
+ARG RUNNER_DIR="/actions-runner"
+ENV RUNNER_DIR=${RUNNER_DIR}
+ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
+ARG CHOWN_USER="runner"
+ARG TARGETARCH
+
+ENV \
+    ASPNETCORE_URLS \
+    NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/packages \
+    # Do not generate certificate
+    DOTNET_GENERATE_ASPNET_CERTIFICATE=false \
+    # Do not show first run text
+    DOTNET_NOLOGO=true \
+    # SDK version
+    DOTNET_SDK_VERSION=7.0.202 \
+    # Enable correct mode for dotnet watch (only mode supported in a container)
+    DOTNET_USE_POLLING_FILE_WATCHER=true \
+    # Skip extraction of XML docs - generally not useful within an image/container - helps performance
+    NUGET_XMLDOC_MODE=skip \
+    # PowerShell telemetry for docker image usage
+    POWERSHELL_DISTRIBUTION_CHANNEL=PSDocker-DotnetSDK-Debian-11
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+RUN mkdir ${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages /_work
+
+# Install .NET SDK
+RUN curl -fSL --output dotnet.tar.gz https://dotnetcli.azureedge.net/dotnet/Sdk/$DOTNET_SDK_VERSION/dotnet-sdk-$DOTNET_SDK_VERSION-linux-x64.tar.gz \
+    && mkdir -p /usr/share/dotnet \
+    && tar -oxzf dotnet.tar.gz -C /usr/share/dotnet ./packs ./sdk ./sdk-manifests ./templates ./LICENSE.txt ./ThirdPartyNotices.txt \
+    && rm dotnet.tar.gz
+
+# Install PowerShell global tool
+RUN powershell_version=7.3.3 \
+    && curl -fSL --output PowerShell.Linux.x64.$powershell_version.nupkg https://pwshtool.blob.core.windows.net/tool/$powershell_version/PowerShell.Linux.x64.$powershell_version.nupkg \
+    && mkdir -p /usr/share/powershell \
+    && dotnet tool install --add-source / --tool-path /usr/share/powershell --version $powershell_version PowerShell.Linux.x64 \
+    && dotnet nuget locals all --clear \
+    && rm PowerShell.Linux.x64.$powershell_version.nupkg \
+    && ln -s /usr/share/powershell/pwsh /usr/bin/pwsh \
+    && chmod 755 /usr/share/powershell/pwsh \
+    # To reduce image size, remove the copy nupkg that nuget keeps.
+    && find /usr/share/powershell -print | grep -i '.*[.]nupkg$' | xargs rm
+
+WORKDIR ${RUNNER_DIR}
+COPY *.sh .
+RUN chmod +x entrypoint.sh \
+    && TARGET_ARCH=$(echo ${TARGETARCH} | sed 's/amd/x/') \
+    && wget -qO- "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-$TARGET_ARCH-${GH_RUNNER_VERSION}.tar.gz" | tar xz \
+    && ./bin/installdependencies.sh \
+    && rm -Rf install_actions.sh ./externals/node12_alpine ./externals/node12 /var/lib/apt/lists/*
+
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
