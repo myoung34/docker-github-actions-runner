@@ -13,7 +13,7 @@ permissions:
 jobs:
   create-release:
     name: Create Release
-    runs-on: [ self-hosted, linux ]
+    runs-on: [ ubuntu-latest ]
     defaults:
       run:
         shell: bash
@@ -57,7 +57,7 @@ jobs:
         echo "RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_OUTPUT
 
   build-release:
-    runs-on: [ self-hosted, linux ]
+    runs-on: [ ubuntu-latest ]
     needs: create-release
     defaults:
       run:
