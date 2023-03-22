@@ -23,7 +23,7 @@ RUN chmod +x entrypoint.sh \
     && wget -qO- "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-$TARGET_ARCH-${GH_RUNNER_VERSION}.tar.gz" | tar xz \
     && ./bin/installdependencies.sh \
     && rm -Rf install_actions.sh ./externals/node12_alpine ./externals/node12 /var/lib/apt/lists/* /tmp/* \
-    && chown ${CHOWN_USER} . \
+    && chown ${CHOWN_USER} .
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
