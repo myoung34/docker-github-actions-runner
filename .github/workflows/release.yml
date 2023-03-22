@@ -139,7 +139,7 @@ jobs:
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
         secrets: |
-          GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+          GIT_AUTH_TOKEN=${{ secrets.GIT_AUTH_TOKEN }}
         platforms: linux/amd64,linux/arm64
         cache-from: type=gha
         cache-to: type=gha,mode=max
