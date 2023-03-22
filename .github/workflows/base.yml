@@ -1,108 +1,111 @@
-name: GitHub Actions Runner in Docker - Base
+name: "GitHub Actions Runner in Docker - Base"
+run-name: "Build base to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+
 on:
-  push:
-    paths:
-      - Dockerfile.base
-      - .github/workflows/base.yml
-    branches:
-      - master
-      - develop
-  schedule:
-    - cron:  '0 22 * * *'
+  workflow_dispatch:
+#  push:
+#    paths:
+#      - Dockerfile.base
+#      - .github/workflows/base.yml
+#    branches:
+#      - master
+#      - develop
+#  schedule:
+#    - cron:  '0 22 * * *'
 
 jobs:
-  ubuntu_base_latest_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile.base
-          pull: true
-          push: true
-          tags: ${{ env.ORG }}/github-runner-base:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  ubuntu_base_deploy:
-    runs-on: ubuntu-latest
+  build_base:
+    runs-on: [ ubuntu-latest ]
     strategy:
-      matrix:
-        release: [jammy, focal, bionic]
       fail-fast: false
+      matrix:
+        os: [ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid]
+        include:
+          - os: ubuntu-jammy
+            distro: ubuntu
+            codename: jammy
+            docker-codename: jammy
+          - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker-codename: focal
+          - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker-codename: bionic
+          - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker-codename: bullseye
+          - os: debian-sid
+            distro: debian
+            codename: sid
+            docker-codename: bullseye
     steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM ubuntu:${{ matrix.release }}/' Dockerfile.base.ubuntu-${{ matrix.release }}
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile.base.ubuntu-${{ matrix.release }}
-          pull: true
-          push: true
-          tags: ${{ env.ORG }}/github-runner-base:ubuntu-${{ matrix.release }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    - name: Copy Repo Files
+      uses: actions/checkout@v3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
 
-  debian_base_deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        release: [bullseye, sid]
-      fail-fast: false
-    steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: Dockerfile.base.debian-${{ matrix.release }}
-          pull: true
-          push: true
-          tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_TOKEN }}
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.ACTOR }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        labels: |
+          org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
+          org.opencontainers.image.version=${{ matrix.os }}
+          org.opencontainers.image.base.name=${{ matrix.distro }}:${{ matrix.codename }}
+          org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+          org.opencontainers.image.licenses=MIT
+        images: |
+          ${{ vars.BASE_IMAGE }}
+          ghcr.io/${{ vars.BASE_IMAGE }}
+        flavor: |
+          latest=false
+          prefix=
+          suffix=
+        tags: |
+          type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
+          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
+          type=raw,value=${{ matrix.os }},enable=true
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: Dockerfile
+        provenance: true
+        sbom: true
+        pull: true
+        push: true
+        #push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}
+          CHOWN_USER=${{ vars.CHOWN_USER }}
+          LSB_RELEASE_CODENAME=${{ matrix.codename }}
+          DOCKER_CODENAME=${{ matrix.docker-codename }}
+          DISTRO=${{ matrix.distro }}
+          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+        secrets: |
+          GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        platforms: linux/amd64,linux/arm64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
