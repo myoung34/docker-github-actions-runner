@@ -1,15 +1,16 @@
 ARG BUILD_IMAGE=ubuntu:focal
 FROM ${BUILD_IMAGE}
 
-LABEL maintainer="myoung34@my.apsu.edu"
+LABEL maintainer=myoung34@my.apsu.edu
 
-ARG DUMB_INIT_VERSION="1.2.2"
-ARG GIT_CORE_PPA_KEY="A1715D88E1DF1F24"
-ARG CHOWN_USER="runner"
-ARG DOCKER_COMPOSE_VERSION="1.27.4"
-ARG GIT_LFS_VERSION="3.2.0"
-ARG LSB_RELEASE_CODENAME="focal"
-ARG DISTRO="ubuntu"
+ARG DUMB_INIT_VERSION=1.2.2
+ARG GIT_CORE_PPA_KEY=A1715D88E1DF1F24
+ARG CHOWN_USER=runner
+ARG DOCKER_COMPOSE_VERSION=1.27.4
+ARG GIT_LFS_VERSION=3.2.0
+ARG LSB_RELEASE_CODENAME=focal
+ARG DOCKER_CODENAME=focal
+ARG DISTRO=ubuntu
 ARG TARGETARCH
 
 ENV DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION}
@@ -61,11 +62,11 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( apt-get install -y --no-install-recommends git || apt-get install -t stable -y --no-install-recommends git || apt-get install -y --no-install-recommends git=1:2.33.1-0ppa1~ubuntu18.04.1 git-man=1:2.33.1-0ppa1~ubuntu18.04.1 ) \
   && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -y --no-install-recommends liblttng-ust0 || : ) \
   && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -y --no-install-recommends liblttng-ust1 || : ) \
-  && ( ( curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install --no-cache-dir awscli ) \
+  && ( ( curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip -qq awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install --no-cache-dir awscli ) \
   && ( curl -sS "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${TARGETARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz && tar -xzf /tmp/lfs.tar.gz -C /tmp && /tmp/git-lfs-${GIT_LFS_VERSION}/install.sh && rm -rf /tmp/lfs.tar.gz  /tmp/git-lfs-${GIT_LFS_VERSION}) \
   && mkdir -p /etc/apt/keyrings \
-  && ( curl -fsSL https://download.docker.com/linux/${DISTRO}/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
-  && ( echo "deb [arch=${TARGETARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${DISTRO} ${LSB_RELEASE_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
+  && ( curl -fsSL "https://download.docker.com/linux/${DISTRO}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
+  && ( echo "deb [arch=${TARGETARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${DISTRO} ${DOCKER_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
   && apt-get update -qq \
   && apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin containerd.io --no-install-recommends --allow-unauthenticated \
   && ( [[ $(lscpu -J | jq -r '.lscpu[] | select(.field == "Vendor ID:") | .data') == "ARM" ]] && echo "Not installing docker-compose. See https://github.com/docker/compose/issues/6831" || ( curl -sSL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose ) ) \

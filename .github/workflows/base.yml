@@ -1,7 +1,8 @@
-name: GitHub Actions Runner in Docker - Base
-# Manual trigger
-on: workflow_dispatch
-#on:
+name: "GitHub Actions Runner in Docker - Base"
+run-name: "Build base to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+
+on:
+  workflow_dispatch:
 #  push:
 #    paths:
 #      - Dockerfile.base
@@ -11,32 +12,43 @@ on: workflow_dispatch
 #      - develop
 #  schedule:
 #    - cron:  '0 22 * * *'
-env:
-  IMAGE_NAME: github-runner-base
-  CHOWN_USER: runner
 
 jobs:
-  build_and_deploy:
-    runs-on: [ self-hosted, linux ]
+  build_base:
+    runs-on: [ ubuntu-latest ]
     strategy:
       fail-fast: false
       matrix:
-        platform: [
-          {tag: "ubuntu-jammy", distro: "ubuntu", codename: "jammy", extra: ""},
-          {tag: "ubuntu-focal", distro: "ubuntu", codename: "focal",  extra: "latest"},
-          {tag: "ubuntu-bionic", distro: "ubuntu", codename: "bionic",  extra: ""},
-          {tag: "debian-bullseye", distro: "ubuntu", codename: "bullseye",  extra: ""},
-          {tag: "debian-sid", distro: "ubuntu", codename: "sid",  extra: ""}
-        ]
+        os: [ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid]
+        include:
+          - os: ubuntu-jammy
+            distro: ubuntu
+            codename: jammy
+            docker-codename: jammy
+          - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker-codename: focal
+          - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker-codename: bionic
+          - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker-codename: bullseye
+          - os: debian-sid
+            distro: debian
+            codename: sid
+            docker-codename: bullseye
     steps:
     - name: Copy Repo Files
       uses: actions/checkout@v3
-    - name: Get GitHub organization or user
-      run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+
     - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
@@ -46,27 +58,52 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
+        username: ${{ github.ACTOR }}
         password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        labels: |
+          org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
+          org.opencontainers.image.version=${{ matrix.os }}
+          org.opencontainers.image.base.name=${{ matrix.distro }}:${{ matrix.codename }}
+          org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+          org.opencontainers.image.licenses=MIT
+        images: |
+          ${{ vars.BASE_IMAGE }}
+          ghcr.io/${{ vars.BASE_IMAGE }}
+        flavor: |
+          latest=false
+          prefix=
+          suffix=
+        tags: |
+          type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
+          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
+          type=raw,value=${{ matrix.os }},enable=true
+
     - name: Build and push
-      uses: docker/build-push-action@v2
+      uses: docker/build-push-action@v4
       with:
         context: .
         file: Dockerfile.base
+        provenance: true
+        sbom: true
         pull: true
         push: true
+        #push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          BUILD_IMAGE="${{ matrix.distro }}:${{ matrix.codename }}"
-          CHOWN_USER="${{ env.CHOWN_USER }}"
-          LSB_RELEASE_CODENAME="${{ env.CHOWN_USER }}"
-          DISTRO="${{ matrix.distro }}"
-        tags: |
-          ${{ env.ORG }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}
-          ${{ env.ORG }}/${{ env.IMAGE_NAME }}:${{ matrix.extra }}
-          ghcr.io/${{ github.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ matrix.tag }}
-          ghcr.io/${{ github.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ matrix.extra }}
-        secrets: |
-          GIT_AUTH_TOKEN=${{ secrets.GITHUB_TOKEN }}
-        platforms: linux/amd64 #,linux/arm64
+          BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}
+          CHOWN_USER=${{ vars.CHOWN_USER }}
+          LSB_RELEASE_CODENAME=${{ matrix.codename }}
+          DOCKER_CODENAME=${{ matrix.docker-codename }}
+          DISTRO=${{ matrix.distro }}
+          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+        platforms: linux/amd64,linux/arm64
         cache-from: type=gha
         cache-to: type=gha,mode=max

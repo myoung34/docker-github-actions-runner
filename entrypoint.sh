@@ -14,7 +14,7 @@ export -n APP_PRIVATE_KEY
 deregister_runner() {
   echo "Caught SIGTERM. Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash ${RUNNER_DIR}/token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -96,7 +96,7 @@ configure_runner() {
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
     nl="
 "
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash ${RUNNER_DIR}/app_token.sh)
   elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
     echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
     exit 1
@@ -104,7 +104,7 @@ configure_runner() {
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash ${RUNNER_DIR}/token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
 
