@@ -12,6 +12,10 @@ on:
 #      - develop
 #  schedule:
 #    - cron:  '0 22 * * *'
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build_base:
     runs-on: [ ubuntu-latest ]
