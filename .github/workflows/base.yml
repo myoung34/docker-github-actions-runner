@@ -108,7 +108,7 @@ jobs:
         cache-to: type=gha,mode=max
 
   build_base_slim:
-    runs-on: [ self-hosted, linux ]
+    runs-on: [ ubuntu-latest ]
     strategy:
       fail-fast: false
       matrix:
