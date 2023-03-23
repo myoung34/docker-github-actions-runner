@@ -80,7 +80,7 @@ jobs:
           suffix=
         tags: |
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
-          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
+          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-jammy' }}
           type=raw,value=${{ matrix.os }},enable=true
     - name: Build and push
       uses: docker/build-push-action@v4
@@ -112,7 +112,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ debian-bullseye ]
+        os: [ debian-bullseye, ubuntu-jammy ]
         include:
         -
           os: debian-bullseye
@@ -120,6 +120,12 @@ jobs:
           distro: debian
           codename: bullseye
           docker-codename: bullseye
+        -
+          os: ubuntu-jammy
+          os-tag: ubuntu:jammy
+          distro: ubuntu
+          codename: jammy
+          docker-codename: jammy
     steps:
     -
       name: Copy Repo Files
@@ -164,7 +170,7 @@ jobs:
         tags: |
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
           type=raw,value=slim-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}-${{ matrix.os }},enable=true
-          type=raw,value=slim-latest,enable=true
+          type=raw,value=slim-${{ matrix.os }}-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4

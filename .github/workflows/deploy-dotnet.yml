@@ -21,7 +21,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ debian-bullseye ]
+        os: [ debian-bullseye, ubuntu-jammy ]
+        include:
+        -
+          os: debian-bullseye
+          distro: debian
+          codename: 11
+        -
+          os: ubuntu-jammy
+          distro: ubuntu
+          codename: jammy
     steps:
     -
       name: Copy Repo Files
@@ -56,8 +65,8 @@ jobs:
       with:
         labels: |
           org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          org.opencontainers.image.version=slim-${{ env.RELEASE_VERSION }}-${{ matrix.os }}
-          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:slim-latest
+          org.opencontainers.image.version=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }}
+          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:slim-${{ matrix.os }}-latest
           org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
           org.opencontainers.image.licenses=MIT
         images: |
@@ -69,7 +78,7 @@ jobs:
           suffix=
         tags: |
           type=raw,value=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-          type=raw,value=dotnet-latest,enable=true
+          type=raw,value=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }}-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
@@ -84,8 +93,10 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          BASE_IMAGE=${{ vars.BASE_IMAGE }}:slim-latest
+          BASE_IMAGE=${{ vars.BASE_IMAGE }}:slim-${{ matrix.os }}-latest
           GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
+          DISTRO=${{ matrix.distro }}
+          CODENAME=${{ matrix.codename }}
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
