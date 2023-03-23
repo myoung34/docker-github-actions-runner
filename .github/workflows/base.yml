@@ -158,12 +158,13 @@ jobs:
           ${{ vars.BASE_IMAGE }}
           ghcr.io/${{ vars.BASE_IMAGE }}
         flavor: |
-          latest=true
+          latest=false
           prefix=
           suffix=
         tags: |
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
           type=raw,value=slim-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}-${{ matrix.os }},enable=true
+          type=raw,value=slim-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
