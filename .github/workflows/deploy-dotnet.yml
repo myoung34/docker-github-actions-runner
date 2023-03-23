@@ -26,11 +26,11 @@ jobs:
         -
           os: debian-bullseye
           distro: debian
-          codename: 11
+          version: 11
         -
           os: ubuntu-jammy
           distro: ubuntu
-          codename: jammy
+          version: 22.04
     steps:
     -
       name: Copy Repo Files
@@ -96,7 +96,7 @@ jobs:
           BASE_IMAGE=${{ vars.BASE_IMAGE }}:slim-${{ matrix.os }}-latest
           GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
           DISTRO=${{ matrix.distro }}
-          CODENAME=${{ matrix.codename }}
+          DISTRO_VERSION=${{ matrix.version }}
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
