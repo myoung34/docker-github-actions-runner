@@ -1,0 +1,26 @@
+ARG BASE_IMAGE="derskythe/github-runner-base:latest"
+FROM ${BASE_IMAGE} AS base
+# hadolint ignore=DL3007
+
+ARG GH_RUNNER_VERSION="2.303.0"
+ARG RUNNER_DIR="/actions-runner"
+ENV RUNNER_DIR=${RUNNER_DIR}
+ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
+ENV CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}
+ARG CHOWN_USER="runner"
+ARG TARGETARCH
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages
+WORKDIR ${RUNNER_DIR}
+COPY *.sh .
+RUN mkdir -p ${NUGET_PACKAGES} /_work \
+    && TARGET_ARCH=$(echo ${TARGETARCH} | sed 's/amd/x/') \
+    && chmod +x entrypoint.sh \
+    && wget -qO- "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSION}/actions-runner-linux-$TARGET_ARCH-${GH_RUNNER_VERSION}.tar.gz" | tar xz \
+    && ./bin/installdependencies.sh \
+    && rm -Rf install_actions.sh ./externals/node12_alpine ./externals/node12 /var/lib/apt/lists/* /tmp/*
+
+ENTRYPOINT ["./entrypoint.sh"]
+CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
