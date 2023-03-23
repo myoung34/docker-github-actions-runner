@@ -1,6 +1,14 @@
 name: "Runner Deploy DotNet"
 run-name: "Deploy DotNet to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 on:
+#  push:
+#    paths-ignore:
+#    - Dockerfile.dotnet
+#    - .github/workflows/deploy-dotnet.yml
+#    branches:
+#    - master
+#    - develop
+#    - update
   workflow_dispatch:
 
 permissions:
@@ -47,20 +55,21 @@ jobs:
       uses: docker/metadata-action@v4
       with:
         labels: |
-          org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME_DOTNET }}
-          org.opencontainers.image.version=${{ env.RELEASE_VERSION }}-${{ matrix.os }}
-          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE_DOTNET }}:latest
+          org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+          org.opencontainers.image.version=slim-${{ env.RELEASE_VERSION }}-${{ matrix.os }}
+          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:slim-latest
           org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
           org.opencontainers.image.licenses=MIT
         images: |
-          ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME_DOTNET }}
-          ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME_DOTNET }}
+          ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+          ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
         flavor: |
-          latest=true
+          latest=false
           prefix=
           suffix=
         tags: |
-          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
+          type=raw,value=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
+          type=raw,value=dotnet-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
@@ -75,8 +84,8 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          BASE_IMAGE_DOTNET=${{ vars.BASE_IMAGE_DOTNET }}:latest
-          GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
+          BASE_IMAGE=${{ vars.BASE_IMAGE }}:slim-latest
+          GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
