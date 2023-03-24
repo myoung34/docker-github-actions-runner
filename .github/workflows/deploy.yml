@@ -9,8 +9,8 @@ on:
 #    branches:
 #      - master
 #      - develop
-#  schedule:
-#    - cron:  '59 23 * * *'
+  schedule:
+    - cron:  '59 23 * * *'
 
 permissions:
   contents: read
@@ -18,6 +18,9 @@ permissions:
 
 jobs:
   deploy-release:
+    concurrency:
+      group: make_deploy
+      cancel-in-progress: true
     runs-on: [ ubuntu-latest ]
     strategy:
       fail-fast: false
