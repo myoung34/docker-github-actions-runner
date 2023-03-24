@@ -85,7 +85,6 @@ jobs:
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
           type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
           type=raw,value=${{ matrix.os }},enable=true
-
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
@@ -95,7 +94,6 @@ jobs:
         sbom: true
         pull: true
         push: true
-        #push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -110,3 +108,4 @@ jobs:
         platforms: linux/amd64,linux/arm64
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
