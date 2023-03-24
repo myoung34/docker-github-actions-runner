@@ -1,21 +1,29 @@
-name: "GitHub Actions Runner in Docker - Base"
+name: "BASE image make"
 run-name: "Build base to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
-#  push:
-#    paths:
-#      - Dockerfile.base
-#      - .github/workflows/base.yml
+  push:
+    paths:
+      - Dockerfile.base
+      - .github/workflows/base.yml
+  schedule:
+    - cron:  '0 22 * * *'
 #    branches:
 #      - master
 #      - develop
-#  schedule:
-#    - cron:  '0 22 * * *'
+concurrency:
+  group: base-image-make
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  build_base:
+  base-image-make:
     runs-on: [ ubuntu-latest ]
+    if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
       matrix:
@@ -91,7 +99,6 @@ jobs:
         sbom: true
         pull: true
         push: true
-        #push: ${{ github.event_name != 'pull_request' }}
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
@@ -109,6 +116,8 @@ jobs:
 
   build_base_slim:
     runs-on: [ ubuntu-latest ]
+    if: ${{ 1 == 2 }}
+    #if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
       matrix:
