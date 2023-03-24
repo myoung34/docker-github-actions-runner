@@ -1,7 +1,10 @@
-name: "GitHub Actions Runner in Docker - Deploy"
+name: "Build and Deploy"
 run-name: "Deploy to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 on:
   workflow_dispatch:
+  workflow_run: 
+    workflows: [BASE image make, RELEASE Create]
+    types: [completed]
 #  push:
 #    paths-ignore:
 #      - Dockerfile.base
@@ -9,19 +12,21 @@ on:
 #    branches:
 #      - master
 #      - develop
-  schedule:
-    - cron:  '59 23 * * *'
+#  schedule:
+#    - cron:  '59 23 * * *'
 
 permissions:
   contents: read
   packages: write
+  
+concurrency:
+  group: pull-build-push
+  cancel-in-progress: true
 
 jobs:
-  deploy-release:
-    concurrency:
-      group: make_deploy
-      cancel-in-progress: true
+  pull-build-push:
     runs-on: [ ubuntu-latest ]
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
       matrix:
