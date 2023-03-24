@@ -80,3 +80,4 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && groupadd -g 121 ${CHOWN_USER} \
   && useradd -mr -d /home/${CHOWN_USER} -u 1001 -g 121 -G sudo,docker ${CHOWN_USER} \
   && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+#

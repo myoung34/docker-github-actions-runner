@@ -1,0 +1,60 @@
+name: "RELEASE update"
+run-name: "Update release ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      TAG_NAME:
+        description: 'Tag name that the major tag will point to'
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+env:
+  TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
+
+jobs:
+  create-release:
+    #if: ${{ format('refs/tags/{0}', github.REF) && contains(github.REF, github.REF_NAME) }}
+    name: Update release
+    runs-on: [ ubuntu-latest ]
+    defaults:
+      run:
+        shell: bash
+    outputs:
+      outvar: ${{ steps.last.outputs.RELEASE_VERSION }}
+    steps:
+    -
+      name: Checkout code
+      uses: actions/checkout@v3
+#    -
+#      name: Set version by default
+#      run: |
+#        echo "RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
+#    -
+#      name: Set release version
+#      run: |
+#        if [[ ${{ github.REF }} =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+#          echo "RELEASE_VERSION=${{ github.REF_NAME }}" >> $GITHUB_ENV
+#        fi
+#        echo "PUBLISH_RELEASE=1" >> $GITHUB_ENV
+#        echo "::notice::New RELEASE is publishing!"
+    -
+      name: Update release
+      id: update-release
+      uses: softprops/action-gh-release@v1
+#      if: ${{ env.PUBLISH_RELEASE == 1 }}
+      with:
+        tag_name: ${{ env.TAG_NAME }}
+        name: Release ${{ env.TAG_NAME }}
+        repository: ${{ github.REPOSITORY }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        generate_release_notes: true
+        #target_commitish: ${{ github.SHA }}
+        draft: false
+        prerelease: false
+        append_body: true
+#

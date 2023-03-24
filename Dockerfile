@@ -25,3 +25,4 @@ RUN chmod +x entrypoint.sh \
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+#

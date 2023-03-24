@@ -1,36 +1,30 @@
-name: "Runner Deploy DotNet"
-run-name: "Deploy DotNet to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+name: "Create containers and deploy"
+run-name: "Deploy ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 on:
-#  push:
-#    paths-ignore:
-#    - Dockerfile.dotnet
-#    - .github/workflows/deploy-dotnet.yml
-#    branches:
-#    - master
-#    - develop
-#    - update
   workflow_dispatch:
+  push:
+    paths:
+    - ${{ github.workflow_ref }}
+  workflow_run:
+    workflows: [BASE build, RELEASE update]
+    types: [completed]
 
 permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
-  deploy-release:
+  pull-build-push:
     runs-on: [ ubuntu-latest ]
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ debian-bullseye, ubuntu-jammy ]
-        include:
-        -
-          os: debian-bullseye
-          distro: debian
-          version: 11
-        -
-          os: ubuntu-jammy
-          distro: ubuntu
-          version: 22.04
+        os: [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
     steps:
     -
       name: Copy Repo Files
@@ -38,7 +32,7 @@ jobs:
     -
       name: Set version by default
       run: |
-        echo "RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}" >> $GITHUB_ENV
+        echo "RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
     -
       name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -65,8 +59,8 @@ jobs:
       with:
         labels: |
           org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          org.opencontainers.image.version=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }}
-          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:slim-${{ matrix.os }}-latest
+          org.opencontainers.image.version=${{ env.RELEASE_VERSION }}-${{ matrix.os }}
+          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
           org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
           org.opencontainers.image.licenses=MIT
         images: |
@@ -77,14 +71,17 @@ jobs:
           prefix=
           suffix=
         tags: |
-          type=raw,value=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-          type=raw,value=dotnet-${{ env.RELEASE_VERSION }}-${{ matrix.os }}-latest,enable=true
+          type=raw,value=${{ matrix.os }},enable=true
+          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
+          type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ matrix.os == 'ubuntu-focal' }}
+          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
+          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: .
-        file: Dockerfile.dotnet
+        file: Dockerfile
         provenance: true
         sbom: true
         pull: true
@@ -93,13 +90,13 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          BASE_IMAGE=${{ vars.BASE_IMAGE }}:slim-${{ matrix.os }}-latest
-          GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
-          DISTRO=${{ matrix.distro }}
-          DISTRO_VERSION=${{ matrix.version }}
+          BASE_IMAGE=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
+          CHOWN_USER=${{ vars.CHOWN_USER }}
+          GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
           BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
           VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
           REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-        platforms: linux/amd64
+        platforms: linux/amd64,linux/arm64
         cache-from: type=gha
         cache-to: type=gha,mode=max
+#

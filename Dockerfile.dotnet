@@ -35,3 +35,5 @@ RUN unset ASPNETCORE_URLS  \
 
 ENTRYPOINT ["./entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+
+#
