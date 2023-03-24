@@ -1,17 +1,17 @@
-name: "GitHub Actions Runner in Docker - Base"
+name: "BASE image make"
 run-name: "Build base to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
-#  push:
-#    paths:
-#      - Dockerfile.base
-#      - .github/workflows/base.yml
+  push:
+    paths:
+      - Dockerfile.base
+      - .github/workflows/base.yml
+  schedule:
+    - cron:  '0 22 * * *'
 #    branches:
 #      - master
 #      - develop
-#  schedule:
-#    - cron:  '0 22 * * *'
 
 jobs:
   build_base:
