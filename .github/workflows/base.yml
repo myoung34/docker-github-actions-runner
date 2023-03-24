@@ -127,6 +127,10 @@ jobs:
           codename: jammy
           docker-codename: jammy
     steps:
+    - name: Set version prefix
+      run: |
+        echo "PREFIX_VERSION=${{ matrix.os }}-slim" >> $GITHUB_ENV
+        echo "VERSION_NUMBER=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}" >> $GITHUB_ENV
     -
       name: Copy Repo Files
       uses: actions/checkout@v3
@@ -156,9 +160,9 @@ jobs:
       with:
         labels: |
           org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
-          org.opencontainers.image.version=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}-${{ matrix.os }}
+          org.opencontainers.image.version=${{ PREFIX_VERSION }}-${{ VERSION_NUMBER }}
           org.opencontainers.image.base.name=${{ matrix.os-tag }}
-          org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+          org.opencontainers.image.revision=${{ VERSION_NUMBER }}
           org.opencontainers.image.licenses=MIT
         images: |
           ${{ vars.BASE_IMAGE }}
@@ -169,8 +173,8 @@ jobs:
           suffix=
         tags: |
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
-          type=raw,value=slim-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}-${{ matrix.os }},enable=true
-          type=raw,value=slim-${{ matrix.os }}-latest,enable=true
+          type=raw,value=${{ PREFIX_VERSION }}-${{ VERSION_NUMBER }},enable=true
+          type=raw,value=${{ PREFIX_VERSION }}-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
