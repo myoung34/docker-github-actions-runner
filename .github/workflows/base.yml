@@ -16,6 +16,9 @@ on:
 jobs:
   build_base:
     runs-on: [ ubuntu-latest ]
+    concurrency:
+      group: make_make
+      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
