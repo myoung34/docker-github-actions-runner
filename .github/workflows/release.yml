@@ -1,10 +1,10 @@
-name: "GitHub Actions Runner in Docker - Release"
+name: "RELEASE Create"
 run-name: "Release to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 on:
   workflow_dispatch:
-#  push:
-#    tags:
-#      - '*'
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: write
@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   create-release:
+    if: ${{ format('refs/tags/{0}', github.REF) && contains(github.REF, github.REF_NAME) }}
     name: Create Release
     runs-on: [ ubuntu-latest ]
     defaults:
@@ -29,7 +30,6 @@ jobs:
         echo "RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
     -
       name: Set release version
-      if: ${{ format('refs/tags/{0}', github.REF) && contains(github.REF, github.REF_NAME) }}
       run: |
         if [[ ${{ github.REF }} =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
           echo "RELEASE_VERSION=${{ github.REF_NAME }}" >> $GITHUB_ENV
@@ -55,89 +55,3 @@ jobs:
       id: last
       run: |
         echo "RELEASE_VERSION=${{ env.RELEASE_VERSION }}" >> $GITHUB_OUTPUT
-
-  build-release:
-    runs-on: [ ubuntu-latest ]
-    needs: create-release
-    defaults:
-      run:
-        shell: bash
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
-    env:
-      invar: ${{ needs.create-release.outputs.outvar }}
-    steps:
-    -
-      name: Receiver variable
-      run: echo "RELEASE_VERSION=${{ env.invar }}" >> $GITHUB_ENV
-    -
-      name: Copy Repo Files
-      uses: actions/checkout@v3
-    -
-      name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    -
-      name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    -
-      name: Login to DockerHub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
-    -
-      name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.ACTOR }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    -
-      name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        labels: |
-          org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          org.opencontainers.image.version=${{ env.RELEASE_VERSION }}-${{ matrix.os }}
-          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
-          org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
-          org.opencontainers.image.licenses=MIT
-        images: |
-          ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-        flavor: |
-          latest=false
-          prefix=
-          suffix=
-        tags: |
-          type=raw,value=${{ matrix.os }},enable=true
-          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-          type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ matrix.os == 'ubuntu-focal' }}
-          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
-          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-    -
-      name: Build and push
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: Dockerfile
-        provenance: true
-        sbom: true
-        pull: true
-        push: true
-        #push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          BASE_IMAGE=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
-          CHOWN_USER=${{ vars.CHOWN_USER }}
-          GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
-          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-        platforms: linux/amd64,linux/arm64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
