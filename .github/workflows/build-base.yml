@@ -5,10 +5,11 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - Dockerfile.base
-      - .github/workflows/base.yml
+    - Dockerfile.base
+    - .github/workflows/base.yml
   schedule:
-    - cron:  '0 22 * * *'
+  -
+    cron: '0 22 * * *'
 #    branches:
 #      - master
 #      - develop
@@ -27,49 +28,59 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid]
+        os: [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
         include:
-          - os: ubuntu-jammy
-            distro: ubuntu
-            codename: jammy
-            docker-codename: jammy
-          - os: ubuntu-focal
-            distro: ubuntu
-            codename: focal
-            docker-codename: focal
-          - os: ubuntu-bionic
-            distro: ubuntu
-            codename: bionic
-            docker-codename: bionic
-          - os: debian-bullseye
-            distro: debian
-            codename: bullseye
-            docker-codename: bullseye
-          - os: debian-sid
-            distro: debian
-            codename: sid
-            docker-codename: bullseye
+        -
+          os: ubuntu-jammy
+          distro: ubuntu
+          codename: jammy
+          docker-codename: jammy
+        -
+          os: ubuntu-focal
+          distro: ubuntu
+          codename: focal
+          docker-codename: focal
+        -
+          os: ubuntu-bionic
+          distro: ubuntu
+          codename: bionic
+          docker-codename: bionic
+        -
+          os: debian-bullseye
+          distro: debian
+          codename: bullseye
+          docker-codename: bullseye
+        -
+          os: debian-sid
+          distro: debian
+          codename: sid
+          docker-codename: bullseye
     steps:
-    - name: Copy Repo Files
+    -
+      name: Copy Repo Files
       uses: actions/checkout@v3
-    - name: Set up QEMU
+    -
+      name: Set up QEMU
       uses: docker/setup-qemu-action@v2
-    - name: Set up Docker Buildx
+    -
+      name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-
-    - name: Login to DockerHub
+    -
+      name: Login to DockerHub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_TOKEN }}
-    - name: Login to GitHub Container Registry
+    -
+      name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
         username: ${{ github.ACTOR }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Docker meta
+    -
+      name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
       with:
@@ -90,7 +101,8 @@ jobs:
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
           type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-jammy' }}
           type=raw,value=${{ matrix.os }},enable=true
-    - name: Build and push
+    -
+      name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: .
@@ -136,7 +148,8 @@ jobs:
           codename: jammy
           docker-codename: jammy
     steps:
-    - name: Set version prefix
+    -
+      name: Set version prefix
       run: |
         echo "PREFIX_VERSION=${{ matrix.os }}-slim" >> $GITHUB_ENV
         echo "VERSION_NUMBER=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}" >> $GITHUB_ENV
@@ -169,7 +182,7 @@ jobs:
       with:
         labels: |
           org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
-          org.opencontainers.image.version=${{ PREFIX_VERSION }}-${{ VERSION_NUMBER }}
+          org.opencontainers.image.version=${{ env.PREFIX_VERSION }}-${{ env.VERSION_NUMBER }}
           org.opencontainers.image.base.name=${{ matrix.os-tag }}
           org.opencontainers.image.revision=${{ VERSION_NUMBER }}
           org.opencontainers.image.licenses=MIT
@@ -182,8 +195,9 @@ jobs:
           suffix=
         tags: |
           type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
-          type=raw,value=${{ PREFIX_VERSION }}-${{ VERSION_NUMBER }},enable=true
-          type=raw,value=${{ PREFIX_VERSION }}-latest,enable=true
+          type=raw,value=${{ env.PREFIX_VERSION }}-${{ env.VERSION_NUMBER }},enable=true
+          type=raw,value=${{ env.PREFIX_VERSION }},enable=true
+          type=raw,value=${{ env.PREFIX_VERSION }}-latest,enable=true
     -
       name: Build and push
       uses: docker/build-push-action@v4
