@@ -27,40 +27,32 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          [
-            ubuntu-jammy,
-            ubuntu-jammy-dotnet,
-            ubuntu-focal,
-            ubuntu-bionic,
-            debian-bullseye,
-            debian-sid,
-            debian-bullseye-dotnet,
-          ]
+          [ ubuntu-jammy, ubuntu-jammy-dotnet, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid, debian-bullseye-dotnet, ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
-            codename: jammy
+            distro-version: 22.04
             has-latest: true
           - os: ubuntu-jammy-dotnet
             distro: ubuntu
-            codename: jammy
+            distro-version: 22.04
             dockerfile: Dockerfile.dotnet
           - os: ubuntu-focal
             distro: ubuntu
-            codename: focal
+            distro-version: 20.04
           - os: ubuntu-bionic
             distro: ubuntu
-            codename: bionic
+            distro-version: 18.04
           - os: debian-bullseye
             distro: debian
-            codename: bullseye
+            distro-version: 11
           - os: debian-sid
             distro: debian
-            codename: sid
+            distro-version: 10
           - os: debian-bullseye-dotnet
             dockerfile: Dockerfile.dotnet
             distro: debian
-            codename: bullseye
+            distro-version: 11
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
@@ -137,7 +129,7 @@ jobs:
             BASE_IMAGE=${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
             CHOWN_USER=${{ vars.CHOWN_USER }}
             DISTRO=${{ matrix.distro }}
-            DISTRO_VERSION=${{ matrix.codename }}
+            DISTRO_VERSION=${{ matrix.distro-version }}
             GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
             BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
@@ -159,14 +151,14 @@ jobs:
   #         os: debian-bullseye
   #         os-tag: debian:bullseye-slim
   #         distro: debian
-  #         codename: bullseye
-  #         docker-codename: bullseye
+  #         distro-version: bullseye
+  #         docker-distro-version: bullseye
   #       -
   #         os: ubuntu-jammy
   #         os-tag: ubuntu:jammy
   #         distro: ubuntu
-  #         codename: jammy
-  #         docker-codename: jammy
+  #         distro-version: jammy
+  #         docker-distro-version: jammy
   #   steps:
   #   -
   #     name: Set version prefix
