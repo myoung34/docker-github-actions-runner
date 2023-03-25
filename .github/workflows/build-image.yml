@@ -1,11 +1,12 @@
 name: "Create containers and deploy"
-run-name: "Deploy ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "Build image ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 on:
   workflow_dispatch:
   push:
     paths:
       - "build-image.yml"
       - "Dockerfile"
+      - 'Dockerfile.dotnet'
   workflow_run:
     workflows: [BASE build, RELEASE update]
     types: [completed]

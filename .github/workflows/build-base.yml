@@ -1,14 +1,15 @@
 name: "BASE build"
-run-name: "Build base to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
   push:
     paths:
       - Dockerfile.base
-      - .github/workflows/base.yml
+      - Dockerfile.base-slim
+      - .github/workflows/build-base.yml
   schedule:
-    - cron: "0 22 * * *"
+    - cron: "0 */6 * * *"
 #    branches:
 #      - master
 #      - develop
@@ -34,8 +35,7 @@ jobs:
             ubuntu-focal,
             ubuntu-bionic,
             debian-bullseye,
-            debian-sid,
-            debian-bullseye-slim,
+            debian-sid
           ]
         include:
           - os: ubuntu-jammy
@@ -64,11 +64,11 @@ jobs:
             distro: debian
             codename: sid
             docker-codename: bullseye
-          - os: debian-bullseye-dotnet
-            distro: debian
-            codename: bullseye
-            docker-codename: bullseye
-            dockerfile: Dockerfile.base-slim
+          # - os: debian-bullseye-dotnet
+          #   distro: debian
+          #   codename: bullseye
+          #   docker-codename: bullseye
+          #   dockerfile: Dockerfile.base-slim
     steps:
       - name: Set version by default
         shell: pwsh
