@@ -69,16 +69,20 @@ jobs:
             dockerfile: Dockerfile.base-slim
     steps:
       - name: Set version by default
+        shell: pwsh
         run: |
-          echo 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
-          echo 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
-          echo 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
-          echo 'BASE_BUILD_IMAGE=${{ env.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
-          if [[ '${{ matrix.dockerfile }}' -eq '' ]]; then
-            echo 'DOCKERFILE=Dockerfile.base' >> $GITHUB_ENV
+          Write-Output 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
+          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
+          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
+          Write-Output 'BASE_BUILD_IMAGE=${{ env.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
+          if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
+          {
+            Write-Output 'DOCKERFILE=Dockerfile.base' >> $GITHUB_ENV
+          }
           else
-            else 'DOCKERFILE=${{ matrix.dockerfile }}' >> $GITHUB_ENV
-          fi
+          {
+            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $GITHUB_ENV
+          }
       - name: Copy Repo Files
         uses: actions/checkout@v3
       - name: Set up QEMU
