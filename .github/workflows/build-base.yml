@@ -122,7 +122,6 @@ jobs:
             prefix=
             suffix=
           tags: |
-            type=raw,value=latest,enable=${{ matrix.has-latest }}
             type=raw,value=${{ env.FULL_TAG }},enable=true
             type=raw,value=${{ env.PREFIX }},enable=true
       - name: Build and push
