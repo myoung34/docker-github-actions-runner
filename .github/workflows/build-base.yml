@@ -68,10 +68,6 @@ jobs:
             docker-codename: bullseye
             dockerfile: Dockerfile.base-slim
     steps:
-      - name: "Qodana Scan"
-        uses: JetBrains/qodana-action@main
-        env:
-          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
       - name: Set version by default
         run: |
           echo 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
