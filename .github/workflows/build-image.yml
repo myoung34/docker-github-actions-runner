@@ -77,7 +77,7 @@ jobs:
           Write-Output "LATEST_FLAG=$LatestFlag" >> $env:GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
-            Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
+            Write-Output 'DOCKERFILE=Dockerfile' >> $env:GITHUB_ENV
           }
           else
           {
@@ -138,7 +138,7 @@ jobs:
             CHOWN_USER=${{ vars.CHOWN_USER }}
             DISTRO=${{ matrix.distro }}
             DISTRO_VERSION=${{ matrix.codename }}
-            GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
+            GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }}
             BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
