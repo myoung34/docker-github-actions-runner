@@ -38,15 +38,29 @@ jobs:
           ]
         include:
           - os: ubuntu-jammy
+            distro: ubuntu
+            codename: jammy
             has-latest: true
           - os: ubuntu-jammy-dotnet
+            distro: ubuntu
+            codename: jammy
             dockerfile: Dockerfile.dotnet
           - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
           - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
           - os: debian-bullseye
+            distro: debian
+            codename: bullseye
           - os: debian-sid
+            distro: debian
+            codename: sid
           - os: debian-bullseye-dotnet
             dockerfile: Dockerfile.dotnet
+            distro: debian
+            codename: bullseye
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
@@ -122,6 +136,8 @@ jobs:
           build-args: |
             BASE_IMAGE=${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
             CHOWN_USER=${{ vars.CHOWN_USER }}
+            DISTRO=${{ matrix.distro }}
+            DISTRO_VERSION=${{ matrix.codename }}
             GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
             BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
