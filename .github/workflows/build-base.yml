@@ -184,7 +184,7 @@ jobs:
           org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
           org.opencontainers.image.version=${{ env.PREFIX_VERSION }}-${{ env.VERSION_NUMBER }}
           org.opencontainers.image.base.name=${{ matrix.os-tag }}
-          org.opencontainers.image.revision=${{ VERSION_NUMBER }}
+          org.opencontainers.image.revision=${{ env.VERSION_NUMBER }}
           org.opencontainers.image.licenses=MIT
         images: |
           ${{ vars.BASE_IMAGE }}
