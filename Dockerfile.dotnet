@@ -13,7 +13,7 @@ ARG DISTRO
 ARG DISTRO_VERSION
 
 # SDK version
-ENV DOTNET_SDK_VERSION=6.0
+ENV DOTNET_VERSION='6.0'
 ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages
 ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
 ENV DOTNET_NOLOGO=true
@@ -26,7 +26,8 @@ COPY *.sh .
 RUN unset ASPNETCORE_URLS  \
     && mkdir -p ${NUGET_PACKAGES} /_work \
     && TARGET_ARCH=$(echo ${TARGETARCH} | sed 's/amd/x/') \
-    && wget -q https://packages.microsoft.com/config/${DISTRO}/${DISTRO_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && dpkg -i packages-microsoft-prod.deb && rm packages-microsoft-prod.deb \
+    && wget -q https://packages.microsoft.com/config/${DISTRO}/${DISTRO_VERSION}/packages-microsoft-prod.deb -O packages-microsoft-prod.deb  \
+    && dpkg -i packages-microsoft-prod.deb && rm packages-microsoft-prod.deb \
     && apt-get update -qq && apt-get install powershell aspnetcore-runtime-${DOTNET_VERSION} -y -qq \
     && echo 'export DOTNET_ROOT=/usr/share/dotnet' >> /etc/profile && echo 'export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared' >> /etc/profile \
     && echo 'export DOTNET_ROOT=/usr/share/dotnet' >> ~/.bashrc && echo 'export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared' >> ~/.bashrc \
