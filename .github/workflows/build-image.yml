@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-    - 'build-image.yml'
-    - 'Dockerfile'
+      - "build-image.yml"
+      - "Dockerfile"
   workflow_run:
     workflows: [BASE build, RELEASE update]
     types: [completed]
@@ -25,79 +25,197 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
+        os:
+          [
+            ubuntu-jammy,
+            ubuntu-jammy-dotnet,
+            ubuntu-focal,
+            ubuntu-bionic,
+            debian-bullseye,
+            debian-sid,
+            debian-bullseye-dotnet,
+          ]
+        include:
+          - os: ubuntu-jammy
+            has-latest: true
+          - os: ubuntu-jammy-dotnet
+            dockerfile: Dockerfile.dotnet
+          - os: ubuntu-focal
+          - os: ubuntu-bionic
+          - os: debian-bullseye
+          - os: debian-sid
+          - os: debian-bullseye-dotnet
+            dockerfile: Dockerfile.dotnet
     steps:
-    -
-      name: Copy Repo Files
-      uses: actions/checkout@v3
-    -
-      name: Set version by default
-      run: |
-        echo "RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}" >> $GITHUB_ENV
-    -
-      name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    -
-      name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    -
-      name: Login to DockerHub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
-    -
-      name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.ACTOR }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    -
-      name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        labels: |
-          org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          org.opencontainers.image.version=${{ env.RELEASE_VERSION }}-${{ matrix.os }}
-          org.opencontainers.image.base.name=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
-          org.opencontainers.image.revision=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
-          org.opencontainers.image.licenses=MIT
-        images: |
-          ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-          ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-        flavor: |
-          latest=false
-          prefix=
-          suffix=
-        tags: |
-          type=raw,value=${{ matrix.os }},enable=true
-          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-          type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ matrix.os == 'ubuntu-focal' }}
-          type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-focal' }}
-          type=raw,value=${{ env.RELEASE_VERSION }}-${{ matrix.os }},enable=true
-    -
-      name: Build and push
-      uses: docker/build-push-action@v4
-      with:
-        context: .
-        file: Dockerfile
-        provenance: true
-        sbom: true
-        pull: true
-        push: true
-        #push: ${{ github.event_name != 'pull_request' }}
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        build-args: |
-          BASE_IMAGE=${{ vars.BASE_IMAGE }}:${{ matrix.os }}
-          CHOWN_USER=${{ vars.CHOWN_USER }}
-          GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
-          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
-        platforms: linux/amd64,linux/arm64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      - name: Copy Repo Files
+        uses: actions/checkout@v3
+      - name: Set version by default
+        run: |
+          echo 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
+          echo 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
+          echo 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $GITHUB_ENV
+          echo 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
+          echo 'BASE_BUILD_IMAGE=${{ env.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
+          if [[ ${{ matrix.dockerfile }} -eq '' ]]; then
+            echo 'DOCKERFILE=Dockerfile' >> $GITHUB_ENV
+          else
+            else 'DOCKERFILE=${{ matrix.dockerfile }}' >> $GITHUB_ENV
+          fi
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.ACTOR }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          labels: |
+            org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+            org.opencontainers.image.version=${{ env.FULL_TAG }}
+            org.opencontainers.image.base.name=${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
+            org.opencontainers.image.revision=${{ env.REVISION }}
+            org.opencontainers.image.licenses=MIT
+          images: |
+            ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+            ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+          flavor: |
+            latest=false
+            prefix=
+            suffix=
+          tags: |
+            type=raw,value=${{ env.PREFIX }},enable=true
+            type=raw,value=${{ env.FULL_TAG }},enable=true
+            type=raw,value=latest,enable=${{ matrix.has-latest }}
+            type=raw,value=${{ env.PREFIX }}-latest,enable=${{ matrix.has-latest }}
+            type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ matrix.has-latest }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ${{ env.DOCKERFILE }}
+          provenance: true
+          sbom: true
+          pull: true
+          push: true
+          #push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BASE_IMAGE=${{ env.BASE_BUILD_IMAGE }}
+            CHOWN_USER=${{ vars.CHOWN_USER }}
+            GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
+            BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # build_base_slim:
+  #   runs-on: ubuntu-latest
+  #   #if: ${{ 1 == 2 }}
+  #   #if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [ debian-bullseye, ubuntu-jammy ]
+  #       include:
+  #       -
+  #         os: debian-bullseye
+  #         os-tag: debian:bullseye-slim
+  #         distro: debian
+  #         codename: bullseye
+  #         docker-codename: bullseye
+  #       -
+  #         os: ubuntu-jammy
+  #         os-tag: ubuntu:jammy
+  #         distro: ubuntu
+  #         codename: jammy
+  #         docker-codename: jammy
+  #   steps:
+  #   -
+  #     name: Set version prefix
+  #     run: |
+  #       echo "PREFIX_VERSION=${{ matrix.os }}-slim" >> $GITHUB_ENV
+  #       echo "VERSION_NUMBER=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}" >> $GITHUB_ENV
+  #   -
+  #     name: Copy Repo Files
+  #     uses: actions/checkout@v3
+  #   -
+  #     name: Set up QEMU
+  #     uses: docker/setup-qemu-action@v2
+  #   -
+  #     name: Set up Docker Buildx
+  #     uses: docker/setup-buildx-action@v2
+  #   -
+  #     name: Login to DockerHub
+  #     uses: docker/login-action@v2
+  #     with:
+  #       username: ${{ secrets.DOCKER_USER }}
+  #       password: ${{ secrets.DOCKER_TOKEN }}
+  #   -
+  #     name: Login to GitHub Container Registry
+  #     uses: docker/login-action@v2
+  #     with:
+  #       registry: ghcr.io
+  #       username: ${{ github.ACTOR }}
+  #       password: ${{ secrets.GITHUB_TOKEN }}
+  #   -
+  #     name: Docker meta
+  #     id: meta
+  #     uses: docker/metadata-action@v4
+  #     with:
+  #       labels: |
+  #         org.opencontainers.image.name=${{ vars.BASE_IMAGE }}
+  #         org.opencontainers.image.version=${{ env.PREFIX_VERSION }}-${{ env.VERSION_NUMBER }}
+  #         org.opencontainers.image.base.name=${{ matrix.os-tag }}
+  #         org.opencontainers.image.revision=${{ env.VERSION_NUMBER }}
+  #         org.opencontainers.image.licenses=MIT
+  #       images: |
+  #         ${{ vars.BASE_IMAGE }}
+  #         ghcr.io/${{ vars.BASE_IMAGE }}
+  #       flavor: |
+  #         latest=false
+  #         prefix=
+  #         suffix=
+  #       tags: |
+  #         type=schedule,enable=true,priority=1000,prefix=,suffix=,pattern=nightly-{{raw}}
+  #         type=raw,value=${{ env.PREFIX_VERSION }}-${{ env.VERSION_NUMBER }},enable=true
+  #         type=raw,value=${{ env.PREFIX_VERSION }},enable=true
+  #         type=raw,value=${{ env.PREFIX_VERSION }}-latest,enable=true
+  #   -
+  #     name: Build and push
+  #     uses: docker/build-push-action@v4
+  #     with:
+  #       context: .
+  #       file: Dockerfile.base-slim
+  #       provenance: true
+  #       sbom: true
+  #       pull: true
+  #       push: true
+  #       #push: ${{ github.event_name != 'pull_request' }}
+  #       tags: ${{ steps.meta.outputs.tags }}
+  #       labels: ${{ steps.meta.outputs.labels }}
+  #       build-args: |
+  #         BUILD_IMAGE=${{ matrix.os-tag }}
+  #         LSB_RELEASE_CODENAME=${{ matrix.codename }}
+  #         DOCKER_CODENAME=${{ matrix.docker-codename }}
+  #         DISTRO=${{ matrix.distro }}
+  #         BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+  #         VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+  #         REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+  #       platforms: linux/amd64
+  #       cache-from: type=gha
+  #       cache-to: type=gha,mode=max
 #EOF
