@@ -58,6 +58,8 @@ jobs:
           Write-Output 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
           Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $env:GITHUB_ENV
           Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}' >> $env:GITHUB_ENV
+          $LatestFlag = ([string]::IsNullOrWhitespace('${{ matrix.has-latest }}') ? 'false' : 'true')
+          Write-Output "LATEST_FLAG=$LatestFlag" >> $env:GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
             Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
@@ -101,9 +103,9 @@ jobs:
           tags: |
             type=raw,value=${{ env.PREFIX }},enable=true
             type=raw,value=${{ env.FULL_TAG }},enable=true
-            type=raw,value=latest,enable=${{ matrix.has-latest }}
-            type=raw,value=${{ env.PREFIX }}-latest,enable=${{ matrix.has-latest }}
-            type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ matrix.has-latest }}
+            type=raw,value=latest,enable=${{ env.LATEST_FLAG }}
+            type=raw,value=${{ env.PREFIX }}-latest,enable=${{ env.LATEST_FLAG }}
+            type=raw,value=${{ env.RELEASE_VERSION }},enable=${{ env.LATEST_FLAG }}
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
