@@ -56,6 +56,10 @@ jobs:
           codename: sid
           docker-codename: bullseye
     steps:
+    - name: 'Qodana Scan'
+      uses: JetBrains/qodana-action@main
+      env:
+        QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
     -
       name: Copy Repo Files
       uses: actions/checkout@v3
