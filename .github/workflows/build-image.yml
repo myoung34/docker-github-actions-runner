@@ -56,7 +56,7 @@ jobs:
           echo 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $GITHUB_ENV
           echo 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
           echo 'BASE_BUILD_IMAGE=${{ env.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
-          if [[ ${{ matrix.dockerfile }} -eq '' ]]; then
+          if [[ '${{ matrix.dockerfile }}' -eq '' ]]; then
             echo 'DOCKERFILE=Dockerfile' >> $GITHUB_ENV
           else
             else 'DOCKERFILE=${{ matrix.dockerfile }}' >> $GITHUB_ENV
