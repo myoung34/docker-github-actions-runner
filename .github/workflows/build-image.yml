@@ -120,7 +120,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BASE_IMAGE=${{ env.BASE_BUILD_IMAGE }}
+            BASE_IMAGE=${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
             CHOWN_USER=${{ vars.CHOWN_USER }}
             GH_RUNNER_VERSION=${{ env.RELEASE_VERSION }}
             BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
