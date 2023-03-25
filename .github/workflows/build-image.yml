@@ -52,19 +52,19 @@ jobs:
       - name: Set version by default
         shell: pwsh
         run: |
-          Write-Output 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
-          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
-          Write-Output 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $GITHUB_ENV
-          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
-          Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
-          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }' >> $GITHUB_ENV
+          Write-Output 'PREFIX=${{ matrix.os }}' >> $env:GITHUB_ENV
+          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $env:GITHUB_ENV
+          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $env:GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }' >> $env:GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
-            Write-Output 'DOCKERFILE=Dockerfile.base' >> $GITHUB_ENV
+            Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
           }
           else
           {
-            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $GITHUB_ENV
+            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $env:GITHUB_ENV
           }
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

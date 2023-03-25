@@ -73,18 +73,18 @@ jobs:
       - name: Set version by default
         shell: pwsh
         run: |
-          Write-Output 'PREFIX=${{ matrix.os }}' | $GITHUB_ENV
-          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' | $GITHUB_ENV
-          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' | $GITHUB_ENV
-          Write-Output 'BASE_BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}' | $GITHUB_ENV
-          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}-base' | $GITHUB_ENV
+          Write-Output 'PREFIX=${{ matrix.os }}' >> $env:GITHUB_ENV
+          Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
+          Write-Output 'BASE_BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}' >> $env:GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}-base' >> $env:GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
-            Write-Output 'DOCKERFILE=Dockerfile.base' | $GITHUB_ENV
+            Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
           }
           else
           {
-            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' | $GITHUB_ENV
+            Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $env:GITHUB_ENV
           }
       - name: Copy Repo Files
         uses: actions/checkout@v3
