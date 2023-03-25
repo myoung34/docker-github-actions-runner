@@ -57,7 +57,7 @@ jobs:
           Write-Output 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $env:GITHUB_ENV
           Write-Output 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $env:GITHUB_ENV
           Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $env:GITHUB_ENV
-          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }' >> $env:GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}' >> $env:GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
             Write-Output 'DOCKERFILE=Dockerfile.base' >> $env:GITHUB_ENV
