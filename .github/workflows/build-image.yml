@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   push:
     paths:
-    - ${{ github.workflow_ref }}
+    - 'build-image.yml'
+    - 'Dockerfile'
   workflow_run:
     workflows: [BASE build, RELEASE update]
     types: [completed]
