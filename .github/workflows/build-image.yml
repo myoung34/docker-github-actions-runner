@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   pull-build-push:
-    runs-on: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
@@ -99,4 +99,4 @@ jobs:
         platforms: linux/amd64,linux/arm64
         cache-from: type=gha
         cache-to: type=gha,mode=max
-#
+#EOF

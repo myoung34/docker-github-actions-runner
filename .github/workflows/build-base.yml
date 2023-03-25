@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   base-image-make:
-    runs-on: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
@@ -127,8 +127,8 @@ jobs:
         cache-to: type=gha,mode=max
 
   build_base_slim:
-    runs-on: [ ubuntu-latest ]
-    if: ${{ 1 == 2 }}
+    runs-on: ubuntu-latest
+    #if: ${{ 1 == 2 }}
     #if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) || github.event_name == 'workflow_dispatch' }}
     strategy:
       fail-fast: false
@@ -222,4 +222,4 @@ jobs:
         platforms: linux/amd64
         cache-from: type=gha
         cache-to: type=gha,mode=max
-#
+#EOF

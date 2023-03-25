@@ -20,7 +20,7 @@ jobs:
   create-release:
     #if: ${{ format('refs/tags/{0}', github.REF) && contains(github.REF, github.REF_NAME) }}
     name: Update release
-    runs-on: [ ubuntu-latest ]
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
@@ -57,4 +57,4 @@ jobs:
         draft: false
         prerelease: false
         append_body: true
-#
+#EOF
