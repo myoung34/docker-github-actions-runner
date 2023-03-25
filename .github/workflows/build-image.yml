@@ -57,6 +57,7 @@ jobs:
           Write-Output 'RELEASE_VERSION=${{ vars.GH_RUNNER_VERSION }}' >> $GITHUB_ENV
           Write-Output 'FULL_TAG=${{ matrix.os }}-${{ vars.GH_RUNNER_VERSION }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
           Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }' >> $GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
             Write-Output 'DOCKERFILE=Dockerfile.base' >> $GITHUB_ENV
@@ -85,14 +86,14 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           labels: |
-            org.opencontainers.image.name=${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+            org.opencontainers.image.name=${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
             org.opencontainers.image.version=${{ env.FULL_TAG }}
             org.opencontainers.image.base.name=${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
             org.opencontainers.image.revision=${{ env.REVISION }}
             org.opencontainers.image.licenses=MIT
           images: |
-            ${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
-            ghcr.io/${{ github.ACTOR }}/${{ vars.RELEASE_IMAGE_NAME }}
+            ${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
+            ghcr.io/${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
           flavor: |
             latest=false
             prefix=

@@ -42,10 +42,12 @@ jobs:
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+            has-latest: true
           - os: ubuntu-jammy-dotnet
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+            dockerfile: Dockerfile.base-slim
           - os: ubuntu-focal
             distro: ubuntu
             codename: focal
@@ -74,7 +76,8 @@ jobs:
           Write-Output 'PREFIX=${{ matrix.os }}' >> $GITHUB_ENV
           Write-Output 'REVISION=${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
           Write-Output 'FULL_TAG=${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}' >> $GITHUB_ENV
-          Write-Output 'BASE_BUILD_IMAGE=${{ vars.RELEASE_IMAGE_NAME }}-base:${{ matrix.os }}' >> $GITHUB_ENV
+          Write-Output 'BASE_BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}' >> $GITHUB_ENV
+          Write-Output 'RELEASE_IMAGE_NAME=${{ vars.RELEASE_IMAGE_NAME }}-base' >> $GITHUB_ENV
           if( [string]::IsNullOrWhitespace('${{ matrix.dockerfile }}') )
           {
             Write-Output 'DOCKERFILE=Dockerfile.base' >> $GITHUB_ENV
@@ -106,27 +109,27 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           labels: |
-            org.opencontainers.image.name=${{ env.BASE_BUILD_IMAGE }}
+            org.opencontainers.image.name=${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
             org.opencontainers.image.version=${{ env.FULL_TAG }}
-            org.opencontainers.image.base.name=${{ matrix.distro }}:${{ matrix.codename }}
+            org.opencontainers.image.base.name=${{ env.BASE_BUILD_IMAGE }}
             org.opencontainers.image.revision=${{ env.REVISION }}
             org.opencontainers.image.licenses=MIT
           images: |
-            ${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
-            ghcr.io/${{ github.ACTOR }}/${{ env.BASE_BUILD_IMAGE }}
+            ${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
+            ghcr.io/${{ github.ACTOR }}/${{ env.RELEASE_IMAGE_NAME }}
           flavor: |
             latest=false
             prefix=
             suffix=
           tags: |
-            type=raw,value=latest,enable=${{ matrix.os == 'ubuntu-jammy' }}
+            type=raw,value=latest,enable=${{ matrix.has-latest }}
             type=raw,value=${{ env.FULL_TAG }},enable=true
             type=raw,value=${{ env.PREFIX }},enable=true
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile.base
+          file: ${{ env.DOCKERFILE }}
           provenance: true
           sbom: true
           pull: true
@@ -134,7 +137,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BUILD_IMAGE=${{ matrix.distro }}:${{ matrix.codename }}
+            BUILD_IMAGE=${{ env.BASE_BUILD_IMAGE }}
             CHOWN_USER=${{ vars.CHOWN_USER }}
             LSB_RELEASE_CODENAME=${{ matrix.codename }}
             DOCKER_CODENAME=${{ matrix.docker-codename }}
