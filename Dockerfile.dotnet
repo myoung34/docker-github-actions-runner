@@ -24,7 +24,6 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR ${RUNNER_DIR}
 COPY --chmod=777 *.sh .
-#RUN set -o pipefail
 RUN unset ASPNETCORE_URLS  \
     && mkdir -p ${NUGET_PACKAGES} /_work /usr/share/pwsh  \
     && wget -qO- "https://dot.net/v1/dotnet-install.sh" | bash /dev/stdin --channel LTS --runtime aspnetcore --install-dir /usr/share/dotnet \
