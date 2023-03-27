@@ -4,7 +4,6 @@ Docker Github Actions Runner
 ---
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/derskythe/docker-github-actions-runner?logo=github&logoColor=white)](https://github.com/derskythe/docker-github-actions-runner)
-[![RELEASE update](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/update-release.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/update-release.yml)
 [![Create containers and deploy](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-image.yml)
 [![BASE build](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
