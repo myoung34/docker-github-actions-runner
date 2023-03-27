@@ -1,0 +1,52 @@
+ARG BUILD_IMAGE
+FROM ${BUILD_IMAGE} AS build
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+# hadolint ignore=SC2086,DL3015,DL3008,DL3013
+RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && apt-get update -qq \
+  && apt-get install -y -q --no-install-recommends \
+  gnupg \
+  lsb-release \
+  curl \
+  tar \
+  unzip \
+  zip \
+  apt-transport-https \
+  ca-certificates \
+  sudo \
+  gpg-agent \
+  software-properties-common \
+  build-essential \
+  zlib1g-dev \
+  zstd \
+  gettext \
+  libcurl4-openssl-dev \
+  dirmngr \
+  openssh-client \
+  locales \
+  python3-pip \
+  python3-setuptools \
+  python3 \
+  dumb-init \
+  nodejs \
+  rsync \
+  libz-dev \
+  libssl-dev \
+  libexpat1-dev \
+  gettext \
+  cmake \
+  gcc \
+  checkinstall \
+  asciidoc \
+  git \
+  && apt-get upgrade -yqq \
+  && git clone https://github.com/git/git.git /tmp/git-src && cd /tmp/git-src
+#
+# Left dependencies as separate layer
+RUN make prefix=/usr all info \
+  && checkinstall --install=yes --default && cp -vf git-*.deb /*

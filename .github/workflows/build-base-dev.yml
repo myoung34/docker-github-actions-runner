@@ -1,0 +1,109 @@
+name: "BASE build"
+run-name: "BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - Dockerfile.base
+      - Dockerfile.base-slim
+      - .github/workflows/build-base.yml
+  schedule:
+    - cron: "0 */6 * * *"
+#    branches:
+#      - master
+#      - develop
+
+concurrency:
+  group: base-image-make
+  cancel-in-progress: true
+
+jobs:
+  base-image-make:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          [
+            ubuntu-jammy,
+            ubuntu-jammy-dotnet,
+            ubuntu-focal,
+            ubuntu-bionic,
+            debian-bullseye,
+            debian-sid,
+          ]
+        include:
+          - os: ubuntu-jammy
+            distro: ubuntu
+            codename: jammy
+            docker-codename: jammy
+            has-latest: true
+          - os: ubuntu-jammy-dotnet
+            distro: ubuntu
+            codename: jammy
+            docker-codename: jammy
+          - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker-codename: focal
+          - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker-codename: bionic
+          - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker-codename: bullseye
+          - os: debian-sid
+            distro: debian
+            codename: sid
+            docker-codename: bullseye
+          # - os: debian-bullseye-dotnet
+          #   distro: debian
+          #   codename: bullseye
+          #   docker-codename: bullseye
+          #   dockerfile: Dockerfile.base-slim
+    env:
+      AGENT_DIR: ${{ vars.AGENT_DIR }}
+      AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
+      GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
+      CHOWN_USER: ${{ vars.CHOWN_USER }}
+      LATEST_RELEASE: ${{ vars.LATEST_RELEASE }}
+      BASE_IMAGE_DOCKERFILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
+      RELEASE_IMAGE_DOCKERFILE: ${{ vars.RELEASE_IMAGE_DOCKERFILE }}
+      #   RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.RELEASE_IMAGE_TAG_PREFIX != '0' && vars.RELEASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.RELEASE_IMAGE_TAG_SUFFIX != '0' && vars.RELEASE_IMAGE_TAG_SUFFIX || '')) }}
+      #   BASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
+      BASE_IMAGE_NAME: ${{ matrix.os }}:${{ matrix.codename }}
+      RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
+      BASE_BUILD_IMAGE: ${{ matrix.os }}:${{ matrix.codename }}
+      TAG_PREFIX: ${{ matrix.os }}
+      REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+      FULL_TAG: ${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
+      REPOSITORY_OWNER: ${{ vars.REPOSITORY_OWNER }}
+      DOCKER_FILE: ${{  vars.BASE_IMAGE_DOCKERFILE }}
+    steps:
+      - name: Run custom action
+        uses: ./.github/actions/build-base@dev
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          docker_user: ${{ secrets.DOCKER_USER }}
+          docker_token: ${{ secrets.DOCKER_TOKEN }}
+          tag_prefix: ${{ env.TAG_PREFIX }}
+          full_tag: ${{ env.FULL_TAG }}
+          repository_owner: ${{ env.REPOSITORY_OWNER }}
+          release_image_name: ${{ env.RELEASE_IMAGE_NAME }}
+          base_name: ${{ env.BASE_IMAGE_NAME }}
+          base_build_image: ${{ env.BASE_BUILD_IMAGE }}
+          revision: ${{ env.REVISION }}
+          dockerfile: ${{ env.DOCKER_FILE }}
+          matrix_distro: ${{ matrix.distro }}
+          matrix_codename: ${{matrix.codename}}
+          chown_user: ${{env.CHOWN_USER }}
+          matrix_docker_codename: ${{ matrix.docker-codename}}
+          platforms: linux/amd64,linux/arm64
+          image_list: |
+            ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
+            ghcr.io/${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
+
+#EOF
