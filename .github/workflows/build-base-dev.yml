@@ -1,5 +1,5 @@
-name: "BASE build"
-run-name: "BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+name: "DEV BASE build"
+run-name: "DEV BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
@@ -8,8 +8,9 @@ on:
       - Dockerfile.base
       - Dockerfile.base-slim
       - .github/workflows/build-base.yml
-  schedule:
-    - cron: "0 */6 * * *"
+      - .github/actions/build-base/action.yml
+#  schedule:
+#    - cron: "0 */6 * * *"
 #    branches:
 #      - master
 #      - develop
@@ -17,6 +18,9 @@ on:
 concurrency:
   group: base-image-make
   cancel-in-progress: true
+
+env:
+  env_vars: ${{ vars.ENV_CONTEXT_VAR }}
 
 jobs:
   base-image-make:

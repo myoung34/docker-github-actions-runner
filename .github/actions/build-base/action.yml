@@ -1,6 +1,8 @@
+---
 name: "Action build BASE image"
 description: "Number of steps to build and deploy base image"
 author: "DerSkythe"
+
 inputs:
   full_tag:
     description: 'full_tag'
@@ -56,10 +58,10 @@ inputs:
   gh_token:
     description: 'Secret'
     required: true
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
 runs:
   using: "composite"
   steps:
@@ -98,7 +100,6 @@ runs:
         tags: |
           type=raw,value=${{ inputs.FULL_TAG }},enable=true
           type=raw,value=${{ inputs.TAG_PREFIX }},enable=true
-
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
@@ -116,9 +117,8 @@ runs:
           LSB_RELEASE_CODENAME=${{ env.MATRIX_CODENAME }}
           DOCKER_CODENAME=${{ env.MATRIX_DOCKER_CODENAME }}
           DISTRO=${{ env.MATRIX_DISTRO }}
-          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
-          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
-          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
+          REVISION=${{ inputs.REVISION }}
         platforms: ${{ env.PLATFORMS }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
