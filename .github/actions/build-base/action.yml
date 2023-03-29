@@ -1,0 +1,124 @@
+---
+name: "Action build BASE image"
+description: "Number of steps to build and deploy base image"
+author: "DerSkythe"
+
+inputs:
+  full_tag:
+    description: 'full_tag'
+    required: true
+  repository_owner:
+    description: 'repository_owner'
+    required: true
+  release_image_name:
+    description: 'release_image_name'
+    required: true
+  base_build_name:
+    description: 'base_build_name'
+    required: true
+  base_build_image:
+    description: 'base_build_image'
+    required: true
+  revision:
+    description: 'revision'
+    required: true
+  tag_prefix:
+    description: 'tag_prefix'
+    required: true
+  dockerfile:
+    description: 'dockerfile'
+    required: true
+  matrix_distro:
+    description: 'matrix_distro'
+    required: true
+  matrix_codename:
+    description: 'matrix_codename'
+    required: true
+  chown_user:
+    description: 'chown_user'
+    required: true
+  matrix_version:
+    description: 'matrix_version'
+    required: true
+  matrix_docker_codename:
+    description: 'matrix_docker_codename'
+    required: true
+  platforms:
+    description: 'platforms'
+    required: true
+  image_list:
+    description: 'image_list'
+    required: true
+  docker_user:
+    description: 'Secret'
+    required: true
+  docker_token:
+    description: 'Secret'
+    required: true
+  gh_token:
+    description: 'Secret'
+    required: true
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.random-number-generator.outputs.random-number }}
+runs:
+  using: "composite"
+  steps:
+    - name: Copy Repo Files
+      uses: actions/checkout@v3
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ inputs.DOCKER_USER }}
+        password: ${{ inputs.DOCKER_TOKEN }}
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ inputs.DOCKER_USER }}
+        password: ${{ inputs.GITHUB_TOKEN }}
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        labels: |
+          org.opencontainers.image.name=${{ inputs.RELEASE_IMAGE_NAME }}
+          org.opencontainers.image.version=${{ inputs.FULL_TAG }}
+          org.opencontainers.image.base.name=${{ inputs.BASE_BUILD_IMAGE }}
+          org.opencontainers.image.revision=${{ inputs.REVISION }}
+          org.opencontainers.image.licenses=MIT
+        images: ${{ inputs.IMAGE_LIST }}
+        flavor: |
+          latest=false
+          prefix=
+          suffix=
+        tags: |
+          type=raw,value=${{ inputs.FULL_TAG }},enable=true
+          type=raw,value=${{ inputs.TAG_PREFIX }},enable=true
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ${{ inputs.DOCKERFILE }}
+        provenance: true
+        sbom: true
+        pull: true
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          BUILD_IMAGE=${{ env.BASE_BUILD_IMAGE }}
+          CHOWN_USER=${{ env.CHOWN_USER }}
+          LSB_RELEASE_CODENAME=${{ env.MATRIX_CODENAME }}
+          DOCKER_CODENAME=${{ env.MATRIX_DOCKER_CODENAME }}
+          DISTRO=${{ env.MATRIX_DISTRO }}
+          VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
+          REVISION=${{ inputs.REVISION }}
+        platforms: ${{ env.PLATFORMS }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
