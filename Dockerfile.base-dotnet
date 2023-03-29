@@ -1,0 +1,80 @@
+ARG BUILD_IMAGE=ubuntu:focal
+FROM ${BUILD_IMAGE}
+
+ARG DUMB_INIT_VERSION=1.2.2
+ARG GIT_CORE_PPA_KEY=A1715D88E1DF1F24
+ARG CHOWN_USER=runner
+ARG DOCKER_COMPOSE_VERSION=1.27.4
+ARG GIT_LFS_VERSION=3.3.0
+ARG LSB_RELEASE_CODENAME=focal
+ARG DOCKER_CODENAME=focal
+ARG DISTRO=ubuntu
+ARG TARGETARCH
+
+ENV DOCKER_COMPOSE_VERSION=${DOCKER_COMPOSE_VERSION}
+ENV GIT_LFS_VERSION=${GIT_LFS_VERSION}
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+# hadolint ignore=SC2086,DL3015,DL3008,DL3013
+RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && apt-get update -qq \
+  && apt-get install -qq -y --no-install-recommends gnupg \
+  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
+  && apt-get update -qq \
+  && apt-get install -q -y --no-install-recommends \
+    gnupg \
+    lsb-release \
+    curl \
+    tar \
+    unzip \
+    zip \
+    apt-transport-https \
+    ca-certificates \
+    sudo \
+    gpg-agent \
+    software-properties-common \
+    build-essential \
+    zlib1g-dev \
+    zstd \
+    gettext \
+    libcurl4-openssl-dev \
+    inetutils-ping \
+    jq \
+    wget \
+    dirmngr \
+    openssh-client \
+    locales \
+    python3-pip \
+    python3-setuptools \
+    python3 \
+    dumb-init \
+    nodejs \
+    rsync \
+    gosu \
+  && sed -e 's/Defaults.*env_reset/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/' -i /etc/sudoers \
+  && echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu $([[ $(grep -E '^ID=' /etc/os-release | sed 's/.*=//g') == "ubuntu" ]] && (echo ${LSB_RELEASE_CODENAME}) || echo bionic) main>/etc/apt/sources.list.d/git-core.list \
+  && apt-get update -qq \
+  && ( apt-get install -qq -y --no-install-recommends git || apt-get install -t stable -y -qq --no-install-recommends git || apt-get install -qq -y --no-install-recommends git=1:2.33.1-0ppa1~ubuntu18.04.1 git-man=1:2.33.1-0ppa1~ubuntu18.04.1 ) \
+  && ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] && apt-get install -q -y --no-install-recommends liblttng-ust0 || : ) \
+  && ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] && apt-get install -q -y --no-install-recommends liblttng-ust1 || : ) \
+  && ( ( curl -sS "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" && unzip -qq awscliv2.zip -d /tmp/ && /tmp/aws/install && rm awscliv2.zip) || pip3 install --no-cache-dir awscli ) \
+  && ( curl -sS "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${TARGETARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz && tar -xzf /tmp/lfs.tar.gz -C /tmp && /tmp/git-lfs-${GIT_LFS_VERSION}/install.sh ) \
+  && mkdir -p /etc/apt/keyrings \
+  && ( curl -fsSL "https://download.docker.com/linux/${DISTRO}/gpg" | gpg --dearmor -o /etc/apt/keyrings/docker.gpg ) \
+  && ( echo "deb [arch=${TARGETARCH} signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/${DISTRO} ${DOCKER_CODENAME} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null ) \
+  && apt-get update -qq && apt-get upgrade -yqq \
+  && apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin containerd.io --no-install-recommends --allow-unauthenticated \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" ]] && ( echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -L "https://build.opensuse.org/projects/devel:kubic/public_key" | apt-key add -; echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list && curl -L "https://build.opensuse.org/projects/devel:kubic/public_key" | apt-key add - && apt-get update) || : ) \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "focal" || "${LSB_RELEASE_CODENAME}" == "jammy" || "${LSB_RELEASE_CODENAME}" == "sid" || "${LSB_RELEASE_CODENAME}" == "bullseye" ]] && apt-get install -y --no-install-recommends podman buildah skopeo || : ) \
+  && ( [[ "${LSB_RELEASE_CODENAME}" == "jammy" ]] && echo "Ubuntu Jammy is marked as beta. Please see https://github.com/actions/virtual-environments/issues/5490" || : ) \
+  && GH_CLI_VERSION=$(curl -sSL -H "Accept: application/vnd.github+json"   https://api.github.com/repos/cli/cli/releases/latest | jq -r '.tag_name' | sed 's/^v//g') \
+  && GH_CLI_DOWNLOAD_URL=$(curl -sSL -H "Accept: application/vnd.github+json"   https://api.github.com/repos/cli/cli/releases/latest | jq ".assets[] | select(.name == \"gh_${GH_CLI_VERSION}_linux_${TARGETARCH}.deb\")" | jq -r '.browser_download_url') \
+  && curl -sSLo /tmp/ghcli.deb ${GH_CLI_DOWNLOAD_URL} && apt-get -y install /tmp/ghcli.deb \
+  && rm -rf /tmp/ghcli.deb /var/lib/apt/lists/* /tmp/* \
+  && groupadd -g 121 ${CHOWN_USER} \
+  && useradd -mr -d /home/${CHOWN_USER} -u 1001 -g 121 -G sudo,docker ${CHOWN_USER} \
+  && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+#

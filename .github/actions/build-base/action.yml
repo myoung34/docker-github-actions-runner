@@ -65,8 +65,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Copy Repo Files
-      uses: actions/checkout@v3
+    # - name: Prints vars
+    #   shell: bash
+    #   run: |
+    #     echo '${{ toJson(env) }}'
+    #     echo '${{ toJson(inputs) }}'
+    #     echo '${{ toJson(github) }}'
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Set up Docker Buildx
@@ -74,37 +78,37 @@ runs:
     - name: Login to DockerHub
       uses: docker/login-action@v2
       with:
-        username: ${{ inputs.DOCKER_USER }}
-        password: ${{ inputs.DOCKER_TOKEN }}
+        username: ${{ inputs.docker_user }}
+        password: ${{ inputs.docker_token }}
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ inputs.DOCKER_USER }}
-        password: ${{ inputs.GITHUB_TOKEN }}
+        username: ${{ inputs.docker_user }}
+        password: ${{ inputs.gh_token }}
     - name: Docker meta
       id: meta
       uses: docker/metadata-action@v4
       with:
         labels: |
-          org.opencontainers.image.name=${{ inputs.RELEASE_IMAGE_NAME }}
-          org.opencontainers.image.version=${{ inputs.FULL_TAG }}
-          org.opencontainers.image.base.name=${{ inputs.BASE_BUILD_IMAGE }}
-          org.opencontainers.image.revision=${{ inputs.REVISION }}
+          org.opencontainers.image.name=${{ inputs.release_image_name }}
+          org.opencontainers.image.version=${{ inputs.full_tag }}
+          org.opencontainers.image.base.name=${{ inputs.base_build_image }}
+          org.opencontainers.image.revision=${{ inputs.revision }}
           org.opencontainers.image.licenses=MIT
-        images: ${{ inputs.IMAGE_LIST }}
+        images: ${{ inputs.image_list }}
         flavor: |
           latest=false
           prefix=
           suffix=
         tags: |
-          type=raw,value=${{ inputs.FULL_TAG }},enable=true
-          type=raw,value=${{ inputs.TAG_PREFIX }},enable=true
+          type=raw,value=${{ inputs.full_tag }},enable=true
+          type=raw,value=${{ inputs.tag_prefix }},enable=true
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
         context: .
-        file: ${{ inputs.DOCKERFILE }}
+        file: ${{ inputs.dockerfile }}
         provenance: true
         sbom: true
         pull: true
@@ -112,13 +116,13 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          BUILD_IMAGE=${{ env.BASE_BUILD_IMAGE }}
-          CHOWN_USER=${{ env.CHOWN_USER }}
-          LSB_RELEASE_CODENAME=${{ env.MATRIX_CODENAME }}
-          DOCKER_CODENAME=${{ env.MATRIX_DOCKER_CODENAME }}
-          DISTRO=${{ env.MATRIX_DISTRO }}
+          BUILD_IMAGE=${{ inputs.base_build_image }}
+          CHOWN_USER=${{ inputs.chown_user }}
+          LSB_RELEASE_CODENAME=${{ inputs.matrix_docker_codename }}
+          DOCKER_CODENAME=${{ inputs.matrix_docker_codename }}
+          DISTRO=${{ inputs.matrix_distro }}
           VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
-          REVISION=${{ inputs.REVISION }}
-        platforms: ${{ env.PLATFORMS }}
+          REVISION=${{ inputs.revision }}
+        platforms: ${{ inputs.platforms }}
         cache-from: type=gha
         cache-to: type=gha,mode=max

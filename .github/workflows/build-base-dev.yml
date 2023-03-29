@@ -1,13 +1,12 @@
 name: "DEV BASE build"
-run-name: "DEV BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "DEV BASE build to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - Dockerfile.base
-      - Dockerfile.base-slim
-      - .github/workflows/build-base.yml
+      - Dockerfile.base-dotnet
+      - .github/workflows/build-base-dev.yml
 #  schedule:
 #    - cron: "0 */6 * * *"
 #    branches:
@@ -15,11 +14,8 @@ on:
 #      - develop
 
 concurrency:
-  group: base-image-make
+  group: dev-base-image-make
   cancel-in-progress: true
-
-env:
-  env_vars: ${{ vars.ENV_CONTEXT_VAR }}
 
 jobs:
   base-image-make:
@@ -27,16 +23,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          [
-            ubuntu-jammy
-          ]
+        os: [ubuntu-jammy]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
-    environment: ${{ vars.ENVIRONMENT_STAGE }}
+    environment:
+      name: Development
+      url: https://github.com
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
@@ -47,22 +42,27 @@ jobs:
       RELEASE_IMAGE_DOCKERFILE: ${{ vars.RELEASE_IMAGE_DOCKERFILE }}
       #   RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.RELEASE_IMAGE_TAG_PREFIX != '0' && vars.RELEASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.RELEASE_IMAGE_TAG_SUFFIX != '0' && vars.RELEASE_IMAGE_TAG_SUFFIX || '')) }}
       #   BASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
-      BASE_IMAGE_NAME: ${{ matrix.os }}:${{ matrix.codename }}
-      RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
-      BASE_BUILD_IMAGE: ${{ matrix.os }}:${{ matrix.codename }}
+      BASE_IMAGE_NAME: '${{ matrix.os }}:${{ matrix.codename }}'
+      RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
+      BASE_BUILD_IMAGE: '${{ matrix.distro }}:${{ matrix.codename }}'
       TAG_PREFIX: ${{ matrix.os }}
       REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
       FULL_TAG: ${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
       REPOSITORY_OWNER: ${{ vars.REPOSITORY_OWNER }}
       DOCKER_FILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
     steps:
-      - name: Prints vars
-        env:
-          VARS_CONTEXT: ${{ toJson(vars) }}
-        run:
-          echo '${{ toJson(vars) }}'
+      - name: Copy Repo Files
+        uses: actions/checkout@v3
+      # - name: Prints vars
+      #   env:
+      #     VARS_CONTEXT: ${{ toJson(vars) }}
+      #   run: |
+      #     echo '${{ toJson(vars) }}'
+      #     echo '${{ toJson(env) }}'
+      #     echo '${{ toJson(github.env) }}'
+      #     echo '${{ toJson(github) }}'
       - name: Run custom action
-        uses: ./.github/actions/build-base@dev
+        uses: ./.github/actions/build-base
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           docker_user: ${{ secrets.DOCKER_USER }}
