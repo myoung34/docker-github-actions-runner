@@ -36,6 +36,7 @@ jobs:
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+    environment: ${{ vars.ENVIRONMENT_STAGE }}
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
@@ -56,6 +57,8 @@ jobs:
       DOCKER_FILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
     steps:
       - name: Prints vars
+        env:
+          VARS_CONTEXT: ${{ toJson(vars) }}
         run:
           echo '${{ toJson(vars) }}'
       - name: Run custom action

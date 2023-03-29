@@ -4,5 +4,8 @@
         "list.warningForeground": "#00d9ff",
         "gitDecoration.modifiedResourceForeground": "#00ffb3",
         "gitDecoration.untrackedResourceForeground": "#f7aeae"
-    }
+    },
+    "github-actions.workflows.pinned.workflows": [
+        "/opt/agent-runner/docker-github-actions-runner/.github/workflows/build-base-dev.yml"
+    ]
 }
