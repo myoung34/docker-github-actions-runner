@@ -8,7 +8,6 @@ on:
       - Dockerfile.base
       - Dockerfile.base-slim
       - .github/workflows/build-base.yml
-      - .github/actions/build-base/action.yml
 #  schedule:
 #    - cron: "0 */6 * * *"
 #    branches:
@@ -54,7 +53,7 @@ jobs:
       REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
       FULL_TAG: ${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
       REPOSITORY_OWNER: ${{ vars.REPOSITORY_OWNER }}
-      DOCKER_FILE: ${{  vars.BASE_IMAGE_DOCKERFILE }}
+      DOCKER_FILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
     steps:
       - name: Prints vars
         run:
