@@ -30,44 +30,13 @@ jobs:
       matrix:
         os:
           [
-            ubuntu-jammy,
-            ubuntu-jammy-dotnet,
-            ubuntu-focal,
-            ubuntu-bionic,
-            debian-bullseye,
-            debian-sid,
+            ubuntu-jammy
           ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
-            has-latest: true
-          - os: ubuntu-jammy-dotnet
-            distro: ubuntu
-            codename: jammy
-            docker-codename: jammy
-          - os: ubuntu-focal
-            distro: ubuntu
-            codename: focal
-            docker-codename: focal
-          - os: ubuntu-bionic
-            distro: ubuntu
-            codename: bionic
-            docker-codename: bionic
-          - os: debian-bullseye
-            distro: debian
-            codename: bullseye
-            docker-codename: bullseye
-          - os: debian-sid
-            distro: debian
-            codename: sid
-            docker-codename: bullseye
-          # - os: debian-bullseye-dotnet
-          #   distro: debian
-          #   codename: bullseye
-          #   docker-codename: bullseye
-          #   dockerfile: Dockerfile.base-slim
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
@@ -87,6 +56,9 @@ jobs:
       REPOSITORY_OWNER: ${{ vars.REPOSITORY_OWNER }}
       DOCKER_FILE: ${{  vars.BASE_IMAGE_DOCKERFILE }}
     steps:
+      - name: Prints vars
+        run:
+          echo '${{ toJson(vars) }}'
       - name: Run custom action
         uses: ./.github/actions/build-base@dev
         with:
