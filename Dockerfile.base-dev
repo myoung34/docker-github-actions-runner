@@ -7,6 +7,7 @@ ENV LC_ALL=en_US.UTF-8
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=SC2086,DL3015,DL3008,DL3013
+WORKDIR /
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update -qq \
   && apt-get install -y -q --no-install-recommends \
@@ -45,8 +46,10 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   asciidoc \
   git \
   && apt-get upgrade -yqq \
+  && rm -rf /var/lib/apt/lists/* \
   && git clone https://github.com/git/git.git /tmp/git-src && cd /tmp/git-src
 #
 # Left dependencies as separate layer
 RUN make prefix=/usr all info \
+  && apt-get remove -y git \
   && checkinstall --install=yes --default && cp -vf git-*.deb /*
