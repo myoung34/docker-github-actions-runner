@@ -1,7 +1,10 @@
 ---
-name: "Action build BASE image"
-description: "Number of steps to build and deploy base image"
+name: "Action build image"
+description: "Number of steps to build and deploy image"
 author: "DerSkythe"
+branding:
+  icon: 'layers'
+  color: 'blue'
 
 inputs:
   full_tag:
@@ -121,8 +124,12 @@ runs:
           LSB_RELEASE_CODENAME=${{ inputs.matrix_docker_codename }}
           DOCKER_CODENAME=${{ inputs.matrix_docker_codename }}
           DISTRO=${{ inputs.matrix_distro }}
+          DISTRO_VERSION=${{ inputs.matrix_version }}
           VERSION=${{ env.DOCKER_METADATA_OUTPUT_VERSION }}
           REVISION=${{ inputs.revision }}
         platforms: ${{ inputs.platforms }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+# BASE_IMAGE
+# DISTRO_VERSION
+# GH_RUNNER_VERSION

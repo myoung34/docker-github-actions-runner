@@ -1,6 +1,6 @@
 name: "DEV BASE build"
 run-name: "DEV BASE build to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
-
+# TODO: MUST BE RANMED TO BUILD IN FUTURE!
 on:
   workflow_dispatch:
   push:
@@ -54,7 +54,6 @@ jobs:
             docker-codename: bullseye
     environment:
       name: Builder
-      url: https://github.com
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
@@ -84,7 +83,7 @@ jobs:
       #     echo '${{ toJson(github) }}'
       - name: Run custom action
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
-        uses: ./.github/actions/build-base
+        uses: ./.github/actions/build-docker
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}
           docker_user: ${{ secrets.DOCKER_USER }}
@@ -106,4 +105,21 @@ jobs:
             ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
             ghcr.io/${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
 
+  update-dockerhub-info:
+    runs-on: ubuntu-latest
+    needs: base-image-make
+    environment:
+      name: Builder
+    env:
+      REPOSITORY_OWNER: ${{ github.repository_owner }}
+    if: ${{ success() }}
+    steps:
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: ${{ github.repository }}
+          short-description: ${{ github.event.repository.description }}
+          readme-filepath: './README_BUILD.md'
 #EOF
