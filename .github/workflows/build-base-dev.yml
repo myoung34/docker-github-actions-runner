@@ -23,14 +23,41 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-jammy]
+        os:
+          [
+            ubuntu-jammy,
+            ubuntu-focal,
+            ubuntu-bionic,
+            debian-bullseye,
+            debian-sid
+          ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+          - os: ubuntu-jammy-dotnet
+            distro: ubuntu
+            codename: jammy
+            docker-codename: jammy
+          - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker-codename: focal
+          - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker-codename: bionic
+          - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker-codename: bullseye
+          - os: debian-sid
+            distro: debian
+            codename: sid
+            docker-codename: bullseye
     environment:
-      name: Development
+      name: Builder
       url: https://github.com
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
@@ -60,6 +87,7 @@ jobs:
       #     echo '${{ toJson(github.env) }}'
       #     echo '${{ toJson(github) }}'
       - name: Run custom action
+        if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
         uses: ./.github/actions/build-base
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }}

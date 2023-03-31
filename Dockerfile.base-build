@@ -50,6 +50,9 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && git clone https://github.com/git/git.git /tmp/git-src && cd /tmp/git-src
 #
 # Left dependencies as separate layer
-RUN make prefix=/usr all info \
+RUN mkdir /deb \
+  && make configure \
+  && ./configure --prefix=/usr \
+  && make all info \
   && apt-get remove -y git \
-  && checkinstall --install=yes --default && cp -vf git-*.deb /*
+  && checkinstall --install=yes --default && cp -vf git-*.deb /deb
