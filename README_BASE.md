@@ -13,7 +13,8 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 **The difference between my build is in a smaller volume and more optimization of the [build](https://github.com/derskythe/docker-github-actions-runner/actions).** ![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/derskythe/docker-github-actions-runner/build-image.yml?label=%20&logo=github&logoColor=black)   ![Docker Image Size (tag)](https://img.shields.io/docker/image-size/derskythe/github-runner/ubuntu-bionic?label=%20&logo=docker&logoColor=white)
 
 **Also, I provide a security report.**
-**You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.**
+**You can [see here](https://hub.docker.com/r/derskythe/github-runner-base/tags) the security report for the base image, additionally installed components may have vulnerabilities due to certain reasons.** [![Known Vulnerabilities](https://snyk.io/dotnet/github/derskythe/docker-github-actions-runner/badge.svg)](https://snyk.io/dotnet/github/derskythe/docker-github-actions-runner)
+
 **I'm working on optimal installation of new versions of packages without dramatically increasing the size of the image.**
 
 ---
