@@ -1,4 +1,5 @@
-Docker Github Actions Runner (Base image)
+# Docker Github Actions Runner
+
 ---
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/derskythe/docker-github-actions-runner?logo=github&logoColor=white)](https://github.com/derskythe/docker-github-actions-runner)

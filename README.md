@@ -1,4 +1,5 @@
-Docker Github Actions Runner
+# Docker Github Actions Runner
+
 ---
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/derskythe/docker-github-actions-runner?logo=github&logoColor=white)](https://github.com/derskythe/docker-github-actions-runner)
@@ -50,7 +51,7 @@ The tag consists entirely of the following parts:
 
 <details>
   <summary>
-    <h2>Click to Quick-Start (Examples and Usage)</h2>
+    <h2>:arrow_forward: Click to Quick-Start (Examples and Usage)</h2>
   </summary>
 
 ## Token Scope

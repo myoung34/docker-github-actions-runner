@@ -1,4 +1,5 @@
 # Docker Github Actions Runner (Build image)
+
 ---
 
 [![GitHub last commit](https://img.shields.io/github/last-commit/derskythe/docker-github-actions-runner?logo=github&logoColor=white)](https://github.com/derskythe/docker-github-actions-runner)
@@ -6,7 +7,7 @@
 [![BASE build](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml/badge.svg)](https://github.com/derskythe/docker-github-actions-runner/actions/workflows/build-base.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-# Warning
+## :warning: Warning
 
 This image exists solely for a clean build of the latest components. All artifacts are copied to the main images [BASE](https://hub.docker.com/r/derskythe/github-runner-base) and [AGENT](https://hub.docker.com/r/derskythe/github-runner)
 
@@ -26,7 +27,7 @@ This is a [fork](https://github.com/myoung34/docker-github-actions-runner).
 ## Supported OS
 
 | Distro / Version                | Latest build status                                                                                                                                                        |
-|:--------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|--------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Ubuntu           Jammy (22.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner-build/dev-ubuntu-jammy?logoColor=white&logo=ubuntu&color=darkgreen)    |
 | Ubuntu           Focal (20.04)  | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner-build/dev-ubuntu-focal?logoColor=white&logo=ubuntu&color=darkgreen)    |
 | Ubuntu           Bionic (18.04) | ![Docker Image Version (tag latest semver)](https://img.shields.io/docker/v/derskythe/github-runner-build/dev-ubuntu-bionic?logoColor=white&logo=ubuntu&color=darkgreen)   |
