@@ -37,20 +37,14 @@ inputs:
   matrix_codename:
     description: 'matrix_codename'
     required: true
-  chown_user:
-    description: 'chown_user'
-    required: true
   matrix_version:
     description: 'matrix_version'
     required: true
   matrix_docker_codename:
     description: 'matrix_docker_codename'
     required: true
-  platforms:
-    description: 'platforms'
-    required: true
-  image_list:
-    description: 'image_list'
+  chown_user:
+    description: 'chown_user'
     required: true
   docker_user:
     description: 'Secret'
@@ -60,6 +54,12 @@ inputs:
     required: true
   gh_token:
     description: 'Secret'
+    required: true
+  platforms:
+    description: 'platforms'
+    required: true
+  image_list:
+    description: 'image_list'
     required: true
 # outputs:
 #   random-number:

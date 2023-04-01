@@ -36,22 +36,27 @@ jobs:
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+            distro-version: 22.04
           - os: ubuntu-focal
             distro: ubuntu
             codename: focal
             docker-codename: focal
+            distro-version: 20.04
           - os: ubuntu-bionic
             distro: ubuntu
             codename: bionic
             docker-codename: bionic
+            distro-version: 18.04
           - os: debian-bullseye
             distro: debian
             codename: bullseye
             docker-codename: bullseye
+            distro-version: 11
           - os: debian-sid
             distro: debian
             codename: sid
             docker-codename: bullseye
+            distro-version: 10
     environment:
       name: Builder
     env:
@@ -85,21 +90,22 @@ jobs:
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
         uses: ./.github/actions/build-docker
         with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          docker_user: ${{ secrets.DOCKER_USER }}
-          docker_token: ${{ secrets.DOCKER_TOKEN }}
-          tag_prefix: ${{ env.TAG_PREFIX }}
           full_tag: ${{ env.FULL_TAG }}
           repository_owner: ${{ env.REPOSITORY_OWNER }}
           release_image_name: ${{ env.RELEASE_IMAGE_NAME }}
           base_name: ${{ env.BASE_IMAGE_NAME }}
           base_build_image: ${{ env.BASE_BUILD_IMAGE }}
           revision: ${{ env.REVISION }}
+          tag_prefix: ${{ env.TAG_PREFIX }}
           dockerfile: ${{ env.DOCKER_FILE }}
           matrix_distro: ${{ matrix.distro }}
           matrix_codename: ${{matrix.codename}}
-          chown_user: ${{env.CHOWN_USER }}
+          matrix_version: ${{ matrix.distro-version }}
           matrix_docker_codename: ${{ matrix.docker-codename}}
+          chown_user: ${{env.CHOWN_USER }}
+          docker_user: ${{ secrets.DOCKER_USER }}
+          docker_token: ${{ secrets.DOCKER_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           platforms: linux/amd64,linux/arm64
           image_list: |
             ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}

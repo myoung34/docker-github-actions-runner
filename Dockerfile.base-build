@@ -5,6 +5,12 @@ ENV RUNNER_DIR=${RUNNER_DIR}
 ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
 ENV CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}
 ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages
+ENV PWSH_VERSION='7.3.3'
+ARG TARGETARCH
+ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
+ENV DOTNET_NOLOGO=true
+ENV NUGET_XMLDOC_MODE=skip
+
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
@@ -60,11 +66,15 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && git clone https://github.com/git/git.git /tmp/git-src && cd /tmp/git-src
 #
 # Left dependencies as separate layer
-RUN make configure \
-  && ./configure --prefix=/usr \
-  && make all info \
-  && apt-get remove -y git \
-  && checkinstall --install=yes --default && cp -vf git-*.deb /deb \
-  && wget -qO- "https://dot.net/v1/dotnet-install.sh" | bash /dev/stdin --channel LTS --runtime aspnetcore --install-dir /usr/share/dotnet \
+# RUN make configure \
+#   && ./configure --prefix=/usr \
+#   && make all info \
+#   && apt-get remove -y git \
+#   && checkinstall --install=yes --default && cp -vf git-*.deb /deb \
+#   && wget -qO- "https://dot.net/v1/dotnet-install.sh" | bash /dev/stdin --channel LTS --runtime aspnetcore --install-dir /usr/share/dotnet \
+#   && wget -qO- "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-$TARGET_ARCH.tar.gz" | tar xz -C /usr/share/pwsh  \
+#   && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh
+RUN wget -qO- "https://dot.net/v1/dotnet-install.sh" | bash /dev/stdin --channel LTS --install-dir /usr/share/dotnet \
+  && TARGET_ARCH=$(echo ${TARGETARCH} | sed 's/amd/x/' ) \
   && wget -qO- "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-$TARGET_ARCH.tar.gz" | tar xz -C /usr/share/pwsh  \
   && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh

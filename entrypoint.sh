@@ -12,7 +12,7 @@ export -n APP_ID
 export -n APP_PRIVATE_KEY
 
 deregister_runner() {
-  echo "Caught SIGTERM. Deregistering runner"
+  echo "Caught SIGTERM. Unregister runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash ${RUNNER_DIR}/token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
@@ -158,7 +158,7 @@ fi
 
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Re-usage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-  # Quoting (even with double-quotes) the regexp brokes the copying
+  # Quoting (even with double-quotes) the regexp broke the copying
   cp -p -r "${RUNNER_DIR}/_diag" "${RUNNER_DIR}/svc.sh" ${RUNNER_DIR}/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
@@ -180,7 +180,7 @@ else
   if [[ $(id -u) -eq 0 ]]; then
     [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R "${CHOWN_USER}" "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
     /usr/bin/chown -R "${CHOWN_USER}" "${_RUNNER_WORKDIR}" ${RUNNER_DIR}
-    # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
+    # The tool cache is not recursively chowned to avoid recursion over populated tooling in derived docker images
     /usr/bin/chown "${CHOWN_USER}" "${CACHE_HOSTED_TOOLS_DIRECTORY}"
     /usr/sbin/gosu "${CHOWN_USER}" "$@"
   else
