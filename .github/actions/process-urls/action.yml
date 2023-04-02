@@ -43,6 +43,7 @@ runs:
       #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
       #   files_changed: ${{ steps.run-check-for-updates.outputs.files_changed }}
       env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
         CONFIG_FILE: ${{ inputs.config_file }}
         OUTPUT_PREFIX: ${{ inputs.output_prefix }}
         PLATFORMS: ${{ inputs.platforms }}
