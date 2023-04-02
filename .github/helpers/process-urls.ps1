@@ -54,8 +54,9 @@ function GetReleaseVersion {
         $Tag = ($Request | ConvertFrom-Json).tag_name
         $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($Tag -match $MaxVersion)
         $IsMatch = ($Tag -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
-        if (($IsMatch) -and (![string]::IsNullOrWhiteSpace($Matches[2])) -and (($MaxVersion -eq '') -or ($IsMaxVersion) )) {
-            return [version]::Parse($Matches[2])
+        $VersionToParse = $Matches[2]
+        if (($IsMatch) -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($IsMaxVersion) )) {
+            return [version]::Parse($VersionToParse)
         }
     }
 
@@ -70,9 +71,9 @@ function GetTagsVersion {
 
     if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = (($Request | ConvertFrom-Json).name | ForEach-Object {
-                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion) ) {
                     [version]::Parse($VersionToParse)
                 }
@@ -93,9 +94,9 @@ function GetNodeVersion {
 
     if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = ($Request | ForEach-Object {
-                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion )) {
                     [version]::Parse($VersionToParse)
                 }
