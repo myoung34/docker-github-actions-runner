@@ -1,0 +1,69 @@
+name: "Update check"
+run-name: "Update check by @${{ github.ACTOR }}"
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/check-update.yml
+  schedule:
+    - cron: "0 * * * *"
+
+concurrency:
+  group: check-update
+  cancel-in-progress: false
+
+jobs:
+  base-image-make:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    env:
+      FILES_CHANGED: 0
+      NEW_VERSION: ${{ vars.GH_RUNNER_VERSION }}
+      GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
+      PLATFORMS: 'amd64,arm64'
+      ENV_PATH: './variables'
+      CONFIG_FILE: './.github/url-list.json'
+      DEPS_UPDATE_COUNTER: ${{ vars.DEPS_UPDATE_COUNTER }}
+    steps:
+      - name: Copy Repo Files
+        uses: actions/checkout@v3
+        
+      - name: Check deps for update
+        shell: pwsh
+        # return env.FILES_CHANGED, env.NEW_VERSION
+        run: |
+          ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.ENV_PATH }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
+
+      - name: Skip if files was not changed
+        if: ${{ success() && env.FILES_CHANGED == 1 }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          UPDATE_COUNTER: ${{ env.DEPS_UPDATE_COUNTER }}
+        run: |
+          date > generated.txt
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout -b "update/deps-$UPDATE_COUNTER"
+          git add .
+          git commit -m "Dependencies auto update"
+          git push
+          echo "DEPS_UPDATE_COUNTER=$(($UPDATE_COUNTER + 1))" >> $GITHUB_ENV
+
+      - name: Dependencies was updated
+        if: ${{ success() && env.DEPS_UPDATE_COUNTER > vars.DEPS_UPDATE_COUNTER }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        run: |
+          gh variable set DEPS_UPDATE_COUNTER -b ${{ env.DEPS_UPDATE_COUNTER }} -R ${{ github.repository }}
+          
+      - name: GitHub runner version was updated
+        if: ${{ success() && env.GH_RUNNER_VERSION != env.NEW_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        run: |
+          gh variable set GH_RUNNER_VERSION -b ${{ env.NEW_VERSION }} -R ${{ github.repository }}
+      
+
+
+#EOF

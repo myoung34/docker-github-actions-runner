@@ -1,13 +1,12 @@
 name: "DEV BASE build"
-run-name: "DEV BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
-
+run-name: "DEV BASE build to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+# TODO: MUST BE RANMED TO BUILD IN FUTURE!
 on:
   workflow_dispatch:
   push:
     paths:
-      - Dockerfile.base
-      - Dockerfile.base-slim
-      - .github/workflows/build-base.yml
+      - Dockerfile*
+      - .github/workflows/build-base-dev.yml
 #  schedule:
 #    - cron: "0 */6 * * *"
 #    branches:
@@ -15,11 +14,8 @@ on:
 #      - develop
 
 concurrency:
-  group: base-image-make
+  group: dev-base-image-make
   cancel-in-progress: true
-
-env:
-  env_vars: ${{ vars.ENV_CONTEXT_VAR }}
 
 jobs:
   base-image-make:
@@ -29,56 +25,107 @@ jobs:
       matrix:
         os:
           [
-            ubuntu-jammy
+            ubuntu-jammy,
+            ubuntu-focal,
+            ubuntu-bionic,
+            debian-bullseye,
+            debian-sid
           ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
             codename: jammy
             docker-codename: jammy
+            distro-version: 22.04
+          - os: ubuntu-focal
+            distro: ubuntu
+            codename: focal
+            docker-codename: focal
+            distro-version: 20.04
+          - os: ubuntu-bionic
+            distro: ubuntu
+            codename: bionic
+            docker-codename: bionic
+            distro-version: 18.04
+          - os: debian-bullseye
+            distro: debian
+            codename: bullseye
+            docker-codename: bullseye
+            distro-version: 11
+          - os: debian-sid
+            distro: debian
+            codename: sid
+            docker-codename: bullseye
+            distro-version: 10
+    environment:
+      name: Builder
     env:
       AGENT_DIR: ${{ vars.AGENT_DIR }}
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
       GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
       CHOWN_USER: ${{ vars.CHOWN_USER }}
-      LATEST_RELEASE: ${{ vars.LATEST_RELEASE }}
-      BASE_IMAGE_DOCKERFILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
-      RELEASE_IMAGE_DOCKERFILE: ${{ vars.RELEASE_IMAGE_DOCKERFILE }}
-      #   RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.RELEASE_IMAGE_TAG_PREFIX != '0' && vars.RELEASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.RELEASE_IMAGE_TAG_SUFFIX != '0' && vars.RELEASE_IMAGE_TAG_SUFFIX || '')) }}
-      #   BASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
-      BASE_IMAGE_NAME: ${{ matrix.os }}:${{ matrix.codename }}
-      RELEASE_IMAGE_NAME: ${{ format ('{0}{1}{2}', (vars.BASE_IMAGE_TAG_PREFIX != '0' && vars.BASE_IMAGE_TAG_PREFIX || ''), vars.IMAGE_NAME, (vars.BASE_IMAGE_TAG_SUFFIX != '0' && vars.BASE_IMAGE_TAG_SUFFIX || '')) }}
-      BASE_BUILD_IMAGE: ${{ matrix.os }}:${{ matrix.codename }}
-      TAG_PREFIX: ${{ matrix.os }}
+      #   BASE_IMAGE_NAME: ${{ format ('{0}-{1}:{2}-{3}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX, matrix.os) }}
+      #   RELEASE_IMAGE_NAME: ${{ format ('{0}', vars.IMAGE_NAME) }}
+      BASE_IMAGE_NAME: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
+      RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
+      BASE_BUILD_IMAGE: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
+      TAG_PREFIX: ${{ format('{0}-{1}', vars.IMAGE_TAG_PREFIX, matrix.os) }}
       REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
-      FULL_TAG: ${{ matrix.os }}-${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
-      REPOSITORY_OWNER: ${{ vars.REPOSITORY_OWNER }}
-      DOCKER_FILE: ${{ vars.BASE_IMAGE_DOCKERFILE }}
+      FULL_TAG: ${{ format('{0}-{1}-{2}.{3}', vars.IMAGE_TAG_PREFIX, matrix.os, github.RUN_NUMBER, github.RUN_ATTEMPT) }}
+      REPOSITORY_OWNER: ${{ github.repository_owner }}
+      #DOCKER_FILE: ${{ format('Dockerfile.{0}', vars.IMAGE_TAG_PREFIX) }}
+      DOCKER_FILE: ${{ format('Dockerfile.{0}-{1}', vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX) }}
     steps:
-      - name: Prints vars
-        run:
-          echo '${{ toJson(vars) }}'
+      - name: Copy Repo Files
+        uses: actions/checkout@v3
+      # - name: Prints vars
+      #   env:
+      #     VARS_CONTEXT: ${{ toJson(vars) }}
+      #   run: |
+      #     echo '${{ toJson(vars) }}'
+      #     echo '${{ toJson(env) }}'
+      #     echo '${{ toJson(github.env) }}'
+      #     echo '${{ toJson(github) }}'
       - name: Run custom action
-        uses: ./.github/actions/build-base@dev
+        if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
+        uses: ./.github/actions/build-docker
         with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
-          docker_user: ${{ secrets.DOCKER_USER }}
-          docker_token: ${{ secrets.DOCKER_TOKEN }}
-          tag_prefix: ${{ env.TAG_PREFIX }}
           full_tag: ${{ env.FULL_TAG }}
           repository_owner: ${{ env.REPOSITORY_OWNER }}
           release_image_name: ${{ env.RELEASE_IMAGE_NAME }}
           base_name: ${{ env.BASE_IMAGE_NAME }}
           base_build_image: ${{ env.BASE_BUILD_IMAGE }}
           revision: ${{ env.REVISION }}
+          tag_prefix: ${{ env.TAG_PREFIX }}
           dockerfile: ${{ env.DOCKER_FILE }}
           matrix_distro: ${{ matrix.distro }}
           matrix_codename: ${{matrix.codename}}
-          chown_user: ${{env.CHOWN_USER }}
+          matrix_version: ${{ matrix.distro-version }}
           matrix_docker_codename: ${{ matrix.docker-codename}}
+          chown_user: ${{env.CHOWN_USER }}
+          docker_user: ${{ secrets.DOCKER_USER }}
+          docker_token: ${{ secrets.DOCKER_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
           platforms: linux/amd64,linux/arm64
           image_list: |
             ${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
             ghcr.io/${{ env.REPOSITORY_OWNER }}/${{ env.RELEASE_IMAGE_NAME }}
 
+  update-dockerhub-info:
+    runs-on: ubuntu-latest
+    needs: base-image-make
+    environment:
+      name: Builder
+    env:
+      REPOSITORY_OWNER: ${{ github.repository_owner }}
+    if: ${{ success() }}
+    steps:
+      - name: Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: ${{ github.repository }}
+          short-description: ${{ github.event.repository.description }}
+          readme-filepath: './README_BUILD.md'
 #EOF

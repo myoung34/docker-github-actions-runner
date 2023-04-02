@@ -1,5 +1,5 @@
 name: "BASE build"
-run-name: "BASE buld to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "BASE build to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
 
 on:
   workflow_dispatch:

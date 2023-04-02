@@ -1,0 +1,78 @@
+# syntax=docker/dockerfile:1
+ARG BUILD_IMAGE
+FROM ${BUILD_IMAGE} AS build
+
+ENV RUNNER_DIR=${RUNNER_DIR}
+ARG CACHE_HOSTED_TOOLS_DIRECTORY="${RUNNER_DIR}/hostedtoolcache"
+ENV CACHE_HOSTED_TOOLS_DIRECTORY=${CACHE_HOSTED_TOOLS_DIRECTORY}
+ENV NUGET_PACKAGES=${CACHE_HOSTED_TOOLS_DIRECTORY}/nuget-packages
+ARG TARGETARCH
+ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
+ENV DOTNET_NOLOGO=true
+ENV NUGET_XMLDOC_MODE=skip
+ARG PREPARED_FILE_VERSION
+
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+# hadolint ignore=SC2086,DL3015,DL3008,DL3013
+WORKDIR /tmp/git-src
+COPY ./${TARGETARCH}_${PREPARED_FILE_VERSION}.env /tmp/${TARGETARCH}.env
+RUN source /tmp/${TARGETARCH}.env \
+  && echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
+  && mkdir -p ${NUGET_PACKAGES} /usr/share/pwsh \
+  && (echo "export DOTNET_ROOT=/usr/share/dotnet" >> /etc/profile )  \
+  && (echo "export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared" >> /etc/profile ) \
+  && apt-get update -qq \
+  && apt-get install -y -q --no-install-recommends \
+  gnupg \
+  lsb-release \
+  curl \
+  wget \
+  tar \
+  unzip \
+  zip \
+  apt-transport-https \
+  ca-certificates \
+  sudo \
+  gpg-agent \
+  software-properties-common \
+  build-essential \
+  zlib1g-dev \
+  zstd \
+  gettext \
+  libcurl4-openssl-dev \
+  dirmngr \
+  openssh-client \
+  locales \
+  python3-pip \
+  python3-setuptools \
+  python3 \
+  dumb-init \
+  nodejs \
+  rsync \
+  libz-dev \
+  libssl-dev \
+  libexpat1-dev \
+  gettext \
+  cmake \
+  gcc \
+  checkinstall \
+  asciidoc \
+  autoconf  \
+  docbook2x \
+  git \
+  && apt-get upgrade -yqq \
+  && wget -qO- "$DOTNET_URL" | bash /dev/stdin --version "$DOTNET_VERSION" --install-dir /usr/share/dotnet \
+  && (wget -qO- "$PWSH_URL" | tar xz -C /usr/share/pwsh) \
+  && git clone "$GIT_URL" /tmp/git-src \
+  && make prefix=/usr all \
+  && apt-get remove -y git git-man \
+  && checkinstall --install=yes --type=debian --pkgname=git --pkgversion="$GIT_VERSION" --pkgarch="${TARGETARCH}" --pkgrelease="docker" --pkglicense='GPL' --pkgsource=/usr/src --pakdir=/deb --maintainer='derskythe@localhost' --provides='git-completion,git-core' --pkggroup=vcs --gzman --nodoc --strip=1 --backup=0 --showinstall=0 --default --deldoc --exclude=INSTALL --exclude=COPYING --exclude=README.md --reset-uids \
+  && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh \
+  && rm -rf /var/lib/apt/lists/*
+# RUN cat /tmp/${TARGETARCH}.env && source /tmp/${TARGETARCH}.env && echo "$DOTNET_URL" && echo "$DOTNET_VERSION" && wget -qO- "$DOTNET_URL" | bash /dev/stdin --version "$DOTNET_VERSION" --install-dir /usr/share/dotnet
+# RUN source /tmp/${TARGETARCH}.env && echo "$PWSH_URL" && (wget -qO- "$PWSH_URL" | tar xz -C /usr/share/pwsh)
+# RUN ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh
