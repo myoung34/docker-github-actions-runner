@@ -16,6 +16,9 @@
 Set-StrictMode -Version 3.0            #
 $ErrorActionPreference = "Stop"        #
 ########################################
+# Execution in GitHub Actions gives
+# The variable '$LASTEXITCODE' cannot be retrieved because it has not been set
+$LASTEXITCODE = 0
 [string]$ConstApiMime = "Accept: application/vnd.github+json"
 [string]$ConstApiVersion = "X-GitHub-Api-Version: 2022-11-28"
 function DebugMessage {
@@ -47,9 +50,11 @@ function GetReleaseVersion {
     $ApiUrl = GetApiUrl $Url
     $Request = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/releases/latest")
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = ($Request | ConvertFrom-Json).tag_name
-        if (($Tag -match '^(\D*)(\d+\.\d+\.\d+)(.*)') -and (![string]::IsNullOrWhiteSpace($Matches[2])) -and (($MaxVersion -eq '') -or ($_ -match $MaxVersion) )) {
+        $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($Tag -match $MaxVersion)
+        $IsMatch = ($Tag -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
+        if (($IsMatch) -and (![string]::IsNullOrWhiteSpace($Matches[2])) -and (($MaxVersion -eq '') -or ($IsMaxVersion) )) {
             return [version]::Parse($Matches[2])
         }
     }
@@ -63,11 +68,12 @@ function GetTagsVersion {
     $ApiUrl = GetApiUrl $Url
     $Request = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/tags")
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = (($Request | ConvertFrom-Json).name | ForEach-Object {
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
-                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($VersionToParse -match $MaxVersion) )) {
+                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion) ) {
                     [version]::Parse($VersionToParse)
                 }
                 else {
@@ -85,11 +91,12 @@ function GetNodeVersion {
     $Like = ('*{0}*' -f $MaxVersion)
     $Request = (Invoke-WebRequest -Uri $Url | Select-Object -ExpandProperty Links | Where-Object href -like $Like).href
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = ($Request | ForEach-Object {
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
-                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($VersionToParse -match $MaxVersion) )) {
+                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion )) {
                     [version]::Parse($VersionToParse)
                 }
                 else {
@@ -242,7 +249,7 @@ try {
             $AlternativeFlat = $Alternative -join ','
             $ScriptInvoke = "$($ScriptsPath)\nodejs-latest.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat) -MaxVersion $($MaxVersion)"
             DebugMessage $ScriptInvoke
-            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
             # $ScriptOutput = (get-latest-release.ps1 -Url $Node.url `
             #         -FileType $Node.archive -Platforms $Platforms `
@@ -266,7 +273,7 @@ try {
             $AlternativeFlat = $Alternative -join ','
             $ScriptInvoke = "$($ScriptsPath)\github-latest-release.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat)"
             DebugMessage $ScriptInvoke
-            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
 
             # $ScriptOutput = (get-node-release.ps1 -Url $Node.url `
