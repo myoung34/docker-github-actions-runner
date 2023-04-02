@@ -68,12 +68,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - name: Prints vars
-    #   shell: bash
-    #   run: |
-    #     echo '${{ toJson(env) }}'
-    #     echo '${{ toJson(inputs) }}'
-    #     echo '${{ toJson(github) }}'
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
     - name: Set up Docker Buildx
@@ -107,6 +101,14 @@ runs:
         tags: |
           type=raw,value=${{ inputs.full_tag }},enable=true
           type=raw,value=${{ inputs.tag_prefix }},enable=true
+
+    - name: Check firmware release
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+      run: |
+        ./.github/helpers/process-urls.ps1 -UniqueId '${{ github.run_id }}' -JsonFile ./.github/url-list.json -Platforms ${{ inputs.platforms }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
+
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
