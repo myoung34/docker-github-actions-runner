@@ -1,8 +1,5 @@
 ﻿param(
     [Parameter (Mandatory = $true)]
-    [string]$UniqueId,
-
-    [Parameter (Mandatory = $true)]
     [string]$JsonFile,
 
     [Parameter (Mandatory = $true)]
@@ -183,15 +180,15 @@ try {
     DebugMessage $ScriptsPath
     $Files = @{ }
     foreach ($Arch in $Platforms) {
-        $Filename = ('{0}_{1}.env' -f $Arch, $UniqueId)
-        $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
-        $Files.$Arch = $Filename
-        if ((Test-Path -Path $Filename -PathType Leaf)) {
-            Remove-Item -Path $Filename -Force -Verbose
-        }
+        $Files.$Arch = New-Object System.Collections.Generic.List[System.String]
+        #$Files.$Arch.Add($Filename)
+        # if ((Test-Path -Path $Filename -PathType Leaf)) {
+        #      Remove-Item -Path $Filename -Force -Verbose
+        # }
     }
     $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json -AsHashtable)
     $JsonOutput = @{ }
+    $GhRunnerVersion = ''
     foreach ($Element in $AppList.Keys) {
         $Node = $AppList[$Element]
 
@@ -284,22 +281,73 @@ try {
 
         # Add to env file depend architecture
         foreach ($Item in $Files.Keys) {
-            $Filename = $Files.$Item
+            # $Filename = $Files.$Item
             $ModKey = "url-$( $Item )"
-            Add-Content -Path $Filename -Value ('{0}_URL={1}{2}' -f (CleanVar $Element), $CurrentProcess.$ModKey, "`n") -Encoding ascii -NoNewline
-            Add-Content -Path $Filename -Value ('{0}_VERSION={1}{2}' -f (CleanVar $Element), $CurrentProcess.version, "`n") -Encoding ascii -NoNewline
+            $Files.$Item.Add(('{0}_URL={1}' -f (CleanVar $Element), $CurrentProcess.$ModKey))
+            $Files.$Item.Add(('{0}_VERSION={1}' -f (CleanVar $Element), $CurrentProcess.version))
+            # Add-Content -Path $Filename -Value ('{0}_URL={1}{2}' -f (CleanVar $Element), $CurrentProcess.$ModKey, "`n") -Encoding ascii -NoNewline
+            # Add-Content -Path $Filename -Value ('{0}_VERSION={1}{2}' -f (CleanVar $Element), $CurrentProcess.version, "`n") -Encoding ascii -NoNewline
         }
 
         # Output JSON
         $JsonOutput += [ordered]@{
             $Element = $CurrentProcess
         }
+
+        if ($Element -like 'gh-runner') {
+            $GhRunnerVersion = $CurrentProcess.version
+        }
+    }
+
+
+    # Ok now write files
+    # Add to env file depend architecture
+    $FilesWasChanged = $false
+    foreach ($Item in $Files.Keys) {
+        $Filename = ('{0}_{1}.env' -f $Item, 'extra')
+        $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
+        Write-Information ("Trying to write file: {0}, Key: {1}" -f $Filename, $Item)
+        $NewContent = ($Files.$Item.ToArray() -join "`n")
+        $IsNull = ([string]::IsNullOrWhiteSpace($NewContent))
+
+        if ($IsNull) {
+            continue
+        }
+
+        if ((Test-Path -Path $Filename -PathType Leaf)) {
+            $OldContent = (Get-Content -Path $Filename)
+            $IsNull = ([string]::IsNullOrWhiteSpace($OldContent))
+            if (!$IsNull) {
+                $FilesCompare = (Compare-Object -ReferenceObject $NewContent -DifferenceObject $OldContent  `
+                    | Measure-Object).Count
+
+                if ($FilesCompare -eq 0) {
+                    # Nothing to do here
+                    continue
+                }
+            }
+            # Delete old file
+            Remove-Item -Path $Filename -Force -Verbose
+        }
+        Add-Content -Path $Filename -Value $NewContent -Encoding ascii -NoNewline
+
+        $FilesWasChanged = $true
     }
 
     # Write JSON
-    $Filename = ('{0}.json' -f $UniqueId)
-    $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
-    $JsonOutput | Sort-Object  | ConvertTo-Json | Out-File -Path $Filename
+    # if ($IsDebug) {
+    #     $Filename = ('{0}.json' -f $UniqueId)
+    #     $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
+    #     $JsonOutput | Sort-Object  | ConvertTo-Json | Out-File -Path $Filename
+    # }
+
+    if ($FilesWasChanged) {
+        Write-Output "FILES_CHANGED=1"
+    }
+    else {
+        Write-Output "FILES_CHANGED=0"
+    }
+    Write-Output ('GH_RUNNER_NEW_VERSION={0}' -f $GhRunnerVersion)
 
     exit 0
 }
