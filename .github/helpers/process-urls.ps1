@@ -342,12 +342,12 @@ try {
     # }
 
     if ($FilesWasChanged) {
-        Write-Output "FILES_CHANGED=1"
+        Write-Output "files_changed=1"
     }
     else {
-        Write-Output "FILES_CHANGED=0"
+        Write-Output "files_changed=0"
     }
-    Write-Output ('GH_RUNNER_NEW_VERSION={0}' -f $GhRunnerVersion)
+    Write-Output ('gh_runner_new_version={0}' -f $GhRunnerVersion)
 
     exit 0
 }

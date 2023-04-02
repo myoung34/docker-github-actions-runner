@@ -1,0 +1,90 @@
+---
+name: "Process URL list of dependencies"
+description: "Process URL list of dependencies and make env files if necessary"
+author: "DerSkythe"
+branding:
+  icon: 'flag'
+  color: 'yellow'
+
+inputs:
+  config_file:
+    description: 'Path to JSON'
+    required: true
+  output_prefix:
+    description: 'Directory to save env files'
+    required: true
+  platforms:
+    description: 'List of required platforms'
+    required: true
+  gh_version:
+    description: 'Version of GitHub Action Runner'
+    required: true
+  deps_update_counter:
+    description: 'Dependencies update counter for commits new branch'
+    required: true
+  gh_token:
+    description: 'Secret token of GitHub account'
+    required: true
+outputs:
+   deps-updated-counter:
+     description: "Updated counter"
+     value: ${{ steps.commit-if-updated.outputs.update_counter }}
+   gh_runner_new_version:
+     description: "Latest version of GitHub Action Runner"
+     value: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+runs:
+  using: composite
+  steps:
+    - name: Check deps for update
+      id: run-check-for-updates
+      shell: pwsh
+      # return env.FILES_CHANGED, env.NEW_VERSION
+      # outputs:
+      #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+      #   files_changed: ${{ steps.run-check-for-updates.outputs.files_changed }}
+      env:
+        CONFIG_FILE: ${{ inputs.config_file }}
+        OUTPUT_PREFIX: ${{ inputs.output_prefix }}
+        PLATFORMS: ${{ inputs.platforms }}
+      run: |
+        ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.OUTPUT_PREFIX }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Output($_) >> $Env:GITHUB_OUTPUT }
+
+    - name: Commit if updated
+      id: commit-if-updated
+      if: ${{ success() && steps.run-check-for-updates.outputs.files_changed == 1 }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        UPDATE_COUNTER: ${{ inputs.deps_update_counter }}
+        NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+      shell: bash
+      # outputs:
+      #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
+      #   update_counter: ${{ steps.run-check-for-updates.outputs.update_counter }}
+      run: |
+        date > generated.txt
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git checkout -b "update/deps-$UPDATE_COUNTER"
+        git add .
+        git commit -m "Dependencies auto update"
+        git push
+        echo "update_counter=$(($UPDATE_COUNTER + 1))" >> "$GITHUB_OUTPUT"
+        echo "latest_gh_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Dependencies was updated
+      if: ${{ steps.commit-if-updated.conclusion == 'success' && steps.run-check-for-updates.outputs.update_counter > inputs.deps_update_counter }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        DEPS_UPDATE_COUNTER: ${{ steps.run-check-for-updates.outputs.update_counter }}
+      shell: bash
+      run: |
+        gh variable set DEPS_UPDATE_COUNTER -b ${{ env.DEPS_UPDATE_COUNTER }} -R ${{ github.repository }}
+
+    - name: GitHub runner version was updated
+      if: ${{ steps.commit-if-updated.conclusion == 'success' && steps.run-check-for-updates.outputs.gh_runner_new_version != inputs.gh_version }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.gh_token }}
+        GH_RUNNER_NEW_VERSION: ${{ steps.commit-if-updated.outputs.gh_runner_new_version }}
+      shell: bash
+      run: |
+        gh variable set GH_RUNNER_VERSION -b ${{ env.GH_RUNNER_NEW_VERSION }} -R ${{ github.repository }}
