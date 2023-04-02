@@ -21,6 +21,7 @@ $ErrorActionPreference = "Stop"        #
 $LASTEXITCODE = 0
 [string]$ConstApiMime = "Accept: application/vnd.github+json"
 [string]$ConstApiVersion = "X-GitHub-Api-Version: 2022-11-28"
+
 function DebugMessage {
     param(
         [string[]]
@@ -32,6 +33,7 @@ function DebugMessage {
     $Msg = ('Caller: {0}, Values: {1}' -f $^, ($Url -join ';'))
     Write-Host $Msg -ForegroundColor DarkGray
 }
+
 function GetApiUrl {
     param(
         [string] $Url
@@ -109,7 +111,6 @@ function GetNodeVersion {
     return [version]::new()
 }
 
-
 function CleanVar {
     param(
         [string]
@@ -118,6 +119,7 @@ function CleanVar {
 
     return ($DurtyString -replace ('[^a-zA-Z\d_\-\s]', '') -replace '[\s|\-]', '_').ToUpperInvariant()
 }
+
 function ChangeNames {
     param(
         [PSCustomObject]$Object,
@@ -134,6 +136,7 @@ function ChangeNames {
     }
     return $Result.ToArray()
 }
+
 function ProcessVersion {
     param(
         [string]$Process,
@@ -142,6 +145,7 @@ function ProcessVersion {
         [string]$MaxVersion
     )
     [string]$ReturnVersion = ''
+    [string]$Msg = ''
     $Process = $Process.ToLowerInvariant()
     $VersionObtained = [version]::new()
 
@@ -165,21 +169,26 @@ function ProcessVersion {
     }
     if ($VersionInput -lt $VersionObtained) {
         $ReturnVersion = $VersionObtained.ToString()
-        Write-Host ('{0} -version updated {1}' -f $Element, $VersionObtained) -ForegroundColor Cyan
+        $Msg = ('√ {0}:{1} → {2}' -f $Element, $VersionInput.ToString(), $VersionObtained.ToString())
+        Write-Host $Msg -ForegroundColor Cyan
     }
     else {
         if ($VersionInput -eq $VersionObtained) {
-            Write-Host ('{0} - same version {1}' -f $Element, $VersionObtained) -ForegroundColor Green
+            Write-Host ('≡ {0} same version {1}' -f $Element, $VersionObtained) -ForegroundColor Green
         }
         else {
-            $Msg = ('Invalid versions in {0}. Prev: {1}, Current: {2}' -f $Element, $VersionInput, $VersionObtained)
+            $Msg = ('ѣ Invalid versions in {0}:{1} ↔ {2}' -f $Element, $VersionInput.ToString(), $VersionObtained.ToString())
             Write-Host $Msg -ForegroundColor Red
         }
         $ReturnVersion = $Node.version
     }
 
-    return [string]$ReturnVersion
+    return @{
+        Version = [string]$ReturnVersion
+        Info = $Msg
+    }
 }
+
 try {
     #[string]$JsonFile = './url-list.json'
     $JsonFile = (Resolve-Path -Path $JsonFile)
@@ -197,12 +206,7 @@ try {
         $Platforms[$Index] = $Arch
         $Files.$Arch = New-Object System.Collections.Generic.List[System.String]
     }
-#    ($Arch in $Platforms) {
-#        #$Files.$Arch.Add($Filename)
-#        # if ((Test-Path -Path $Filename -PathType Leaf)) {
-#        #      Remove-Item -Path $Filename -Force -Verbose
-#        # }
-#    }
+    $LogVersionVerdict = New-Object -TypeName "System.Text.StringBuilder"
     $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json -AsHashtable)
     $JsonOutput = @{ }
     $GhRunnerVersion = ''
@@ -213,13 +217,17 @@ try {
         $KeySrcUrlFrom = 'src-url-from'
         $KeyUrlSrc = 'url-src'
         $MaxVersion = [string]($Node.ContainsKey($KeyMaxVersion) ? $Node.$KeyMaxVersion : '')
-        $Version = ProcessVersion $Node.process $Node.url $Node.version $MaxVersion
+        $VersionInfo = ProcessVersion $Node.process $Node.url $Node.version $MaxVersion
+        if (![string]::IsNullOrEmpty($VersionInfo.Info)) {
+            [void]$LogVersionVerdict.Append($VersionInfo.Info).Append(';')
+        }
+
         $CurrentProcess = [ordered]@{
             install = $Node.install
             archive = $Node.archive
             process = $Node.process
             url     = $Node.url
-            version = $Version
+            version = $VersionInfo.Version
         }
 
         $Type = $Node.$KeySrcUrlFrom
@@ -261,9 +269,6 @@ try {
             DebugMessage $ScriptInvoke
             $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
-            # $ScriptOutput = (get-latest-release.ps1 -Url $Node.url `
-            #         -FileType $Node.archive -Platforms $Platforms `
-            #         -AnotherName $Alternative)
 
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"
@@ -286,10 +291,6 @@ try {
             $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
 
-            # $ScriptOutput = (get-node-release.ps1 -Url $Node.url `
-            #         -FileType $Node.archive -Platforms $Platforms `
-            #         -AnotherName $Alternative)
-
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"
                 $CurrentProcess.$ModKey = $ScriptOutput.$Item
@@ -298,12 +299,9 @@ try {
 
         # Add to env file depend architecture
         foreach ($Item in $Files.Keys) {
-            # $Filename = $Files.$Item
             $ModKey = "url-$( $Item )"
             $Files.$Item.Add(('{0}_URL={1}' -f (CleanVar $Element), $CurrentProcess.$ModKey))
             $Files.$Item.Add(('{0}_VERSION={1}' -f (CleanVar $Element), $CurrentProcess.version))
-            # Add-Content -Path $Filename -Value ('{0}_URL={1}{2}' -f (CleanVar $Element), $CurrentProcess.$ModKey, "`n") -Encoding ascii -NoNewline
-            # Add-Content -Path $Filename -Value ('{0}_VERSION={1}{2}' -f (CleanVar $Element), $CurrentProcess.version, "`n") -Encoding ascii -NoNewline
         }
 
         # Output JSON
@@ -315,7 +313,6 @@ try {
             $GhRunnerVersion = $CurrentProcess.version
         }
     }
-
 
     # Ok now write files
     # Add to env file depend architecture
@@ -331,7 +328,7 @@ try {
             continue
         }
 
-        if ((Test-Path -Path $Filename -PathType Leaf)) {
+        if (Test-Path -Path $Filename -PathType Leaf) {
             $OldContent = (Get-Content -Path $Filename)
             $IsNull = ([string]::IsNullOrWhiteSpace($OldContent))
             if (!$IsNull) {
@@ -365,7 +362,7 @@ try {
         Write-Output "files_changed=0"
     }
     Write-Output ('gh_runner_new_version={0}' -f $GhRunnerVersion)
-
+    Write-Output('log_version={0}' -f $LogVersionVerdict.ToString())
     exit 0
 }
 catch {

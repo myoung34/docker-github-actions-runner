@@ -19,7 +19,8 @@ concurrency:
 
 permissions:
   contents: write
-  packages: write
+  pull-requests: write
+  actions: write
 
 jobs:
   base-image-make:
