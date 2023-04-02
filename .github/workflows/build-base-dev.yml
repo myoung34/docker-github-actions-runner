@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  base-image-make:
+  base-make:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -86,7 +86,7 @@ jobs:
       #     echo '${{ toJson(env) }}'
       #     echo '${{ toJson(github.env) }}'
       #     echo '${{ toJson(github) }}'
-      - name: Run custom action
+      - name: Run ${{ env.RELEASE_IMAGE_NAME }} BUILD
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
         uses: ./.github/actions/build-docker
         with:

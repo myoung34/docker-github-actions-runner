@@ -1,10 +1,10 @@
-name: "Update check"
-run-name: "Update check by @${{ github.ACTOR }}"
+name: "Check for updates"
+run-name: "Check for updates by @${{ github.ACTOR }}"
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - .github/workflows/check-update.yml
+#  push:
+#    paths:
+#      - .github/workflows/check-update.yml
 #  schedule:
 #    - cron: "0 * * * *"
 
@@ -12,8 +12,12 @@ concurrency:
   group: check-update
   cancel-in-progress: false
 
+permissions:
+  contents: write
+  branches: write
+
 jobs:
-  base-image-make:
+  check-for-updates:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -28,42 +32,33 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
-        
-      - name: Check deps for update
-        shell: pwsh
-        # return env.FILES_CHANGED, env.NEW_VERSION
-        run: |
-          ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.ENV_PATH }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
 
-      - name: Skip if files was not changed
-        if: ${{ success() && env.FILES_CHANGED == 1 }}
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-          UPDATE_COUNTER: ${{ env.DEPS_UPDATE_COUNTER }}
-        run: |
-          date > generated.txt
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git checkout -b "update/deps-$UPDATE_COUNTER"
-          git add .
-          git commit -m "Dependencies auto update"
-          git push
-          echo "DEPS_UPDATE_COUNTER=$(($UPDATE_COUNTER + 1))" >> $GITHUB_ENV
+      - name: Process URLs
+        id: process-urls
+        uses: ./.github/actions/process-urls
+        with:
+          config_file: ${{ env.CONFIG_FILE }}
+          output_prefix: ${{ env.ENV_PATH }}
+          platforms: ${{ env.PLATFORMS }}
+          gh_version: ${{ env.GH_RUNNER_VERSION }}
+          deps_update_counter: ${{ env.DEPS_UPDATE_COUNTER }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Dependencies was updated
-        if: ${{ success() && env.DEPS_UPDATE_COUNTER > vars.DEPS_UPDATE_COUNTER }}
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-        run: |
-          gh variable set DEPS_UPDATE_COUNTER -b ${{ env.DEPS_UPDATE_COUNTER }} -R ${{ github.repository }}
-          
-      - name: GitHub runner version was updated
-        if: ${{ success() && env.GH_RUNNER_VERSION != env.NEW_VERSION }}
-        env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-        run: |
-          gh variable set GH_RUNNER_VERSION -b ${{ env.NEW_VERSION }} -R ${{ github.repository }}
-      
-
+#      - name: Process URLs
+#        if: ${{ always() && steps.process-urls.outputs.counter > env.DEPS_UPDATE_COUNTER }}
+#        env:
+#          COUNTER: ${{ steps.process-urls.outputs.counter }}
+#          VERSION: ${{ steps.process-urls.outputs.version }}
+#          GH_TOKEN: ${{ github.token }}
+#        shell: pwsh
+#        run: |
+#          if ( (![string]::IsNullOrWhitespace("$env:VERSION"))) {
+#            gh variable set GH_RUNNER_VERSION -b "$env:VERSION" -R '${{ github.repository }}'
+#          }
+#          gh variable set DEPS_UPDATE_COUNTER -b "$env:COUNTER" -R '${{ github.repository }}'
+#          platforms: 'linux/amd64,linux/arm64'
+#          gh_version: ${{ env.GH_RUNNER_VERSION }}
+#          deps_update_counter: ${{ env.DEPS_UPDATE_COUNTER }}
+#          gh_token: ${{ secrets.GITHUB_TOKEN }}
 
 #EOF

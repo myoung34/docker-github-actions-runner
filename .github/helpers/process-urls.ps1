@@ -16,8 +16,12 @@
 Set-StrictMode -Version 3.0            #
 $ErrorActionPreference = "Stop"        #
 ########################################
+# Execution in GitHub Actions gives
+# The variable '$LASTEXITCODE' cannot be retrieved because it has not been set
+$LASTEXITCODE = 0
 [string]$ConstApiMime = "Accept: application/vnd.github+json"
 [string]$ConstApiVersion = "X-GitHub-Api-Version: 2022-11-28"
+
 function DebugMessage {
     param(
         [string[]]
@@ -29,6 +33,7 @@ function DebugMessage {
     $Msg = ('Caller: {0}, Values: {1}' -f $^, ($Url -join ';'))
     Write-Host $Msg -ForegroundColor DarkGray
 }
+
 function GetApiUrl {
     param(
         [string] $Url
@@ -47,10 +52,13 @@ function GetReleaseVersion {
     $ApiUrl = GetApiUrl $Url
     $Request = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/releases/latest")
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = ($Request | ConvertFrom-Json).tag_name
-        if (($Tag -match '^(\D*)(\d+\.\d+\.\d+)(.*)') -and (![string]::IsNullOrWhiteSpace($Matches[2])) -and (($MaxVersion -eq '') -or ($_ -match $MaxVersion) )) {
-            return [version]::Parse($Matches[2])
+        $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($Tag -match $MaxVersion)
+        $IsMatch = ($Tag -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
+        $VersionToParse = $Matches[2]
+        if (($IsMatch) -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($IsMaxVersion) )) {
+            return [version]::Parse($VersionToParse)
         }
     }
 
@@ -63,11 +71,12 @@ function GetTagsVersion {
     $ApiUrl = GetApiUrl $Url
     $Request = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/tags")
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = (($Request | ConvertFrom-Json).name | ForEach-Object {
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
-                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($VersionToParse -match $MaxVersion) )) {
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
+                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion) ) {
                     [version]::Parse($VersionToParse)
                 }
                 else {
@@ -85,11 +94,12 @@ function GetNodeVersion {
     $Like = ('*{0}*' -f $MaxVersion)
     $Request = (Invoke-WebRequest -Uri $Url | Select-Object -ExpandProperty Links | Where-Object href -like $Like).href
 
-    if ($LASTEXITCODE -eq 0) {
+    if (($LASTEXITCODE -eq 0) -and ($? -eq $true)) {
         $Tag = ($Request | ForEach-Object {
                 $MatchResult = ($_ -match '^(\D*)(\d+\.\d+\.\d+)(.*)')
                 $VersionToParse = $Matches[2]
-                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and (($MaxVersion -eq '') -or ($VersionToParse -match $MaxVersion) )) {
+                $IsMaxVersion = [string]::IsNullOrEmpty($MaxVersion) ? $true : ($VersionToParse -match $MaxVersion)
+                if ($MatchResult -and (![string]::IsNullOrWhiteSpace($VersionToParse)) -and ($IsMaxVersion )) {
                     [version]::Parse($VersionToParse)
                 }
                 else {
@@ -101,7 +111,6 @@ function GetNodeVersion {
     return [version]::new()
 }
 
-
 function CleanVar {
     param(
         [string]
@@ -110,6 +119,7 @@ function CleanVar {
 
     return ($DurtyString -replace ('[^a-zA-Z\d_\-\s]', '') -replace '[\s|\-]', '_').ToUpperInvariant()
 }
+
 function ChangeNames {
     param(
         [PSCustomObject]$Object,
@@ -126,6 +136,7 @@ function ChangeNames {
     }
     return $Result.ToArray()
 }
+
 function ProcessVersion {
     param(
         [string]$Process,
@@ -134,6 +145,7 @@ function ProcessVersion {
         [string]$MaxVersion
     )
     [string]$ReturnVersion = ''
+    [string]$Msg = ''
     $Process = $Process.ToLowerInvariant()
     $VersionObtained = [version]::new()
 
@@ -157,21 +169,26 @@ function ProcessVersion {
     }
     if ($VersionInput -lt $VersionObtained) {
         $ReturnVersion = $VersionObtained.ToString()
-        Write-Host ('{0} -version updated {1}' -f $Element, $VersionObtained) -ForegroundColor Cyan
+        $Msg = ('√ {0}:{1} → {2}' -f $Element, $VersionInput.ToString(), $VersionObtained.ToString())
+        Write-Host $Msg -ForegroundColor Cyan
     }
     else {
         if ($VersionInput -eq $VersionObtained) {
-            Write-Host ('{0} - same version {1}' -f $Element, $VersionObtained) -ForegroundColor Green
+            Write-Host ('≡ {0} same version {1}' -f $Element, $VersionObtained) -ForegroundColor Green
         }
         else {
-            $Msg = ('Invalid versions in {0}. Prev: {1}, Current: {2}' -f $Element, $VersionInput, $VersionObtained)
+            $Msg = ('ѣ Invalid versions in {0}:{1} ↔ {2}' -f $Element, $VersionInput.ToString(), $VersionObtained.ToString())
             Write-Host $Msg -ForegroundColor Red
         }
         $ReturnVersion = $Node.version
     }
 
-    return [string]$ReturnVersion
+    return @{
+        Version = [string]$ReturnVersion
+        Info = $Msg
+    }
 }
+
 try {
     #[string]$JsonFile = './url-list.json'
     $JsonFile = (Resolve-Path -Path $JsonFile)
@@ -179,13 +196,17 @@ try {
     $ScriptsPath = (Resolve-Path -Path $MyInvocation.MyCommand.Path | Get-Item).Directory.FullName
     DebugMessage $ScriptsPath
     $Files = @{ }
-    foreach ($Arch in $Platforms) {
+    for ($Index = 0; $Index -lt $Platforms.Count; $Index++) {
+        $Arch = $Platforms[$Index].ToLowerInvariant()
+        if ($Arch.Contains('/')) {
+            $Parted = $Arch -split '/'
+            $Arch = $Parted[1]
+        }
+        # Also clean input array
+        $Platforms[$Index] = $Arch
         $Files.$Arch = New-Object System.Collections.Generic.List[System.String]
-        #$Files.$Arch.Add($Filename)
-        # if ((Test-Path -Path $Filename -PathType Leaf)) {
-        #      Remove-Item -Path $Filename -Force -Verbose
-        # }
     }
+    $LogVersionVerdict = New-Object -TypeName "System.Text.StringBuilder"
     $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json -AsHashtable)
     $JsonOutput = @{ }
     $GhRunnerVersion = ''
@@ -196,13 +217,17 @@ try {
         $KeySrcUrlFrom = 'src-url-from'
         $KeyUrlSrc = 'url-src'
         $MaxVersion = [string]($Node.ContainsKey($KeyMaxVersion) ? $Node.$KeyMaxVersion : '')
-        $Version = ProcessVersion $Node.process $Node.url $Node.version $MaxVersion
+        $VersionInfo = ProcessVersion $Node.process $Node.url $Node.version $MaxVersion
+        if (![string]::IsNullOrEmpty($VersionInfo.Info)) {
+            [void]$LogVersionVerdict.Append($VersionInfo.Info).Append(';')
+        }
+
         $CurrentProcess = [ordered]@{
             install = $Node.install
             archive = $Node.archive
             process = $Node.process
             url     = $Node.url
-            version = $Version
+            version = $VersionInfo.Version
         }
 
         $Type = $Node.$KeySrcUrlFrom
@@ -242,11 +267,8 @@ try {
             $AlternativeFlat = $Alternative -join ','
             $ScriptInvoke = "$($ScriptsPath)\nodejs-latest.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat) -MaxVersion $($MaxVersion)"
             DebugMessage $ScriptInvoke
-            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
-            # $ScriptOutput = (get-latest-release.ps1 -Url $Node.url `
-            #         -FileType $Node.archive -Platforms $Platforms `
-            #         -AnotherName $Alternative)
 
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"
@@ -266,12 +288,8 @@ try {
             $AlternativeFlat = $Alternative -join ','
             $ScriptInvoke = "$($ScriptsPath)\github-latest-release.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat)"
             DebugMessage $ScriptInvoke
-            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke -ErrorAction Stop
             DebugMessage ($ScriptOutput | ConvertTo-Json)
-
-            # $ScriptOutput = (get-node-release.ps1 -Url $Node.url `
-            #         -FileType $Node.archive -Platforms $Platforms `
-            #         -AnotherName $Alternative)
 
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"
@@ -281,12 +299,9 @@ try {
 
         # Add to env file depend architecture
         foreach ($Item in $Files.Keys) {
-            # $Filename = $Files.$Item
             $ModKey = "url-$( $Item )"
             $Files.$Item.Add(('{0}_URL={1}' -f (CleanVar $Element), $CurrentProcess.$ModKey))
             $Files.$Item.Add(('{0}_VERSION={1}' -f (CleanVar $Element), $CurrentProcess.version))
-            # Add-Content -Path $Filename -Value ('{0}_URL={1}{2}' -f (CleanVar $Element), $CurrentProcess.$ModKey, "`n") -Encoding ascii -NoNewline
-            # Add-Content -Path $Filename -Value ('{0}_VERSION={1}{2}' -f (CleanVar $Element), $CurrentProcess.version, "`n") -Encoding ascii -NoNewline
         }
 
         # Output JSON
@@ -298,7 +313,6 @@ try {
             $GhRunnerVersion = $CurrentProcess.version
         }
     }
-
 
     # Ok now write files
     # Add to env file depend architecture
@@ -314,7 +328,7 @@ try {
             continue
         }
 
-        if ((Test-Path -Path $Filename -PathType Leaf)) {
+        if (Test-Path -Path $Filename -PathType Leaf) {
             $OldContent = (Get-Content -Path $Filename)
             $IsNull = ([string]::IsNullOrWhiteSpace($OldContent))
             if (!$IsNull) {
@@ -342,13 +356,13 @@ try {
     # }
 
     if ($FilesWasChanged) {
-        Write-Output "FILES_CHANGED=1"
+        Write-Output "files_changed=1"
     }
     else {
-        Write-Output "FILES_CHANGED=0"
+        Write-Output "files_changed=0"
     }
-    Write-Output ('GH_RUNNER_NEW_VERSION={0}' -f $GhRunnerVersion)
-
+    Write-Output ('gh_runner_new_version={0}' -f $GhRunnerVersion)
+    Write-Output('log_version={0}' -f $LogVersionVerdict.ToString())
     exit 0
 }
 catch {

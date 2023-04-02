@@ -43,6 +43,9 @@ Set-StrictMode -Version 3.0            #
 $ErrorActionPreference = "Stop"        #
 ########################################
 
+# Execution in GitHub Actions gives
+# The variable '$LASTEXITCODE' cannot be retrieved because it has not been set
+$LASTEXITCODE = 0
 $ConstApiMime = "Accept: application/vnd.github+json"
 $ConstApiVersion = "X-GitHub-Api-Version: 2022-11-28"
 
@@ -82,7 +85,7 @@ $ApiUrl = $Url -replace '^https\:\/\/github\.com\/([^\/]+)\/([^\/]+).*', '/repos
 DebugMessage $ApiUrl
 
 $Release = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/releases/latest" | ConvertFrom-Json)
-if (($LASTEXITCODE -ne 0) -or ($null -eq $Release) -or ([string]::IsNullOrWhiteSpace($Release.tag_name))) {
+if (($LASTEXITCODE -ne 0) -or ($false -eq $?) -or ($null -eq $Release) -or ([string]::IsNullOrWhiteSpace($Release.tag_name))) {
     Write-Error "Invalid URL: $( $Url )"
     ErrorMessage "Invalid URL: $( $Url )"
     exit 1
