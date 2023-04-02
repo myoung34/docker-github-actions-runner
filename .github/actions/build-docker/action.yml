@@ -107,7 +107,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
       run: |
-        ./.github/helpers/process-urls.ps1 -UniqueId '${{ github.run_id }}' -JsonFile ./.github/url-list.json -Platforms ${{ inputs.platforms }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
+        ./.github/helpers/process-urls.ps1 -UniqueId '${{ github.run_id }}' -JsonFile ./.github/url-list.json -OutputPrefix ./ -Platforms ${{ inputs.platforms }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
 
     - name: Build and push
       uses: docker/build-push-action@v4
@@ -121,6 +121,7 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
+          PREPARED_FILE_VERSION=${{ github.run_id }}
           BUILD_IMAGE=${{ inputs.base_build_image }}
           CHOWN_USER=${{ inputs.chown_user }}
           LSB_RELEASE_CODENAME=${{ inputs.matrix_docker_codename }}
