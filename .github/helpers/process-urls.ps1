@@ -186,13 +186,22 @@ try {
     $ScriptsPath = (Resolve-Path -Path $MyInvocation.MyCommand.Path | Get-Item).Directory.FullName
     DebugMessage $ScriptsPath
     $Files = @{ }
-    foreach ($Arch in $Platforms) {
+    for ($Index = 0; $Index -lt $Platforms.Count; $Index++) {
+        $Arch = $Platforms[$Index].ToLowerInvariant()
+        if ($Arch.Contains('/')) {
+            $Parted = $Arch -split '/'
+            $Arch = $Parted[1]
+        }
+        # Also clean input array
+        $Platforms[$Index] = $Arch
         $Files.$Arch = New-Object System.Collections.Generic.List[System.String]
-        #$Files.$Arch.Add($Filename)
-        # if ((Test-Path -Path $Filename -PathType Leaf)) {
-        #      Remove-Item -Path $Filename -Force -Verbose
-        # }
     }
+#    ($Arch in $Platforms) {
+#        #$Files.$Arch.Add($Filename)
+#        # if ((Test-Path -Path $Filename -PathType Leaf)) {
+#        #      Remove-Item -Path $Filename -Force -Verbose
+#        # }
+#    }
     $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json -AsHashtable)
     $JsonOutput = @{ }
     $GhRunnerVersion = ''
