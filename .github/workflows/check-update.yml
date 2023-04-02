@@ -5,8 +5,8 @@ on:
   push:
     paths:
       - .github/workflows/check-update.yml
-  schedule:
-    - cron: "0 * * * *"
+#  schedule:
+#    - cron: "0 * * * *"
 
 concurrency:
   group: check-update
