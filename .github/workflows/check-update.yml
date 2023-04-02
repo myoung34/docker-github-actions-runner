@@ -12,6 +12,9 @@ concurrency:
   group: check-update
   cancel-in-progress: false
 
+permissions:
+  contents: write
+
 jobs:
   check-for-updates:
     runs-on: ubuntu-latest
