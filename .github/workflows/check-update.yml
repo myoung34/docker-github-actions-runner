@@ -14,7 +14,8 @@ concurrency:
 
 permissions:
   contents: write
-  branches: write
+  pull-requests: write
+  actions: write
 
 jobs:
   check-for-updates:
