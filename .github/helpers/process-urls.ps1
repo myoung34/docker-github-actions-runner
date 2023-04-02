@@ -178,7 +178,7 @@ function ProcessVersion {
 try {
     #[string]$JsonFile = './url-list.json'
     $JsonFile = (Resolve-Path -Path $JsonFile)
-    $WorkDir = (Resolve-Path -Path $OutputPrefix)
+    $WorkDir = $OutputPrefix
     $ScriptsPath = (Resolve-Path -Path $MyInvocation.MyCommand.Path | Get-Item).Directory.FullName
     DebugMessage $ScriptsPath
     $Files = @{ }

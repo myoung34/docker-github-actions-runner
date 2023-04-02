@@ -110,6 +110,7 @@ runs:
         ./.github/helpers/process-urls.ps1 -UniqueId '${{ github.run_id }}' -JsonFile ./.github/url-list.json -OutputPrefix ./ -Platforms ${{ inputs.platforms }} | %{ Write-Output($_) >> $Env:GITHUB_ENV }
 
     - name: Build and push
+      if: ${{ success() }}
       uses: docker/build-push-action@v4
       with:
         context: .
