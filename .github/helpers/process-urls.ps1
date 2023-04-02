@@ -179,6 +179,8 @@ try {
     #[string]$JsonFile = './url-list.json'
     $JsonFile = (Resolve-Path -Path $JsonFile)
     $WorkDir = (Resolve-Path -Path $OutputPrefix)
+    $ScriptsPath = (Resolve-Path -Path $MyInvocation.MyCommand.Path | Get-Item).Directory.FullName
+    DebugMessage $ScriptsPath
     $Files = @{ }
     foreach ($Arch in $Platforms) {
         $Filename = ('{0}_{1}.env' -f $Arch, $UniqueId)
@@ -234,9 +236,20 @@ try {
         elseif (($Type -eq 'url') -and ($Node.process -eq 'nodejs')) {
             # NodeJS
             $Alternative = @(ChangeNames $Node $Platforms)
-            $ScriptOutput = (./get-node-release.ps1 -Url $Node.url `
-                    -FileType $Node.archive -Platforms $Platforms `
-                    -AnotherName $Alternative)
+            # $Parameters = @{
+            #     FilePath     = $ScriptNodeJsRelease
+            #     ArgumentList = $Node.url, $Node.archive, $Platforms, $Alternative
+            #     # ArgumentList = "-Url $($Node.url) -FileType $($Node.archive) -Platforms $($Platforms) -AnotherName $($Alternative)"
+            # }
+            $PlatformsFlat = $Platforms -join ','
+            $AlternativeFlat = $Alternative -join ','
+            $ScriptInvoke = "$($ScriptsPath)\nodejs-latest.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat) -MaxVersion $($MaxVersion)"
+            DebugMessage $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            DebugMessage ($ScriptOutput | ConvertTo-Json)
+            # $ScriptOutput = (get-latest-release.ps1 -Url $Node.url `
+            #         -FileType $Node.archive -Platforms $Platforms `
+            #         -AnotherName $Alternative)
 
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"
@@ -246,9 +259,22 @@ try {
         else {
             # Binary from GitHub
             $Alternative = @(ChangeNames $Node $Platforms)
-            $ScriptOutput = (./get-latest-release.ps1 -Url $Node.url `
-                    -FileType $Node.archive -Platforms $Platforms `
-                    -AnotherName $Alternative)
+            # $Parameters = @{
+            #     FilePath     = $ScriptGithubLatestRelease
+            #     #ArgumentList = "-Url $($Node.url) -FileType $($Node.archive) -Platforms $($Platforms) -AnotherName $($Alternative)"
+            #     ArgumentList = $Node.url, $Node.archive, $Platforms, $Alternative
+            # }
+            # $ScriptOutput = Invoke-Command @parameters
+            $PlatformsFlat = $Platforms -join ','
+            $AlternativeFlat = $Alternative -join ','
+            $ScriptInvoke = "$($ScriptsPath)\github-latest-release.ps1 -Url $($Node.url) -FileType $($Node.archive) -Platforms $($PlatformsFlat) -AnotherName $($AlternativeFlat)"
+            DebugMessage $ScriptInvoke
+            $ScriptOutput = Invoke-Expression $ScriptInvoke
+            DebugMessage ($ScriptOutput | ConvertTo-Json)
+
+            # $ScriptOutput = (get-node-release.ps1 -Url $Node.url `
+            #         -FileType $Node.archive -Platforms $Platforms `
+            #         -AnotherName $Alternative)
 
             foreach ($Item in $Files.Keys) {
                 $ModKey = "url-$( $Item )"

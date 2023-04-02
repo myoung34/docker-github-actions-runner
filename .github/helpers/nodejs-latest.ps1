@@ -59,6 +59,10 @@ if ( [string]::IsNullOrWhiteSpace($MaxVersion)) {
 else {
     $MaxVersion = $MaxVersion.ToLowerInvariant()
 }
+if ([string]::IsNullOrWhiteSpace($Url)) {
+    Write-Error "Empty URL"
+    exit 1
+}
 function DebugMessage {
     param(
         [string[]]$Url
@@ -78,10 +82,14 @@ function ErrorMessage {
     Write-Host ($Url -join ', ') -ForegroundColor Red
 }
 $Like = "*$( $Os )*.$( $FileType )"
-
-$DownloadUrls = (Invoke-WebRequest -Uri $Url `
-    | Select-Object -ExpandProperty Links | Where-Object href -like $Like).href
+$Invoked = (Invoke-WebRequest -Uri $Url)
+if ( !$? ) {
+    Write-Error "Invalid invoke"
+    exit 1
+}
+$DownloadUrls = ($Invoked | Select-Object -ExpandProperty Links | Where-Object href -like $Like).href
 if (($null -eq $DownloadUrls)) {
+    Write-Error "Invalid URL: $( $Url )"
     ErrorMessage "Invalid URL: $( $Url )"
     exit 1
 }

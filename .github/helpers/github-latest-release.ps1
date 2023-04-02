@@ -53,6 +53,10 @@ else {
     $Os = $Os.ToLowerInvariant()
 }
 
+if ([string]::IsNullOrWhiteSpace($Url)) {
+    Write-Error "Empty URL"
+    exit 1
+}
 
 function DebugMessage {
     param(
@@ -78,8 +82,8 @@ $ApiUrl = $Url -replace '^https\:\/\/github\.com\/([^\/]+)\/([^\/]+).*', '/repos
 DebugMessage $ApiUrl
 
 $Release = (gh api -H $ConstApiMime -H $ConstApiVersion "$( $ApiUrl )/releases/latest" | ConvertFrom-Json)
-
-if (($null -eq $Release) -or ([string]::IsNullOrWhiteSpace($Release.tag_name))) {
+if (($LASTEXITCODE -ne 0) -or ($null -eq $Release) -or ([string]::IsNullOrWhiteSpace($Release.tag_name))) {
+    Write-Error "Invalid URL: $( $Url )"
     ErrorMessage "Invalid URL: $( $Url )"
     exit 1
 }
