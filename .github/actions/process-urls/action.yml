@@ -67,7 +67,7 @@ runs:
         $BranchName = "update/deps-$($LastBranchNumber)"
         git checkout -b $BranchName
         git add .
-        $Body = ('{0}' -f ($env:LOG_VERSION -replace ';', "`n"))
+        $Body = ('{0}' -f ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
         git commit -m @"
         $Body
         "@
