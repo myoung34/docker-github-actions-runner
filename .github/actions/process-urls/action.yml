@@ -73,8 +73,12 @@ runs:
         git push --set-upstream origin $BranchName
         if ($?) {
           #$DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-          Write-Host ('CurrentBranch: {0}, DefaultBranch: {1}' -f $CurrentBranch, $DefaultBranch)
-          gh pr create --head $CurrentBranch --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
+          #Write-Host ('CurrentBranch: {0}, DefaultBranch: {1}' -f $CurrentBranch, $DefaultBranch)
+          #gh pr create --head $CurrentBranch --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
+          gh api --method POST -H $ConstApiMime -H $ConstApiVersion '/repos/${{ github.github.repository }}/pulls' `
+            -f title='Update deps' -f body='Please pull these awesome changes in!' `
+            -f head="${{ github.repository_owner }}:$BranchName" -f head_repo="${{ github.repository_owner }}" `
+            -f base="$CurrentBranch" 
         }
 
     - name: Dependencies was updated
