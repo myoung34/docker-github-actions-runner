@@ -401,9 +401,12 @@ try {
     }
 
     # We need to update JSON
+    # And we need to re-read file to left order unchanged
+    $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json)
+    # $AppList
     if ($FilesWasChanged) {
-        foreach ($Element in $AppList.Keys) {
-            $AppList[$Element].version = $JsonOutput.$Element.version
+        foreach ($Element in $OrderedList) {
+            $AppList.$Element.version = $JsonOutput.$Element.version
         }
         #$AppList | Sort-Object | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
         # Left order as is
