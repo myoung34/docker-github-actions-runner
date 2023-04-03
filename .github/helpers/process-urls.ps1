@@ -185,7 +185,7 @@ function ProcessVersion {
 
     return @{
         Version = [string]$ReturnVersion
-        Info = $Msg
+        Info    = $Msg
     }
 }
 
@@ -357,6 +357,25 @@ try {
 
     if ($FilesWasChanged) {
         Write-Output "files_changed=1"
+
+        # Find number for a next update branch
+        $LastNumber = git branch -ar --list *update/deps-* | Foreach-Object {
+            if ([string]::IsNullOrWhiteSpace($_) -or !($_.Contains('/'))) {
+                continue
+            }
+
+            $Parted = ($_ -split '/')
+            $LastPart = $Parted[$Parted.lenght - 1] 
+            $LastPart.SubString($LastPart.LastIndexOf('-') + 1) -as [int]
+        } | Sort-Object -Descending | Select-Object -Index 0
+
+        if (($null -ne $LastNumber) && ($LastNumber -is [int])) {
+            $LastNumber++
+            Write-Output('last_number={0}' -f $LastNumber)
+        }
+        else {
+            Write-Output('last_number=1')
+        }
     }
     else {
         Write-Output "files_changed=0"

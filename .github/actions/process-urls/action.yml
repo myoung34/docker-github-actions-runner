@@ -98,5 +98,5 @@ runs:
         $NewVersion = (([string]::IsNullOrWhitespace($env:NEW_VERSION)) ? $env:CURRENT_VERSION : $env:NEW_VERSION)
         Write-Output "version=$NewVersion" >> $env:GITHUB_OUTPUT
         Write-Output "counter=$Counter" >> $env:GITHUB_OUTPUT
-        gh variable set DEPS_UPDATE_COUNTER -b $Counter -R '${{ github.repository }}'
-        gh variable set GH_RUNNER_VERSION -b "$NewVersion" -R '${{ github.repository }}'
+#        gh variable set DEPS_UPDATE_COUNTER -b $Counter -R '${{ github.repository }}'
+#        gh variable set GH_RUNNER_VERSION -b "$NewVersion" -R '${{ github.repository }}'
