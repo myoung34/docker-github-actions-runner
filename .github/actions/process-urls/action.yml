@@ -73,7 +73,7 @@ runs:
         git push --set-upstream origin $BranchName
         if ($?) {
           $DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-          
+          Write-Host ('CurrentBranch: {0}, DefaultBranch: {1}' -f $CurrentBranch, $DefaultBranch)
           gh pr create --head $CurrentBranch --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
         }
 
