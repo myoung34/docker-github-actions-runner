@@ -71,6 +71,7 @@ runs:
         Write-Output($Body) | Out-File pr.txt
         git commit --file=pr.txt
         git push --set-upstream origin $BranchName
+        Remove-Item -Force pr.txt
         if ($?) {
           #$DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
           #Write-Host ('CurrentBranch: {0}, DefaultBranch: {1}' -f $CurrentBranch, $DefaultBranch)
