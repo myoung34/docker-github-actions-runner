@@ -24,8 +24,6 @@ jobs:
     strategy:
       fail-fast: false
     env:
-      FILES_CHANGED: 0
-      NEW_VERSION: ${{ vars.GH_RUNNER_VERSION }}
       GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
       PLATFORMS: 'amd64,arm64'
       ENV_PATH: './variables'
