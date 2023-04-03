@@ -73,12 +73,15 @@ runs:
         $BranchName = "update/deps-$($LastBranchNumber)"
         git checkout -b $BranchName
         git add .
-        git commit -m "Dependencies auto update"
+        $Body = ('{0}' -f ($env:LOG_VERSION -replace ';', "`n"))
+        git commit -m @"
+        $Body
+        "@
         git push --set-upstream origin $BranchName
         if ($?) {
           $DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-          $env:LOG_VERSION -replace ';', "`n" | Out-File pr.txt
-          gh pr create --label 'ci/di' --assignee @me --base "$($DefaultBranch)" --title "Update deps #$($LastBranchNumber)" --file-body pr.txt
+          Write-Output($Body) | Out-File pr.txt
+          gh pr create --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
         }
 #        date > generated.txt
   #        git config user.name github-actions
