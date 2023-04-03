@@ -67,7 +67,7 @@ RUN source /tmp/${TARGETARCH}.env \
   && wget -qO- "$DOTNET_URL" | bash /dev/stdin --version "$DOTNET_VERSION" --install-dir /usr/share/dotnet \
   && (wget -qO- "$PWSH_URL" | tar xz -C /usr/share/pwsh) \
   && git clone "$GIT_URL" /tmp/git-src \
-  && make prefix=/usr all \
+  && make prefix=/usr --bindir=/usr/bin all \
   && apt-get remove -y git git-man \
   && checkinstall --install=yes --type=debian --pkgname=git --pkgversion="$GIT_VERSION" --pkgarch="${TARGETARCH}" --pkgrelease="docker" --pkglicense='GPL' --pkgsource=/usr/src --pakdir=/deb --maintainer='derskythe@localhost' --provides='git-completion,git-core' --pkggroup=vcs --gzman --nodoc --strip=1 --backup=0 --showinstall=0 --default --deldoc --exclude=INSTALL --exclude=COPYING --exclude=README.md --reset-uids \
   && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh \
