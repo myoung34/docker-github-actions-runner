@@ -357,19 +357,6 @@ try {
 
     if ($FilesWasChanged) {
         Write-Output "files_changed=1"
-
-        # Find number for a next update branch
-        $LastNumber = git branch -ar --list *update/deps-* | Foreach-Object {
-        ($_ -replace '[^\d]', '') -as [int]
-        } | Sort-Object -Descending | Select-Object -Index 0
-
-        if ($LastNumber -is [int]) {
-            $LastNumber++
-            Write-Output('last_number={0}' -f $LastNumber)
-        }
-        else {
-            Write-Output('last_number=1')
-        }
     }
     else {
         Write-Output "files_changed=0"
