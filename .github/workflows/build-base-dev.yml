@@ -78,14 +78,7 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
-      # - name: Prints vars
-      #   env:
-      #     VARS_CONTEXT: ${{ toJson(vars) }}
-      #   run: |
-      #     echo '${{ toJson(vars) }}'
-      #     echo '${{ toJson(env) }}'
-      #     echo '${{ toJson(github.env) }}'
-      #     echo '${{ toJson(github) }}'
+
       - name: Run ${{ env.RELEASE_IMAGE_NAME }} BUILD
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
         uses: ./.github/actions/build-docker
@@ -113,7 +106,7 @@ jobs:
 
   update-dockerhub-info:
     runs-on: ubuntu-latest
-    needs: base-image-make
+    needs: base-make
     environment:
       name: Builder
     env:
