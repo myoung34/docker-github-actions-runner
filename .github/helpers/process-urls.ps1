@@ -204,7 +204,7 @@ try {
         }
         # Also clean input array
         $Platforms[$Index] = $Arch
-        $Files.$Arch = New-Object System.Collections.Generic.List[System.String]
+        $Files.$Arch = New-Object System.Collections.Generic.Dictionary"[String,String]"
     }
     $LogVersionVerdict = New-Object -TypeName "System.Text.StringBuilder"
     $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json -AsHashtable)
@@ -298,12 +298,22 @@ try {
         }
 
         # Add to env file depend architecture
+        # $CleanedName = (CleanVar $Element)
+        $Combined = @{ }
         foreach ($Item in $Files.Keys) {
-            $ModKey = "url-$( $Item )"
-            $Files.$Item.Add(('{0}_URL={1}' -f (CleanVar $Element), $CurrentProcess.$ModKey))
-            $Files.$Item.Add(('{0}_VERSION={1}' -f (CleanVar $Element), $CurrentProcess.version))
+            # $ModKey = "url-$( $Item )"
+            $Combined.$Item = $CurrentProcess.$ModKey
+            # @{
+            #     Url    = $CurrentProcess.$ModKey
+            #     ModKey = $ModKey
+            # }
+            #            $KeyUrl = ('{0}_URL' -f $CleanedName)
+            #            $KeyVersion = ('{0}_VERSION' -f $CleanedName)
+            #            $Files.$Item.Add($KeyUrl, $CurrentProcess.$ModKey)
+            #            $Files.$Item.Add($KeyVersion, $CurrentProcess.version)
         }
-
+        # $CurrentProcess.cleanVar = $CleanedName
+        $CurrentProcess.combined = $Combined
         # Output JSON
         $JsonOutput += [ordered]@{
             $Element = $CurrentProcess
@@ -314,25 +324,60 @@ try {
         }
     }
 
+    # Create ordered list of keys
+    # Because magic word ordered seems not working
+    $OrderedList = $JsonOutput.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object
+    # $OrderedList
+
     # Ok now write files
     # Add to env file depend architecture
     $FilesWasChanged = $false
     foreach ($Item in $Files.Keys) {
+        # Make content of file according order of keys
+        $NewContent = New-Object -TypeName "System.Text.StringBuilder"
+        foreach($Key in $OrderedList) {
+            $CleanedName = (CleanVar $Key)
+
+            $Version = $JsonOutput.$Key.version
+            $Url = $JsonOutput.$Key.combined.$Item
+
+            # NAME_URL=URL
+            [void]$NewContent.Append($CleanedName)
+            [void]$NewContent.Append('_URL=')
+            [void]$NewContent.Append($Url)
+            [void]$NewContent.Append("`n")
+            
+            # NAME_VERSION=VERSION
+            [void]$NewContent.Append($CleanedName)
+            [void]$NewContent.Append('_VERSION=')
+            [void]$NewContent.Append($Version)
+            [void]$NewContent.Append("`n")
+        }
+
         $Filename = ('{0}_{1}.env' -f $Item, 'extra')
         $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
         Write-Information ("Trying to write file: {0}, Key: {1}" -f $Filename, $Item)
-        $NewContent = ($Files.$Item.ToArray() -join "`n")
-        $IsNull = ([string]::IsNullOrWhiteSpace($NewContent))
+        #        $JsonOutput.GetEnumerator() | ForEach-Object {
+        #            #$_ | Get-Member | Out-Host -Paging
+        #            $CleanVar = $_.Value.CleanVar
+        #            $KeyUrl = "$($CleanVar)_URL"
+        #            $KeyVersion = "$($CleanVar)_VERSION"
+        #            ('{0} - {1}' -f $_.Key, $_.Value.$KeyUrl. )
+        #        }
+        # continue
+        # Not it's dictionary!!
+        # $NewContent = ($Files.$Item.ToArray() -join "`n")
+        # $IsNull = ([string]::IsNullOrWhiteSpace($NewContent))
 
-        if ($IsNull) {
-            continue
-        }
+        # if ($IsNull) {
+        #     continue
+        # }
 
         if (Test-Path -Path $Filename -PathType Leaf) {
             $OldContent = (Get-Content -Path $Filename)
             $IsNull = ([string]::IsNullOrWhiteSpace($OldContent))
             if (!$IsNull) {
-                $FilesCompare = (Compare-Object -ReferenceObject $NewContent -DifferenceObject $OldContent  `
+                $FilesCompare = (Compare-Object -ReferenceObject $NewContent.ToString() -DifferenceObject $OldContent  `
                     | Measure-Object).Count
 
                 if ($FilesCompare -eq 0) {
@@ -343,17 +388,30 @@ try {
             # Delete old file
             Remove-Item -Path $Filename -Force -Verbose
         }
-        Add-Content -Path $Filename -Value $NewContent -Encoding ascii -NoNewline
+        Add-Content -Path $Filename -Value $NewContent.ToString() -Encoding ascii -NoNewline
 
         $FilesWasChanged = $true
     }
 
     # Write JSON
-    # if ($IsDebug) {
-    #     $Filename = ('{0}.json' -f $UniqueId)
-    #     $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
-    #     $JsonOutput | Sort-Object  | ConvertTo-Json | Out-File -Path $Filename
-    # }
+    if ($IsDebug) {
+        # $Filename = ('{0}.json' -f $UniqueId)
+        $Filename = (Join-Path -Path $WorkDir -ChildPath 'url-updated.json')
+        $JsonOutput | Sort-Object  | ConvertTo-Json -Depth 5 | Out-File -Path $Filename
+    }
+
+    # We need to update JSON
+    # And we need to re-read file to left order unchanged
+    $AppList = (Get-Content -Raw $JsonFile | ConvertFrom-Json)
+    # $AppList
+    if ($FilesWasChanged) {
+        foreach ($Element in $OrderedList) {
+            $AppList.$Element.version = $JsonOutput.$Element.version
+        }
+        #$AppList | Sort-Object | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
+        # Left order as is
+        $AppList | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
+    }
 
     if ($FilesWasChanged) {
         Write-Output "files_changed=1"
@@ -361,8 +419,8 @@ try {
     else {
         Write-Output "files_changed=0"
     }
-    Write-Output ('gh_runner_new_version={0}' -f $GhRunnerVersion)
-    Write-Output('log_version={0}' -f $LogVersionVerdict.ToString())
+    Write-Output ("gh_runner_new_version='{0}'" -f $GhRunnerVersion)
+    Write-Output('log_version=''{0}''' -f $LogVersionVerdict.ToString())
     exit 0
 }
 catch {

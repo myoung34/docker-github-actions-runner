@@ -1,4 +1,4 @@
-﻿{
+{
   "aws-cli": {
     "process": "tags",
     "src-url-from": "replace",
@@ -8,7 +8,7 @@
     "amd64": "x86_64",
     "url": "https://github.com/aws/aws-cli/",
     "url-src": "https://awscli.amazonaws.com/awscli-exe-linux-{REPLACE}.zip",
-    "version": "2.10.8"
+    "version": "2.11.8"
   },
   "docker": {
     "process": "release",
@@ -17,7 +17,7 @@
     "archive": "sh",
     "url": "https://github.com/moby/moby/releases",
     "url-src": "https://raw.githubusercontent.com/docker/docker-install/master/install.sh",
-    "version": "20.10"
+    "version": "23.0.2"
   },
   "dotnet": {
     "process": "tags",
@@ -27,7 +27,7 @@
     "max-version": "7.0",
     "url": "https://github.com/dotnet/sdk/releases",
     "url-src": "https://dot.net/v1/dotnet-install.sh",
-    "version": "7.0.0"
+    "version": "7.0.202"
   },
   "gh-cli": {
     "process": "release",
@@ -52,7 +52,7 @@
     "install": "make",
     "archive": "git",
     "url": "https://github.com/git/git.git",
-    "version": "2.39.0"
+    "version": "2.40.0"
   },
   "git-lfs": {
     "process": "release",
