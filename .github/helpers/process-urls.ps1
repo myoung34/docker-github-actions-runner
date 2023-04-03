@@ -185,7 +185,7 @@ function ProcessVersion {
 
     return @{
         Version = [string]$ReturnVersion
-        Info = $Msg
+        Info    = $Msg
     }
 }
 
