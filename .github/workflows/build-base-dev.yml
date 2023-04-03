@@ -24,13 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          [
-            ubuntu-jammy,
-            ubuntu-focal,
-            ubuntu-bionic,
-            debian-bullseye,
-            debian-sid
-          ]
+          [ ubuntu-jammy, ubuntu-focal, ubuntu-bionic, debian-bullseye, debian-sid ]
         include:
           - os: ubuntu-jammy
             distro: ubuntu
