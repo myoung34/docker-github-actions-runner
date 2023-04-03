@@ -10,7 +10,6 @@ ARG TARGETARCH
 ENV DOTNET_GENERATE_ASPNET_CERTIFICATE=false
 ENV DOTNET_NOLOGO=true
 ENV NUGET_XMLDOC_MODE=skip
-ARG PREPARED_FILE_VERSION
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8
@@ -19,7 +18,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=SC2086,DL3015,DL3008,DL3013
 WORKDIR /tmp/git-src
-COPY ./${TARGETARCH}_${PREPARED_FILE_VERSION}.env /tmp/${TARGETARCH}.env
+COPY ./variables/${TARGETARCH}_extra.env /tmp/${TARGETARCH}.env
 RUN source /tmp/${TARGETARCH}.env \
   && echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && mkdir -p ${NUGET_PACKAGES} /usr/share/pwsh \

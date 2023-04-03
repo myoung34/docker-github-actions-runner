@@ -61,10 +61,6 @@ inputs:
   image_list:
     description: 'image_list'
     required: true
-# outputs:
-#   random-number:
-#     description: "Random number"
-#     value: ${{ steps.random-number-generator.outputs.random-number }}
 runs:
   using: "composite"
   steps:
@@ -115,7 +111,6 @@ runs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
         build-args: |
-          PREPARED_FILE_VERSION=${{ github.run_id }}
           BUILD_IMAGE=${{ inputs.base_build_image }}
           CHOWN_USER=${{ inputs.chown_user }}
           LSB_RELEASE_CODENAME=${{ inputs.matrix_docker_codename }}
@@ -127,6 +122,3 @@ runs:
         platforms: ${{ inputs.platforms }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
-# BASE_IMAGE
-# DISTRO_VERSION
-# GH_RUNNER_VERSION

@@ -64,8 +64,6 @@ jobs:
       AGENT_TOOLS_DIRECTORY: ${{ vars.AGENT_TOOLS_DIRECTORY }}
       GH_RUNNER_VERSION: ${{ vars.GH_RUNNER_VERSION }}
       CHOWN_USER: ${{ vars.CHOWN_USER }}
-      #   BASE_IMAGE_NAME: ${{ format ('{0}-{1}:{2}-{3}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX, matrix.os) }}
-      #   RELEASE_IMAGE_NAME: ${{ format ('{0}', vars.IMAGE_NAME) }}
       BASE_IMAGE_NAME: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
       RELEASE_IMAGE_NAME: ${{ format ('{0}-{1}', vars.IMAGE_NAME, vars.BASE_IMAGE_SUFFIX) }}
       BASE_BUILD_IMAGE: ${{ format('{0}:{1}', matrix.distro, matrix.codename) }}
@@ -73,13 +71,12 @@ jobs:
       REVISION: ${{ github.RUN_NUMBER }}.${{ github.RUN_ATTEMPT }}
       FULL_TAG: ${{ format('{0}-{1}-{2}.{3}', vars.IMAGE_TAG_PREFIX, matrix.os, github.RUN_NUMBER, github.RUN_ATTEMPT) }}
       REPOSITORY_OWNER: ${{ github.repository_owner }}
-      #DOCKER_FILE: ${{ format('Dockerfile.{0}', vars.IMAGE_TAG_PREFIX) }}
       DOCKER_FILE: ${{ format('Dockerfile.{0}-{1}', vars.BASE_IMAGE_SUFFIX, vars.IMAGE_TAG_PREFIX) }}
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
 
-      - name: Run ${{ env.RELEASE_IMAGE_NAME }} BUILD
+      - name: BUILD ${{ env.RELEASE_IMAGE_NAME }}
         if: ${{ env.RELEASE_IMAGE_NAME != '-' }}
         uses: ./.github/actions/build-docker
         with:
