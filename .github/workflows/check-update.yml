@@ -2,9 +2,11 @@ name: "Check for updates"
 run-name: "Check for updates by @${{ github.ACTOR }}"
 on:
   workflow_dispatch:
-#  push:
-#    paths:
-#      - .github/workflows/check-update.yml
+  push:
+    paths:
+      - .github/workflows/check-update.yml
+      - .github/actions/process-urls/action.yml
+      - .github/helpers/process-urls.ps1
 #  schedule:
 #    - cron: "0 * * * *"
 
