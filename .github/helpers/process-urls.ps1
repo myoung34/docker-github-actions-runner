@@ -327,7 +327,7 @@ try {
     # Create ordered list of keys
     # Because magic word ordered seems not working
     $OrderedList = $JsonOutput.GetEnumerator() | ForEach-Object { $_.Key } | Sort-Object
-    $OrderedList
+    # $OrderedList
 
     # Ok now write files
     # Add to env file depend architecture
@@ -414,8 +414,8 @@ try {
     else {
         Write-Output "files_changed=0"
     }
-    Write-Output ('gh_runner_new_version={0}' -f $GhRunnerVersion)
-    Write-Output('log_version={0}' -f $LogVersionVerdict.ToString())
+    Write-Output ("gh_runner_new_version='{0}'" -f $GhRunnerVersion)
+    Write-Output('log_version=''{0}''' -f $LogVersionVerdict.ToString())
     exit 0
 }
 catch {
