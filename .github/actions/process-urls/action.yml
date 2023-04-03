@@ -54,6 +54,7 @@ runs:
         LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
       shell: pwsh
       run: |
+        $CurrentBranch = (git branch --no-color --no-column --show-current)
         git pull
         $Listed = (git branch -ar --no-color --no-column --list '*update/deps-*')
         Write-Host $Listed
