@@ -37,10 +37,6 @@ runs:
     - name: Check deps for update
       id: run-check-for-updates
       shell: pwsh
-      # return env.FILES_CHANGED, env.NEW_VERSION
-      # outputs:
-      #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
-      #   files_changed: ${{ steps.run-check-for-updates.outputs.files_changed }}
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         CONFIG_FILE: ${{ inputs.config_file }}
@@ -57,9 +53,6 @@ runs:
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
         LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
       shell: pwsh
-      # outputs:
-      #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
-      #   update_counter: ${{ steps.run-check-for-updates.outputs.update_counter }}
       run: |
         git pull
         $Listed = (git branch -ar --no-color --no-column --list '*update/deps-*')
@@ -83,31 +76,6 @@ runs:
           Write-Output($Body) | Out-File pr.txt
           gh pr create --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
         }
-#        date > generated.txt
-  #        git config user.name github-actions
-  #        git config user.email github-actions@github.com
-  #        git pull
-  #        git branch -ar --no-color --no-column --list '*update/deps-*'
-  #        NUMBER=$(git branch -ar --no-color --no-column --list '*update/deps-*' | sed "s/[^0-9]//g" | sort -r | head -1)
-  #        echo $NUMBER
-  #        NUMBER=$(($NUMBER + 1))
-  #        BRANCH_NAME="update/deps-$NUMBER"
-  #        git checkout -b $BRANCH_NAME
-  #        git add .
-  #        git commit -m "Dependencies auto update"
-  #        git push --set-upstream origin $BRANCH_NAME
-  #        DEFAULT_BRANCH=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-  #        (echo $NUMBER | sed "s/;/\n/g") > gh pr create --label 'ci/di' --assignee @me --base "$DEFAULT_BRANCH" --title "Update deps #$NUMBER" --body-file -
-
-
-#    - name: GitHub runner version was updated
-#      if: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version != inputs.gh_version }}
-#      env:
-#        GITHUB_TOKEN: ${{ inputs.gh_token }}
-#        GH_RUNNER_NEW_VERSION: ${{ steps.commit-if-updated.outputs.gh_runner_new_version }}
-#      shell: bash
-#      run: |
-#        gh variable set GH_RUNNER_VERSION -b ${{ env.GH_RUNNER_NEW_VERSION }} -R ${{ github.repository }}
 
     - name: Dependencies was updated
       id: prepare-for-output
@@ -120,6 +88,3 @@ runs:
       run: |
         $NewVersion = (([string]::IsNullOrWhitespace($env:NEW_VERSION)) ? $env:CURRENT_VERSION : $env:NEW_VERSION)
         Write-Output "version=$NewVersion" >> $env:GITHUB_OUTPUT
-#        Write-Output "counter=$Counter" >> $env:GITHUB_OUTPUT
-#        gh variable set DEPS_UPDATE_COUNTER -b $Counter -R '${{ github.repository }}'
-#        gh variable set GH_RUNNER_VERSION -b "$NewVersion" -R '${{ github.repository }}'

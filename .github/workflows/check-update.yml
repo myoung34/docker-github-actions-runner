@@ -7,8 +7,8 @@ on:
       - .github/workflows/check-update.yml
       - .github/actions/process-urls/action.yml
       - .github/helpers/process-urls.ps1
-#  schedule:
-#    - cron: "0 * * * *"
+  schedule:
+    - cron: "0 * * * *"
 
 concurrency:
   group: check-update
@@ -41,22 +41,3 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           gh_version: ${{ env.GH_RUNNER_VERSION }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
-
-#      - name: Process URLs
-#        if: ${{ always() && steps.process-urls.outputs.counter > env.DEPS_UPDATE_COUNTER }}
-#        env:
-#          COUNTER: ${{ steps.process-urls.outputs.counter }}
-#          VERSION: ${{ steps.process-urls.outputs.version }}
-#          GH_TOKEN: ${{ github.token }}
-#        shell: pwsh
-#        run: |
-#          if ( (![string]::IsNullOrWhitespace("$env:VERSION"))) {
-#            gh variable set GH_RUNNER_VERSION -b "$env:VERSION" -R '${{ github.repository }}'
-#          }
-#          gh variable set DEPS_UPDATE_COUNTER -b "$env:COUNTER" -R '${{ github.repository }}'
-#          platforms: 'linux/amd64,linux/arm64'
-#          gh_version: ${{ env.GH_RUNNER_VERSION }}
-#          deps_update_counter: ${{ env.DEPS_UPDATE_COUNTER }}
-#          gh_token: ${{ secrets.GITHUB_TOKEN }}
-
-#EOF
