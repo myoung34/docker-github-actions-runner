@@ -19,16 +19,10 @@ inputs:
   gh_version:
     description: 'Version of GitHub Action Runner'
     required: true
-  deps_update_counter:
-    description: 'Dependencies update counter for commits new branch'
-    required: true
   gh_token:
     description: 'Secret token of GitHub account'
     required: true
 outputs:
-    counter:
-      description: "Updated counter"
-      value: ${{ steps.prepare-for-output.outputs.counter }}
     version:
       description: "Latest version of GitHub Action Runner"
       value: ${{ steps.prepare-for-output.outputs.version }}
@@ -55,10 +49,10 @@ runs:
       if: ${{ success() && steps.run-check-for-updates.outputs.files_changed == 1 }}
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
-        UPDATE_COUNTER: ${{ inputs.deps_update_counter }}
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
         BRANCH_NAME: update/deps-${{ inputs.deps_update_counter }}
         LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
+        UPDATE_COUNTER: ${{ steps.run-check-for-updates.outputs.last_number }}
       shell: bash
       # outputs:
       #   gh_runner_new_version: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
@@ -89,14 +83,12 @@ runs:
       if: ${{ always() && steps.run-check-for-updates.outputs.files_changed == 1 }}
       env:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
-        UPDATE_COUNTER: ${{ inputs.deps_update_counter }}
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
         CURRENT_VERSION: ${{ inputs.gh_version }}
       shell: pwsh
       run: |
-        $Counter = $env:UPDATE_COUNTER + 1
         $NewVersion = (([string]::IsNullOrWhitespace($env:NEW_VERSION)) ? $env:CURRENT_VERSION : $env:NEW_VERSION)
         Write-Output "version=$NewVersion" >> $env:GITHUB_OUTPUT
-        Write-Output "counter=$Counter" >> $env:GITHUB_OUTPUT
+#        Write-Output "counter=$Counter" >> $env:GITHUB_OUTPUT
 #        gh variable set DEPS_UPDATE_COUNTER -b $Counter -R '${{ github.repository }}'
 #        gh variable set GH_RUNNER_VERSION -b "$NewVersion" -R '${{ github.repository }}'

@@ -28,7 +28,6 @@ jobs:
       PLATFORMS: 'amd64,arm64'
       ENV_PATH: './variables'
       CONFIG_FILE: './.github/url-list.json'
-      DEPS_UPDATE_COUNTER: ${{ vars.DEPS_UPDATE_COUNTER }}
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@v3
@@ -41,7 +40,6 @@ jobs:
           output_prefix: ${{ env.ENV_PATH }}
           platforms: ${{ env.PLATFORMS }}
           gh_version: ${{ env.GH_RUNNER_VERSION }}
-          deps_update_counter: ${{ env.DEPS_UPDATE_COUNTER }}
           gh_token: ${{ secrets.GITHUB_TOKEN }}
 
 #      - name: Process URLs
