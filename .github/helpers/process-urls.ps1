@@ -360,16 +360,10 @@ try {
 
         # Find number for a next update branch
         $LastNumber = git branch -ar --list *update/deps-* | Foreach-Object {
-            if ([string]::IsNullOrWhiteSpace($_) -or !($_.Contains('/'))) {
-                continue
-            }
-
-            $Parted = ($_ -split '/')
-            $LastPart = $Parted[$Parted.lenght - 1] 
-            $LastPart.SubString($LastPart.LastIndexOf('-') + 1) -as [int]
+        ($_ -replace '[^\d]', '') -as [int]
         } | Sort-Object -Descending | Select-Object -Index 0
 
-        if (($null -ne $LastNumber) && ($LastNumber -is [int])) {
+        if ($LastNumber -is [int]) {
             $LastNumber++
             Write-Output('last_number={0}' -f $LastNumber)
         }
