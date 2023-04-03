@@ -68,14 +68,13 @@ runs:
         git checkout -b $BranchName
         git add .
         $Body = ('{0}' -f ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
-        git commit -m @"
-        $Body
-        "@
+        Write-Output($Body) | Out-File pr.txt
+        git commit --file=pr.txt
         git push --set-upstream origin $BranchName
         if ($?) {
           $DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-          Write-Output($Body) | Out-File pr.txt
-          gh pr create --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
+          
+          gh pr create --head $CurrentBranch --label 'ci/di' --title "Update deps #$($LastBranchNumber)" -F pr.txt
         }
 
     - name: Dependencies was updated
