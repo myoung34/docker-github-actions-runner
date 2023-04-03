@@ -405,7 +405,9 @@ try {
         foreach ($Element in $AppList.Keys) {
             $AppList[$Element].version = $JsonOutput.$Element.version
         }
-        $AppList | Sort-Object | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
+        #$AppList | Sort-Object | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
+        # Left order as is
+        $AppList | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
     }
 
     if ($FilesWasChanged) {
