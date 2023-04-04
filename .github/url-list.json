@@ -79,7 +79,6 @@
     "amd64": "x64",
     "archive": "tar.gz",
     "url": "https://github.com/PowerShell/PowerShell/releases",
-    "version": "7.3.3"
+    "version": "7.3.0"
   }
 }
-
