@@ -68,9 +68,6 @@ jobs:
             distro: debian
             distro-version: 11
     steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@v3
-
       - name: Set version by default
         shell: pwsh
         run: |
@@ -87,7 +84,15 @@ jobs:
           {
             Write-Output 'DOCKERFILE=${{ matrix.dockerfile }}' >> $env:GITHUB_ENV
           }
-
+      - name: Copy Repo Files
+        uses: actions/checkout@v3
+      
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
@@ -125,7 +130,7 @@ jobs:
         run: |
           docker build --build-arg BASE_IMAGE=${{ github.DOCKER_USER }}/${{ env.BASE_BUILD_IMAGE }} --build-arg CHOWN_USER=${{ vars.CHOWN_USER }} \
           --build-arg DISTRO=${{ matrix.distro }} --build-arg DISTRO_VERSION=${{ matrix.distro-version }} --build-arg GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }} \
-          -t ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
+          --platform linux/amd64 --tag ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
         
       - name: Container test
         run: snyk container test --print-deps ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
