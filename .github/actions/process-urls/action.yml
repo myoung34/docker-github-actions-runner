@@ -67,7 +67,8 @@ runs:
         $BranchName = "update/deps-$($LastBranchNumber)"
         git checkout -b $BranchName
         git add .
-        $Body = ('list of updates:{0}{1}' -f "\n", ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
+        $Body = "list of updates:`n"
+        $Body = $Body + ('{0}' -f ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
         Write-Output($Body) | Out-File pr.txt
         git commit --file=pr.txt
         git push --set-upstream origin $BranchName
