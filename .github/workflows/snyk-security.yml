@@ -129,23 +129,23 @@ jobs:
         # Build the docker image for testing
       - name: Build a Docker image
         run: |
-          docker build --build-arg BASE_IMAGE=${{ github.DOCKER_USER }}/${{ env.BASE_BUILD_IMAGE }} --build-arg CHOWN_USER=${{ vars.CHOWN_USER }} \
+          docker build --build-arg BASE_IMAGE=${{ secrets.DOCKER_USER }}/${{ env.BASE_BUILD_IMAGE }} --build-arg CHOWN_USER=${{ vars.CHOWN_USER }} \
           --build-arg DISTRO=${{ matrix.distro }} --build-arg DISTRO_VERSION=${{ matrix.distro-version }} --build-arg GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }} \
-          --platform linux/amd64 --tag ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
+          --platform linux/amd64 --tag ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
         
       - name: Container test
-        run: snyk container test --print-deps ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
+        run: snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
 
       - name: Container test
-        run: snyk container test --print-deps ghcr.io/${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
+        run: snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
-        run: snyk container monitor ${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
+        run: snyk container monitor ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
-        run: snyk container monitor ghcr.io/${{ github.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
+        run: snyk container monitor ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
         # Push the Snyk Code results into GitHub Code Scanning tab
       - name: Upload result to GitHub Code Scanning
