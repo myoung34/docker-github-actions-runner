@@ -8,7 +8,7 @@
     "amd64": "x86_64",
     "url": "https://github.com/aws/aws-cli/",
     "url-src": "https://awscli.amazonaws.com/awscli-exe-linux-{REPLACE}.zip",
-    "version": "2.11.9"
+    "version": "2.11.8"
   },
   "docker": {
     "process": "release",
