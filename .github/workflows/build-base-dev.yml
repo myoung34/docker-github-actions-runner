@@ -4,6 +4,7 @@ run-name: "Build DEV-BASE ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:
+    branches: dev
     paths:
       - Dockerfile*
       - .github/workflows/build-base-dev.yml
