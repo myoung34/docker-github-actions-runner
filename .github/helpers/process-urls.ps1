@@ -347,7 +347,7 @@ try {
             [void]$NewContent.Append('_URL=')
             [void]$NewContent.Append($Url)
             [void]$NewContent.Append("`n")
-            
+
             # NAME_VERSION=VERSION
             [void]$NewContent.Append($CleanedName)
             [void]$NewContent.Append('_VERSION=')
@@ -358,6 +358,7 @@ try {
         $Filename = ('{0}_{1}.env' -f $Item, 'extra')
         $Filename = (Join-Path -Path $WorkDir -ChildPath $Filename)
         Write-Information ("Trying to write file: {0}, Key: {1}" -f $Filename, $Item)
+        Write-Host ("Trying to write file: {0}, Key: {1}" -f $Filename, $Item) -Foreground Blue
         #        $JsonOutput.GetEnumerator() | ForEach-Object {
         #            #$_ | Get-Member | Out-Host -Paging
         #            $CleanVar = $_.Value.CleanVar
@@ -373,14 +374,17 @@ try {
         # if ($IsNull) {
         #     continue
         # }
+        $TempFile = New-TemporaryFile
+        Add-Content -Path $TempFile -Value ($NewContent.ToString() -replace "`r", "") -Encoding ascii -NoNewline
 
         if (Test-Path -Path $Filename -PathType Leaf) {
             $OldContent = (Get-Content -Path $Filename)
             $IsNull = ([string]::IsNullOrWhiteSpace($OldContent))
             if (!$IsNull) {
-                $FilesCompare = (Compare-Object -ReferenceObject $NewContent.ToString() -DifferenceObject $OldContent  `
-                    | Measure-Object).Count
-
+                $FilesCompare = ((Get-FileHash $TempFile).Hash -eq (Get-FileHash $Filename).Hash)
+                $Msg = ("Compare: {0}" -f $FilesCompare)
+                Write-Information $Msg
+                Write-Host $Msg -Foreground Blue
                 if ($FilesCompare -eq 0) {
                     # Nothing to do here
                     continue
@@ -389,7 +393,7 @@ try {
             # Delete old file
             Remove-Item -Path $Filename -Force -Verbose
         }
-        Add-Content -Path $Filename -Value $NewContent.ToString() -Encoding ascii -NoNewline
+        Copy-Item $TempFile $Filename -Force
 
         $FilesWasChanged = $true
     }
@@ -398,7 +402,7 @@ try {
     if ($IsDebug) {
         # $Filename = ('{0}.json' -f $UniqueId)
         $Filename = (Join-Path -Path $WorkDir -ChildPath 'url-updated.json')
-        $JsonOutput | Sort-Object  | ConvertTo-Json -Depth 5 | Out-File -Path $Filename
+        $JsonOutput | Sort-Object  | ConvertTo-Json -Depth 5 | Out-String | Foreach-Object { $_ -replace "`r", "" } | Out-File -Path $Filename
     }
 
     # We need to update JSON
@@ -411,7 +415,7 @@ try {
         }
         #$AppList | Sort-Object | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
         # Left order as is
-        $AppList | ConvertTo-Json -Depth 5 | Out-File -Path $JsonFile
+        $AppList | ConvertTo-Json -Depth 5 | Out-String | Foreach-Object { $_ -replace "`r", "" } | Out-File -Path $JsonFile
     }
 
     if ($FilesWasChanged) {
