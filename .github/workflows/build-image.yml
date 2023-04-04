@@ -3,6 +3,7 @@ run-name: "Build image ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:
+    branches: dotnet
     paths:
       - "build-image.yml"
       - "Dockerfile"
