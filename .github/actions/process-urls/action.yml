@@ -33,7 +33,7 @@ runs:
       uses: actions/checkout@v3
       with:
         ref: ${{ github.ref }}
-    
+
     - name: Check deps for update
       id: run-check-for-updates
       shell: pwsh
@@ -67,14 +67,14 @@ runs:
         $BranchName = "update/deps-$($LastBranchNumber)"
         git checkout -b $BranchName
         git add .
-        $Body = ('{0}' -f ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
+        $Body = ('list of updates:{0}{1}' -f "\n", ($env:LOG_VERSION -replace ';', "`n")) -replace "'", ''
         Write-Output($Body) | Out-File pr.txt
         git commit --file=pr.txt
         git push --set-upstream origin $BranchName
         if ($?) {
-          $BranchName = ('/refs/heads/{0}' -f $BranchName)
-          $CurrentBranch = ('/refs/heads/{0}' -f $CurrentBranch)
-          gh pr create --head "$BranchName" --base "$CurrentBranch" --label 'ci/di' --title "Update deps" -F pr.txt --repo ${{ github.repository }}
+          $BranchName = ('{0}' -f $BranchName)
+          $CurrentBranch = ('{0}' -f $CurrentBranch)
+          gh pr create --head "$BranchName" --base "$CurrentBranch" --label 'ci/cd' --title "Update deps" -F pr.txt --repo ${{ github.repository }}
         }
         Remove-Item -Force pr.txt
 #          $DefaultBranch=(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
