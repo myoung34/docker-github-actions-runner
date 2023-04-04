@@ -43,7 +43,7 @@ runs:
         OUTPUT_PREFIX: ${{ inputs.output_prefix }}
         PLATFORMS: ${{ inputs.platforms }}
       run: |
-        ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.OUTPUT_PREFIX }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Output($_) >> $Env:GITHUB_OUTPUT }
+        ./.github/helpers/process-urls.ps1 -JsonFile ${{ env.CONFIG_FILE }} -OutputPrefix ${{ env.OUTPUT_PREFIX }} -Platforms ${{ env.PLATFORMS }} | %{ Write-Host $_ Write-Output($_) >> $Env:GITHUB_OUTPUT }
 
     - name: Commit if updated
       id: commit-if-updated
@@ -52,6 +52,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
         NEW_VERSION: ${{ steps.run-check-for-updates.outputs.gh_runner_new_version }}
         LOG_VERSION: ${{ steps.run-check-for-updates.outputs.log_version }}
+        FILES_CHANGED: ${{ steps.run-check-for-updates.outputs.files_changed }}
       shell: pwsh
       run: |
         $CurrentBranch = (git branch --no-color --no-column --show-current)
