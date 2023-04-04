@@ -21,7 +21,7 @@ WORKDIR /tmp/git-src
 COPY ./variables/${TARGETARCH}_extra.env /tmp/${TARGETARCH}.env
 RUN source /tmp/${TARGETARCH}.env \
   && echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
-  && mkdir -p ${NUGET_PACKAGES} /usr/share/pwsh \
+  && mkdir -p ${NUGET_PACKAGES} /usr/share/pwsh /root/share \
   && (echo "export DOTNET_ROOT=/usr/share/dotnet" >> /etc/profile )  \
   && (echo "export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/shared" >> /etc/profile ) \
   && apt-get update -qq \
@@ -66,10 +66,11 @@ RUN source /tmp/${TARGETARCH}.env \
   && apt-get upgrade -yqq \
   && wget -qO- "$DOTNET_URL" | bash /dev/stdin --version "$DOTNET_VERSION" --install-dir /usr/share/dotnet \
   && (wget -qO- "$PWSH_URL" | tar xz -C /usr/share/pwsh) \
-  && git clone "$GIT_URL" /tmp/git-src \
-  && make prefix=/usr all \
+  && git clone "$GIT_URL" /tmp/git-src
+
+RUN export PREFIX=/usr && export BINDIR=/usr/bin && make prefix=/usr all doc info \
   && apt-get remove -y git git-man \
-  && checkinstall --install=yes --type=debian --pkgname=git --pkgversion="$GIT_VERSION" --pkgarch="${TARGETARCH}" --pkgrelease="docker" --pkglicense='GPL' --pkgsource=/usr/src --pakdir=/deb --maintainer='derskythe@localhost' --provides='git-completion,git-core' --pkggroup=vcs --gzman --nodoc --strip=1 --backup=0 --showinstall=0 --default --deldoc --exclude=INSTALL --exclude=COPYING --exclude=README.md --reset-uids \
+  && checkinstall --install=no --fstrans=yes --type=debian --pkgname=git --pkgversion="$GIT_VERSION" --pkgarch="${TARGETARCH}" --pkgrelease="docker" --pkglicense='GPL' --pkgsource=/usr/src --pakdir=/deb --maintainer='derskythe@localhost' --provides='git-completion,git-core' --pkggroup=vcs --gzman --nodoc --strip=1 --backup=0 --showinstall=0 --default --deldoc --dpkgflags --exclude=INSTALL --exclude=COPYING --exclude=README.md --reset-uids \
   && ln -s /usr/share/pwsh/pwsh /usr/bin/pwsh \
   && rm -rf /var/lib/apt/lists/*
 # RUN cat /tmp/${TARGETARCH}.env && source /tmp/${TARGETARCH}.env && echo "$DOTNET_URL" && echo "$DOTNET_VERSION" && wget -qO- "$DOTNET_URL" | bash /dev/stdin --version "$DOTNET_VERSION" --install-dir /usr/share/dotnet

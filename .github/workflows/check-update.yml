@@ -1,5 +1,5 @@
 name: "Check for updates"
-run-name: "Check for updates by @${{ github.ACTOR }}"
+run-name: "Check for updates ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:

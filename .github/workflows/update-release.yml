@@ -1,5 +1,5 @@
 name: "RELEASE update"
-run-name: "Update release ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+run-name: "Update release ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   release:
     types: [released]

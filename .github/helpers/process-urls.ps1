@@ -299,10 +299,10 @@ try {
 
         # Add to env file depend architecture
         # $CleanedName = (CleanVar $Element)
-        $Combined = @{ }
-        foreach ($Item in $Files.Keys) {
-            # $ModKey = "url-$( $Item )"
-            $Combined.$Item = $CurrentProcess.$ModKey
+#        $Combined = @{ }
+#        foreach ($Item in $Files.Keys) {
+#            $ModKey = "url-$( $Item )"
+#            $Combined.$Item = $CurrentProcess.$ModKey
             # @{
             #     Url    = $CurrentProcess.$ModKey
             #     ModKey = $ModKey
@@ -311,9 +311,9 @@ try {
             #            $KeyVersion = ('{0}_VERSION' -f $CleanedName)
             #            $Files.$Item.Add($KeyUrl, $CurrentProcess.$ModKey)
             #            $Files.$Item.Add($KeyVersion, $CurrentProcess.version)
-        }
+#        }
         # $CurrentProcess.cleanVar = $CleanedName
-        $CurrentProcess.combined = $Combined
+#        $CurrentProcess.combined = $Combined
         # Output JSON
         $JsonOutput += [ordered]@{
             $Element = $CurrentProcess
@@ -339,7 +339,8 @@ try {
             $CleanedName = (CleanVar $Key)
 
             $Version = $JsonOutput.$Key.version
-            $Url = $JsonOutput.$Key.combined.$Item
+            $ModKey = "url-$( $Item )"
+            $Url = $JsonOutput.$Key.$ModKey
 
             # NAME_URL=URL
             [void]$NewContent.Append($CleanedName)
