@@ -1,6 +1,6 @@
 name: "DEV BASE build"
-run-name: "DEV BASE build to ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
-# TODO: MUST BE RANMED TO BUILD IN FUTURE!
+run-name: "Build DEV-BASE ${{ github.ref_name }} by ${{ github.event_name }}"
+# TODO: MUST BE RENAMED TO BUILD IN FUTURE!
 on:
   workflow_dispatch:
   push:

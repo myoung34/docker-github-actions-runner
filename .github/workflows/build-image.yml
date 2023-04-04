@@ -1,5 +1,5 @@
-name: "Create containers and deploy"
-run-name: "Build image ${{ inputs.DEPLOY_TARGET }} by @${{ github.ACTOR }}"
+name: "Build and deploy"
+run-name: "Build image ${{ github.ref_name }} by ${{ github.event_name }}"
 on:
   workflow_dispatch:
   push:
