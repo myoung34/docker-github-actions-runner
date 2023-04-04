@@ -138,22 +138,30 @@ jobs:
       - name: Container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_REGISTRY_USERNAME: ${{ secrets.DOCKER_USER }}
+          SNYK_REGISTRY_PASSWORD: ${{ secrets.DOCKER_TOKEN }}
         run: snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
 
       - name: Container test
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_REGISTRY_USERNAME: ${{ secrets.DOCKER_USER }}
+          SNYK_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: snyk container test --print-deps ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_REGISTRY_USERNAME: ${{ secrets.DOCKER_USER }}
+          SNYK_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: snyk container monitor ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
         # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
       - name: Snyk Container monitor
         env:
+          SNYK_REGISTRY_USERNAME: ${{ secrets.DOCKER_USER }}
+          SNYK_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}          
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk container monitor ghcr.io/${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }}
 
