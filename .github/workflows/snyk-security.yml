@@ -19,6 +19,7 @@
 name: Snyk Security
 
 on:
+  workflow_dispatch:
   push:
     branches: ["dotnet"]
   pull_request:
