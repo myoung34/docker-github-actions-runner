@@ -126,12 +126,12 @@ jobs:
       - name: Snyk Code test
         run: snyk code test --sarif > snyk-code.sarif || true
 
-        # Build the docker image for testing
-      - name: Build a Docker image
-        run: |
-          docker build --build-arg BASE_IMAGE=${{ secrets.DOCKER_USER }}/${{ env.BASE_BUILD_IMAGE }} --build-arg CHOWN_USER=${{ vars.CHOWN_USER }} \
-          --build-arg DISTRO=${{ matrix.distro }} --build-arg DISTRO_VERSION=${{ matrix.distro-version }} --build-arg GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }} \
-          --platform linux/amd64 --tag ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
+#        # Build the docker image for testing
+#      - name: Build a Docker image
+#        run: |
+#          docker build --build-arg BASE_IMAGE=${{ secrets.DOCKER_USER }}/${{ env.BASE_BUILD_IMAGE }} --build-arg CHOWN_USER=${{ vars.CHOWN_USER }} \
+#          --build-arg DISTRO=${{ matrix.distro }} --build-arg DISTRO_VERSION=${{ matrix.distro-version }} --build-arg GH_RUNNER_VERSION=${{ vars.GH_RUNNER_VERSION }} \
+#          --platform linux/amd64 --tag ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
         
       - name: Container test
         run: snyk container test --print-deps ${{ secrets.DOCKER_USER }}/${{ env.RELEASE_IMAGE_NAME }} --file=${{ env.DOCKERFILE }} .
