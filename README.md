@@ -31,11 +31,6 @@ Also, some GitHub Actions Workflow features, like [Job Services](https://docs.gi
 
 Currently runners [do not support containerd](https://github.com/actions/runner/issues/1265)
 
-### Docker-Compose on ARM ###
-
-Please note `docker-compose` does not currently work on ARM ([see issue](https://github.com/docker/compose/issues/6831)) so it is not installed on ARM based builds here.
-A workaround exists, please see [here](https://github.com/myoung34/docker-github-actions-runner/issues/72#issuecomment-804723656)
-
 ## Docker Artifacts ##
 
 | Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
