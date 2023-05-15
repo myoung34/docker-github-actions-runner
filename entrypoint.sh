@@ -167,6 +167,12 @@ if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
+# Start docker service if needed (e.g. for docker-in-docker)
+if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
+  echo "Starting docker service"
+  service docker start
+fi
+
 # Container's command (CMD) execution as runner user
 
 
@@ -187,9 +193,4 @@ else
   else
     "$@"
   fi
-fi
-
-if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
-  echo "Starting docker service"
-  service docker start
 fi
