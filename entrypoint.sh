@@ -46,6 +46,7 @@ _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
+_START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -186,4 +187,9 @@ else
   else
     "$@"
   fi
+fi
+
+if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
+  echo "Starting docker service"
+  service docker start
 fi
