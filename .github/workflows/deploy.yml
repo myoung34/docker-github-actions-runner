@@ -20,10 +20,8 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
-      - name: Convert repo and org to lowercase
-        run: |
-          echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-          echo 'REPO='$(echo $(basename ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -48,7 +46,7 @@ jobs:
           file: Dockerfile
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner:latest,ghcr.io/${{ env.ORG }}/${{ env.REPO }}:latest
+          tags: ${{ env.ORG }}/github-runner:latest,ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -62,10 +60,8 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
-      - name: Convert repo and org to lowercase
-        run: |
-          echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-          echo 'REPO='$(echo $(basename ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -90,7 +86,7 @@ jobs:
           file: Dockerfile.ubuntu-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{env.ORG}}/github-runner:ubuntu-${{ matrix.release }},ghcr.io/${{ env.ORG }}/${{ env.REPO }}:ubuntu-${{ matrix.release }}
+          tags: ${{env.ORG}}/github-runner:ubuntu-${{ matrix.release }},ghcr.io/${{ github.repository }}:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -104,10 +100,8 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
-      - name: Convert repo and org to lowercase
-        run: |
-          echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-          echo 'REPO='$(echo $(basename ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
@@ -132,7 +126,7 @@ jobs:
           file: Dockerfile.debian-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner:debian-${{ matrix.release }},ghcr.io/${{ env.ORG }}/${{ env.REPO }}:debian-${{ matrix.release }}
+          tags: ${{ env.ORG }}/github-runner:debian-${{ matrix.release }},ghcr.io/${{ github.repository }}:debian-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
