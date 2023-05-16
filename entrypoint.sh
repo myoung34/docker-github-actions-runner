@@ -46,6 +46,7 @@ _LABELS=${LABELS:-default}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
+_START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -164,6 +165,12 @@ fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+fi
+
+# Start docker service if needed (e.g. for docker-in-docker)
+if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
+  echo "Starting docker service"
+  service docker start
 fi
 
 # Container's command (CMD) execution as runner user
