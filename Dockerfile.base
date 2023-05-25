@@ -45,6 +45,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
     dumb-init \
     nodejs \
     rsync \
+    libpq-dev \
     gosu \
   && DPKG_ARCH="$(dpkg --print-architecture)" \
   && LSB_RELEASE_CODENAME="$(lsb_release --codename | cut -f2)" \
