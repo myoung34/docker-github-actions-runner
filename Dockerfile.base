@@ -77,4 +77,5 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && useradd -mr -d /home/runner -u 1001 -g 121 runner \
   && usermod -aG sudo runner \
   && usermod -aG docker runner \
-  && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
+  && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
+  && ( [[ -f /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ]] && rm /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list || : )
