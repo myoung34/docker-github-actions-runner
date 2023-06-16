@@ -185,10 +185,10 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && /usr/bin/chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    /usr/bin/chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
+    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
-    /usr/bin/chown runner /opt/hostedtoolcache/
+    chown runner /opt/hostedtoolcache/
     /usr/sbin/gosu runner "$@"
   else
     "$@"
