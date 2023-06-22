@@ -13,8 +13,9 @@ ENV DEBIAN_FRONTEND=noninteractive
 # hadolint ignore=SC2086,DL3015,DL3008,DL3013,SC2015
 RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && apt-get update \
-  && apt-get install -y --no-install-recommends gnupg \
+  && apt-get install -y --no-install-recommends gnupg curl \
   && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
+  && curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash - \
   && apt-get update \
   && apt-get install -y --no-install-recommends \
     gnupg \
