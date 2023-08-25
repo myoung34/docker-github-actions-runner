@@ -170,7 +170,7 @@ fi
 # Start docker service if needed (e.g. for docker-in-docker)
 if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
-  service docker start
+  sudo service docker start
 fi
 
 # Container's command (CMD) execution as runner user
