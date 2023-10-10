@@ -20,7 +20,7 @@ We aim to foster a welcoming and inclusive environment for all contributors. Her
 
 ### Before Creating an Issue
 
-1. **Search Existing Issues**: Before creating a new issue, please [check if a similar issue already exists](https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-issues-and-pull-requests#search-by-the-title-body-or-comments). This helps in reducing duplicates and streamlining discussions.
+1. **Search Existing Issues**: Before creating a new issue, please [check if a similar issue already exists](https://github.com/myoung34/docker-github-actions-runner/issues). This helps in reducing duplicates and streamlining discussions.
 2. **Refer to the Wiki**: The [project's wiki](https://github.com/myoung34/docker-github-actions-runner/wiki) is a valuable resource. It might have the information or solution you're seeking.
 
 ## Contribute to the Wiki
