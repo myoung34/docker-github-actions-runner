@@ -1,17 +1,28 @@
-# Welcome to docker-github-actions-runner contributing guide <!-- omit in toc -->
+# Contributing to docker-github-actions-runner
 
-Welcome!
+Thank you for your interest in contributing to `docker-github-actions-runner`! This guide is designed to make your contribution experience smooth and effective. Let's work together to make this project even better!
 
-## Code of conduct
+## Table of Contents
+- [Code of Conduct](#code-of-conduct)
+- [Issues](#issues)
+  - [Before Creating an Issue](#before-creating-an-issue)
+- [Contribute to the Wiki](#contribute-to-the-wiki)
 
-Be kind, research before asking/contributing.
+## Code of Conduct
 
-Please remember that my time is limited and my resources are as well. Solving "nuances" will likely require external contributions but I'm happy to help and guide.
+We aim to foster a welcoming and inclusive environment for all contributors. Here are some guidelines to keep in mind:
 
-### Issues
+- **Be Respectful**: Treat everyone with kindness and respect. Avoid making assumptions or passing judgments.
+- **Do Your Research**: Before asking or contributing, take a moment to research. It's possible that your question or issue has already been addressed.
+- **Value Everyone's Time**: Please understand that the maintainers and contributors have other commitments. While we're always eager to help, addressing certain nuances might require external contributions. However, we're here to guide and assist you.
 
-#### Create a new issue
+## Issues
 
-If you spot an issue, [search if an issue already exists](https://docs.github.com/en/github/searching-for-information-on-github/searching-on-github/searching-issues-and-pull-requests#search-by-the-title-body-or-comments). If a related issue doesn't exist, you can open a new issue using a relevant issue.
+### Before Creating an Issue
 
-Also use [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki) and contribute to it
+1. **Search Existing Issues**: Before creating a new issue, please [check if a similar issue already exists](https://github.com/myoung34/docker-github-actions-runner/issues). This helps in reducing duplicates and streamlining discussions.
+2. **Refer to the Wiki**: The [project's wiki](https://github.com/myoung34/docker-github-actions-runner/wiki) is a valuable resource. It might have the information or solution you're seeking.
+
+## Contribute to the Wiki
+
+The [wiki](https://github.com/myoung34/docker-github-actions-runner/wiki) is a collaborative space for the community. You're encouraged to share knowledge, tips, and best practices related to `docker-github-actions-runner`. Your contributions can help others and enhance the overall quality of the wiki.
