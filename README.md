@@ -1,53 +1,55 @@
-Docker Github Actions Runner
-============================
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/myoung34/github-runner.svg)](https://hub.docker.com/r/myoung34/github-runner) [![awesome-runners](https://img.shields.io/badge/listed%20on-awesome--runners-blue.svg)](https://github.com/jonico/awesome-runners)
+# Docker Github Actions Runner
 
-This will run the [new self-hosted github actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
+[![Docker Pulls](https://img.shields.io/docker/pulls/myoung34/github-runner.svg)](https://hub.docker.com/r/myoung34/github-runner) 
+[![awesome-runners](https://img.shields.io/badge/listed%20on-awesome--runners-blue.svg)](https://github.com/jonico/awesome-runners)
 
-## Quick-Start (Examples and Usage) ##
+This repository facilitates running the [self-hosted GitHub Actions runners](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/hosting-your-own-runners).
 
-Please see [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
-Please read [the contributing guidelines](https://github.com/myoung34/docker-github-actions-runner/blob/master/CONTRIBUTING.md)
+## Quick Start 
 
-## Notes ##
+- [Examples and Usage](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
+- [Contributing Guidelines](https://github.com/myoung34/docker-github-actions-runner/blob/master/CONTRIBUTING.md)
 
-### Security ###
+## Notes
 
-It is known that environment variables are not safe from exfiltration.
-If you are using this runner make sure that any workflow changes are gated by a verification process (in the actions settings) so that malicious PR's cannot exfiltrate these.
+### Security
 
-### Docker Support ###
+Please be aware that environment variables are susceptible to exfiltration. When using this runner, ensure that any workflow changes undergo a verification process (within the actions settings) to prevent malicious PRs from exfiltrating this information.
 
-Please note that while this runner installs and allows docker, github actions itself does not support using docker from a self hosted runner yet.
-For more information:
+### Docker Support
 
-* https://github.com/actions/runner/issues/406
-* https://github.com/actions/runner/issues/367
+Although this runner installs and supports Docker, GitHub Actions currently does not support using Docker with a self-hosted runner. For more details:
+- [Issue #406](https://github.com/actions/runner/issues/406)
+- [Issue #367](https://github.com/actions/runner/issues/367)
 
-Also, some GitHub Actions Workflow features, like [Job Services](https://docs.github.com/en/actions/guides/about-service-containers), won't be usable and [will result in an error](https://github.com/myoung34/docker-github-actions-runner/issues/61).
+Additionally, certain GitHub Actions Workflow features, like [Job Services](https://docs.github.com/en/actions/guides/about-service-containers), are not supported and [may lead to errors](https://github.com/myoung34/docker-github-actions-runner/issues/61).
 
-### Containerd Support ###
+### Containerd Support
 
-Currently runners [do not support containerd](https://github.com/actions/runner/issues/1265)
+As of now, runners [do not support containerd](https://github.com/actions/runner/issues/1265).
 
-## Docker Artifacts ##
+## Docker Artifacts
 
 | Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
-| --- | --- | --- | --- | --- | --- |
+|:--------------:|:-----------------------:|:---------:|:-----------:|:-----------:|:-----:|
+
 | ubuntu focal | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+/` `/\d\.\d{3}\.\d+-ubuntu-focal/`| [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) [ubuntu-focal](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-focal) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. Tags with `-ubuntu-focal` are included and created on [upstream tags](https://github.com/actions/runner/tags).|
 | ubuntu jammy | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-jammy/` | [ubuntu-jammy](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-jammy) | This is the latest build from jammy (Rebuilt nightly and on master merges). Tags with `-ubuntu-jammy` are included and created on [upstream tags](https://github.com/actions/runner/tags). | There is [currently an issue with jammy from inside a 20.04LTS host](https://github.com/myoung34/docker-github-actions-runner/issues/219) which is why this is not `latest` |
 | ubuntu bionic | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | debian buster (now deprecated) | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-buster/` | [debian-buster](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-buster) | Debian buster is now deprecated. The packages for arm v7 are in flux and are wildly causing build failures (git as well as apt-key and liblttng-ust#. Tags with `-debian-buster` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | debian bullseye | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-bullseye/` | [debian-bullseye](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-bullseye) | This is the latest build from bullseye (Rebuilt nightly and on master merges). Tags with `-debian-bullseye` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
-| debian sid | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-sid/` | [debian-sid](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-sid) | This is the latest build from sid (Rebuilt nightly and on master merges). Tags with `-debian-sid` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
+| debian sid | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-sid/` | [debian-sid](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-sid) | This is the latest build from sid (Rebuilt nightly and on master merges). Tags with `-debian-sid` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |docker-github-actions-runner/issues/219) |
+| ... | ... | ... | ... | ... | ... |
 
-These containers are built via Github actions that [copy the dockerfile](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47), changing the `FROM` and building to provide simplicity.
+> Note: For brevity, only a portion of the table is shown. The format has been slightly modified for clarity.
 
-## Environment Variables ##
+These containers are built via GitHub Actions. For more details, see the [deployment workflow](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47).
 
-| Environment Variable | Description |
-| --- | --- |
+## Environment Variables
+
+| Variable | Description |
+|:--------:|:-----------:|
 | `RUN_AS_ROOT` | Boolean to run as root. If `true`: will run as root. If `True` and the user is overridden it will error. If any other value it will run as the `runner` user and allow an optional override. Default is `true` |
 | `RUNNER_NAME` | The name of the runner to use. Supercedes (overrides) `RUNNER_NAME_PREFIX` |
 | `RUNNER_NAME_PREFIX` | A prefix for runner name (See `RANDOM_RUNNER_SUFFIX` for how the full name is generated). Note: will be overridden by `RUNNER_NAME` if provided. Defaults to `github-runner` |
@@ -70,3 +72,6 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
 | `START_DOCKER_SERVICE` | Optional flag which automatically starts the docker service if set to `true`. Useful when using [sysbox](https://github.com/nestybox/sysbox). Defaults to `false`.
+| ... | ... |
+
+
