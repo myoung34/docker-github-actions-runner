@@ -33,14 +33,12 @@ As of now, runners [do not support containerd](https://github.com/actions/runner
 
 | Container Base | Supported Architectures | Tag Regex | Docker Tags | Description | Notes |
 |:--------------:|:-----------------------:|:---------:|:-----------:|:-----------:|:-----:|
-| ubuntu focal | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+/` `/\d\.\d{3}\.\d+-ubuntu-focal/`| [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest), [ubuntu-focal](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-focal) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. Tags with `-ubuntu-focal` are included and created on [upstream tags](https://github.com/actions/runner/tags).| |
+| ubuntu focal | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+/` `/\d\.\d{3}\.\d+-ubuntu-focal/`| [latest](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=latest) [ubuntu-focal](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-focal) | This is the latest build (Rebuilt nightly and on master merges). Tags without an OS name are included. Tags with `-ubuntu-focal` are included and created on [upstream tags](https://github.com/actions/runner/tags).|
 | ubuntu jammy | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-jammy/` | [ubuntu-jammy](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-jammy) | This is the latest build from jammy (Rebuilt nightly and on master merges). Tags with `-ubuntu-jammy` are included and created on [upstream tags](https://github.com/actions/runner/tags). | There is [currently an issue with jammy from inside a 20.04LTS host](https://github.com/myoung34/docker-github-actions-runner/issues/219) which is why this is not `latest` |
 | ubuntu bionic | `x86_64`,`arm64` | `/\d\.\d{3}\.\d+-ubuntu-bionic/` | [ubuntu-bionic](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=ubuntu-bionic) | This is the latest build from bionic (Rebuilt nightly and on master merges). Tags with `-ubuntu-bionic` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | debian buster (now deprecated) | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-buster/` | [debian-buster](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-buster) | Debian buster is now deprecated. The packages for arm v7 are in flux and are wildly causing build failures (git as well as apt-key and liblttng-ust#. Tags with `-debian-buster` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | debian bullseye | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-bullseye/` | [debian-bullseye](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-bullseye) | This is the latest build from bullseye (Rebuilt nightly and on master merges). Tags with `-debian-bullseye` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
 | debian sid | `x86_64`,`arm64` |  `/\d\.\d{3}\.\d+-debian-sid/` | [debian-sid](https://hub.docker.com/r/myoung34/github-runner/tags?page=1&name=debian-sid) | This is the latest build from sid (Rebuilt nightly and on master merges). Tags with `-debian-sid` are included and created on [upstream tags](https://github.com/actions/runner/tags). | |
-| ... | ... | ... | ... | ... | ... |
-
 
 
 These containers are built via GitHub Actions. For more details, see the [deployment workflow](https://github.com/myoung34/docker-github-actions-runner/blob/master/.github/workflows/deploy.yml#L47).
@@ -71,6 +69,5 @@ These containers are built via GitHub Actions. For more details, see the [deploy
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
 | `START_DOCKER_SERVICE` | Optional flag which automatically starts the docker service if set to `true`. Useful when using [sysbox](https://github.com/nestybox/sysbox). Defaults to `false`.
-| ... | ... |
 
 
