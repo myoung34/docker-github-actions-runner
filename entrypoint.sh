@@ -119,12 +119,12 @@ configure_runner() {
     echo "Disable auto update option is enabled"
     ARGS+=("--disableupdate")
   fi
-  
+
   if [ -n "${NO_DEFAULT_LABELS}" ]; then
     echo "Disable adding the default self-hosted, platform, and architecture labels"
     ARGS+=("--no-default-labels")
   fi
-  
+
   echo "Configuring"
   ./config.sh \
       --url "${_SHORT_URL}" \
