@@ -10,6 +10,6 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
       - uses: actions/setup-python@v5
-      - uses: pre-commit/action@v3.0.0
+      - uses: pre-commit/action@v3.0.1
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
