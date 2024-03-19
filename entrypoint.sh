@@ -177,6 +177,8 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
   _PREFIX=""
   [[ ${_RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
+  ## ilyaro: work arround issue with ulimit in docker 25 version https://github.com/docker/cli/issues/4807
+  sed 's#Hn#n#' /etc/init.d/docker > /etc/init.d/docker1; chmod +x /etc/init.d/docker1;mv /etc/init.d/docker1 /etc/init.d/docker
   ${_PREFIX} service docker start
 fi
 
