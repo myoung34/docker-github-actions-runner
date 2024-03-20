@@ -32,7 +32,7 @@ jobs:
           file: Dockerfile.base
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner-base:latest
+          tags: ${{ env.DOCKER_USER }}/github-runner-base:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -80,8 +80,8 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Get GitHub DOCKER_USERanization or user
+        run: echo 'DOCKER_USER='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
