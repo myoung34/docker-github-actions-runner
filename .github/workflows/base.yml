@@ -80,8 +80,8 @@ jobs:
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
-      - name: Get GitHub DOCKER_USERanization or user
-        run: echo 'DOCKER_USER='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Get GitHub Organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
