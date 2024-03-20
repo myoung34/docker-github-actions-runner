@@ -24,7 +24,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Update Dockerfile FROM org
-        run: sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:latest/" Dockerfile
+        run: sed -i.bak "s/FROM.*/FROM ${secrets.DOKER_USER}\/github-runner-base:latest/" Dockerfile
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -64,7 +64,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
+        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${secrets.DOCKER_USER}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
@@ -83,7 +83,7 @@ jobs:
           file: Dockerfile.ubuntu-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{env.ORG}}/github-runner:ubuntu-${{ matrix.release }},ghcr.io/${{ github.repository }}:ubuntu-${{ matrix.release }}
+          tags: ${{secrets.DOCKER_USER}}/github-runner:ubuntu-${{ matrix.release }},ghcr.io/${{ github.repository }}:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
