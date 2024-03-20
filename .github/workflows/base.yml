@@ -1,13 +1,12 @@
 name: GitHub Actions Runner in Docker - Base
 on:
-  push:
-    paths:
-      - Dockerfile.base
-      - .github/workflows/base.yml
-    branches:
-      - master
-      - develop
-
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'     
+        required: true
+        default: 'warning'
+      
 jobs:
   ubuntu_base_latest_deploy:
     runs-on: ubuntu-latest
