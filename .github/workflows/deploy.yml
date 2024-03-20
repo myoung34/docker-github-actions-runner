@@ -43,7 +43,7 @@ jobs:
           file: Dockerfile
           pull: true
           push: true
-          tags: ${{ secret.DOCKER_USER }}/github-runner:latest,ghcr.io/${{ github.repository }}:latest
+          tags: ${{ secrets.DOCKER_USER }}/github-runner:latest,ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -123,7 +123,7 @@ jobs:
           file: Dockerfile.debian-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{ secret.DOCKER_USER }}/github-runner:debian-${{ matrix.release }},ghcr.io/${{ github.repository }}:debian-${{ matrix.release }}
+          tags: ${{ secrets.DOCKER_USER }}/github-runner:debian-${{ matrix.release }},ghcr.io/${{ github.repository }}:debian-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
