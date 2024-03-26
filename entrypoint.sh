@@ -191,7 +191,7 @@ fi
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
     ## ilyaro: to set permissions to 777 to enable job container non root user to save files on mounted volumes   
-    ##umask 0000
+    umask 0000
     "$@"
   else
     echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
