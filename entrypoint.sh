@@ -180,6 +180,7 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   ## ilyaro: work arround issue with ulimit in docker 25 version https://github.com/docker/cli/issues/4807
   sed 's#Hn#n#' /etc/init.d/docker > /etc/init.d/docker1; chmod +x /etc/init.d/docker1;mv /etc/init.d/docker1 /etc/init.d/docker
   ## set GUID for /tmp, chmod +s /tmp
+  chmod -R 777 ${_RUNNER_WORKDIR}
   chmod -R +s ${_RUNNER_WORKDIR}
   ${_PREFIX} service docker start
 fi
@@ -190,7 +191,7 @@ fi
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
     ## ilyaro: to set permissions to 777 to enable job container non root user to save files on mounted volumes   
-    umask 0000
+    ##umask 0000
     "$@"
   else
     echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
