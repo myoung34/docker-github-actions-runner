@@ -179,9 +179,11 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   [[ ${_RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
   ## ilyaro: work arround issue with ulimit in docker 25 version https://github.com/docker/cli/issues/4807
   sed 's#Hn#n#' /etc/init.d/docker > /etc/init.d/docker1; chmod +x /etc/init.d/docker1;mv /etc/init.d/docker1 /etc/init.d/docker
-  ## set GUID for /tmp, chmod +s /tmp
+  ## set GUID for /tmp/work_dir, chmod +s /tmp/work_dir and /opt/hostedtoolcache both used in volumes dind
   chmod -R 777 ${_RUNNER_WORKDIR}
   chmod -R +s ${_RUNNER_WORKDIR}
+  chmod -R 777 /opt/hostedtoolcache
+  chmod -R +s /opt/hostedtoolcache
   ${_PREFIX} service docker start
 fi
 
