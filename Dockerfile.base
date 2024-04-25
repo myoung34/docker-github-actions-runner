@@ -82,6 +82,7 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && ( curl -s ${YQ_DOWNLOAD_URL} -L -o /tmp/yq.tar.gz && tar -xzf /tmp/yq.tar.gz -C /tmp && mv /tmp/yq_linux_${DPKG_ARCH} /usr/local/bin/yq) \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
+  && sed -i 's/ulimit -Hn/# ulimit -Hn/g' /etc/init.d/docker \
   && groupadd -g 121 runner \
   && useradd -mr -d /home/runner -u 1001 -g 121 runner \
   && usermod -aG sudo runner \
