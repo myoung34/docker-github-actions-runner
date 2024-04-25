@@ -11,8 +11,15 @@ export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
 
+trap_with_arg() {
+    func="$1" ; shift
+    for sig ; do
+        trap "$func $sig" "$sig"
+    done
+}
+
 deregister_runner() {
-  echo "Caught SIGTERM. Deregistering runner"
+  echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
@@ -168,8 +175,10 @@ if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
+
+
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  trap deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+  trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
 fi
 
 # Start docker service if needed (e.g. for docker-in-docker)
