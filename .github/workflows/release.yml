@@ -70,7 +70,7 @@ jobs:
     needs: create-release
     strategy:
       matrix:
-        release: [jammy, focal, bionic]
+        release: [jammy, focal, noble]
       fail-fast: false
     steps:
       - name: Copy Repo Files
