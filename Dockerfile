@@ -1,5 +1,6 @@
 # hadolint ignore=DL3007
-FROM myoung34/github-runner-base:latest
+FROM ghcr.io/ouroborosi/docker-github-actions-runner-base:ubuntu-focal
+LABEL org.opencontainers.image.source=https://github.com/Ouroborosi/docker-github-actions-runner
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache

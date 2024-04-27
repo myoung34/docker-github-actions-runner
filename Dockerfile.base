@@ -1,4 +1,5 @@
 FROM ubuntu:focal
+LABEL org.opencontainers.image.source=https://github.com/Ouroborosi/docker-github-actions-runner
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG DUMB_INIT_VERSION="1.2.2"
