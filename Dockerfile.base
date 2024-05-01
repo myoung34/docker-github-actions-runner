@@ -81,8 +81,8 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && YQ_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" https://api.github.com/repos/mikefarah/yq/releases/latest | jq ".assets[] | select(.name == \"yq_linux_${DPKG_ARCH}.tar.gz\")" | jq -r '.browser_download_url') \
   && ( curl -s ${YQ_DOWNLOAD_URL} -L -o /tmp/yq.tar.gz && tar -xzf /tmp/yq.tar.gz -C /tmp && mv /tmp/yq_linux_${DPKG_ARCH} /usr/local/bin/yq) \
   && PWSH_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" https://api.github.com/repos/PowerShell/PowerShell/releases/latest | jq -r '.tag_name' | sed 's/^v//g') \
-  && PWSH_DOUNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" https://api.github.com/repos/PowerShell/PowerShell/releases/latest | jq -r ".assets[] | select(.name == \"powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz\") | .browser_download_url") \
-  && curl -L -o /tmp/powershell.tar.gz $PWSH_DOUNLOAD_URL && sudo mkdir -p /opt/powershell && sudo tar zxf /tmp/powershell.tar.gz -C /opt/powershell \
+  && PWSH_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" https://api.github.com/repos/PowerShell/PowerShell/releases/latest | jq -r ".assets[] | select(.name == \"powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz\") | .browser_download_url") \
+  && curl -L -o /tmp/powershell.tar.gz $PWSH_DOWNLOAD_URL && sudo mkdir -p /opt/powershell && sudo tar zxf /tmp/powershell.tar.gz -C /opt/powershell \
   && sudo chmod +x /opt/powershell/pwsh && sudo ln -s /opt/powershell/pwsh /usr/bin/pwsh \
   && rm -rf /var/lib/apt/lists/* \
   && rm -rf /tmp/* \
