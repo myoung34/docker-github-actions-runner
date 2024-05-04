@@ -12,7 +12,7 @@ Please read [the contributing guidelines](https://github.com/myoung34/docker-git
 
 ## Notes ##
 
-### Security ###
+### Security ### 
 
 It is known that environment variables are not safe from exfiltration.
 If you are using this runner make sure that any workflow changes are gated by a verification process (in the actions settings) so that malicious PR's cannot exfiltrate these.
