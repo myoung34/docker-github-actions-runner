@@ -112,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: [bookworm, bullseye, sid]
+        release: [bookworm, sid]
       fail-fast: false
     needs: create-release
     steps:
