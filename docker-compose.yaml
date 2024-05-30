@@ -25,15 +25,15 @@ services:
       - github_docker_certs:/certs/client:ro
       - type: "bind"
         source: "/data/github_runner1"
-        target: "/runner"
+        target: "/actions-runner"
     environment:
       RUNNER_ORG: "LouisVuitton"
       ACCESS_TOKEN: "${RUNNER_CFG_PAT}"
       DOCKER_HOST: "tcp://docker:2376"
       DOCKER_CERT_PATH: "/certs/client"
       DOCKER_TLS_VERIFY: 0
-      RUNNER_NAME: "azure-vm-runner-1"
-      RUNNER_LABELS: "azure,vm,testing,compose-self-hosted"
+      RUNNER_NAME: "azure-docker-1"
+      RUNNER_LABELS: "azure,vm,testing,azure-prd"
       RUNNER_GROUP: "azure-vm"
     extra_hosts:
       - "api.github.com:140.82.121.6"
