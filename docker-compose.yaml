@@ -35,7 +35,6 @@ services:
       RUNNER_NAME: "azure-vm-runner-1"
       RUNNER_LABELS: "azure,vm,testing,compose-self-hosted"
       RUNNER_GROUP: "azure-vm"
-    command: "'rm -fR /runner/_*;entrypoint.sh'"
     extra_hosts:
       - "api.github.com:140.82.121.6"
       - "github.com:140.82.121.3"
@@ -55,7 +54,7 @@ services:
       - "harbor-prj.vuitton.net:10.55.16.110"
 
   docker:
-    image: harbor.vuitton.net/lvm/trmdind@sha256:a6827e7f344a2a62c7005da6733d5fb119ced3e3486d76f93cac0c44d1118f97
+    image: harbor.vuitton.net/lvm/trmdind:1.0
     restart: always
     privileged: true
     environment:
