@@ -13,12 +13,10 @@ volumes:
 
 services:
   runner1:
-    image: "harbor.vuitton.net/github/github-runner-base:withazurecli"
+    image: "harbor.vuitton.net/github/github-az-runner@sha256:812f45395bed1f1bc1c1abbc633bf39d195a1fa1fd6e55c670b2529cf414eb51"
     deploy:
       resources:
         limits:
-          cpus: '4'
-        reservations:
           cpus: '1'
     restart: always
     depends_on:
@@ -57,7 +55,7 @@ services:
       - "harbor-prj.vuitton.net:10.55.16.110"
 
   docker:
-    image: harbor.vuitton.net/lvm/trmdind:1.0
+    image: harbor.vuitton.net/lvm/trmdind@sha256:a6827e7f344a2a62c7005da6733d5fb119ced3e3486d76f93cac0c44d1118f97
     restart: always
     privileged: true
     environment:
