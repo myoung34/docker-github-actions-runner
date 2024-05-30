@@ -1,0 +1,67 @@
+FROM docker:dind
+
+RUN apk update --allow-untrusted && apk add ca-certificates
+
+ADD ["./daemon.json", "/etc/docker/daemon.json"]
+
+# add zscaler certificate
+ADD ["./cert/zscaler.cer", "/usr/local/share/ca-certificates/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "/usr/local/share/ca-certificates/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "/usr/local/share/ca-certificates/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "/usr/local/share/ca-certificates/vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "/usr/local/share/ca-certificates/harbor.vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/usr/local/share/ca-certificates/GeoTrustTLSRSACAG1.crt"]
+
+# add certif for signing docker image
+ADD ["./cert/zscaler.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/harbor.vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/etc/docker/certs.d/harbor-prj.vuitton.net/GeoTrustTLSRSACAG1.crt"]
+
+
+# add certif for signing docker image
+ADD ["./cert/zscaler.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/harbor.vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "~/.docker/tls/harbor-prj.vuitton.net:4443/GeoTrustTLSRSACAG1.crt"]
+ADD ["./cert/zscaler.cer", "~/.docker/tls/harbor-prj.vuitton.net/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "~/.docker/tls/harbor-prj.vuitton.net/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "~/.docker/tls/harbor-prj.vuitton.net/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "~/.docker/tls/harbor-prj.vuitton.net/vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "~/.docker/tls/harbor-prj.vuitton.net/GeoTrustTLSRSACAG1.crt"]
+ADD ["./cert/nexus.vuitton.net.cer", "~/.docker/tls/harbor-prj.vuitton.net/nexus.vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "~/.docker/tls/harbor-prj.vuitton.net/harbor.vuitton.net.crt"]
+
+# add certif for signing docker image
+ADD ["./cert/zscaler.cer", "/etc/docker/certs.d/harbor.vuitton.net/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "/etc/docker/certs.d/harbor.vuitton.net/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "/etc/docker/certs.d/harbor.vuitton.net/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "/etc/docker/certs.d/harbor.vuitton.net/vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "/etc/docker/certs.d/harbor.vuitton.net/harbor./vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/etc/docker/certs.d/harbor.vuitton.net/GeoTrustTLSRSACAG1.crt"]
+
+
+RUN update-ca-certificates --fresh
+
+RUN adduser -D github
+
+# add certif for signing docker image
+ADD ["./cert/zscaler.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/harbor.vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/home/github/.docker/tls/harbor.vuitton.net:4443/GeoTrustTLSRSACAG1.crt"]
+ADD ["./cert/zscaler.cer", "/home/github/.docker/tls/harbor.vuitton.net/ZscalerRootCertificate-2048-SHA256.crt"]
+ADD ["./cert/DigicertCA.cer", "/home/github/.docker/tls/harbor.vuitton.net/DigicertCA.crt"]
+ADD ["./cert/thawte.cer", "/home/github/.docker/tls/harbor.vuitton.net/thawte.crt"]
+ADD ["./cert/vuitton.net.cer", "/home/github/.docker/tls/harbor.vuitton.net/vuitton.net.crt"]
+ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/home/github/.docker/tls/harbor.vuitton.net/GeoTrustTLSRSACAG1.crt"]
+ADD ["./cert/nexus.vuitton.net.cer", "/home/github/.docker/tls/harbor.vuitton.net/nexus.vuitton.net.crt"]
+ADD ["./cert/harbor.vuitton.net.cer", "/home/github/.docker/tls/harbor.vuitton.net/harbor.vuitton.net.crt"]
+
+RUN mkdir /home/github/workdir
