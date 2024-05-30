@@ -1,7 +1,5 @@
 FROM docker:dind
 
-RUN apk update --allow-untrusted && apk add ca-certificates
-
 ADD ["./daemon.json", "/etc/docker/daemon.json"]
 
 # add zscaler certificate
@@ -46,7 +44,7 @@ ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/etc/docker/certs.d/harbor.vuitton.net/Ge
 
 RUN sed -i 's/https/http/g' /etc/apk/repositories && cat /etc/apk/repositories
 
-RUN update-ca-certificates --fresh
+RUN apk update --allow-untrusted && apk add ca-certificates && update-ca-certificates --fresh
 
 RUN adduser -D github
 
