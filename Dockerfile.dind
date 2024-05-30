@@ -44,6 +44,7 @@ ADD ["./cert/vuitton.net.cer", "/etc/docker/certs.d/harbor.vuitton.net/vuitton.n
 ADD ["./cert/harbor.vuitton.net.cer", "/etc/docker/certs.d/harbor.vuitton.net/harbor./vuitton.net.crt"]
 ADD ["./cert/GeoTrustTLSRSACAG1.cer", "/etc/docker/certs.d/harbor.vuitton.net/GeoTrustTLSRSACAG1.crt"]
 
+RUN sed -i 's/https/http/g' /etc/apk/repositories && cat /etc/apk/repositories
 
 RUN update-ca-certificates --fresh
 
