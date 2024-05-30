@@ -57,7 +57,7 @@ services:
       - "harbor-prj.vuitton.net:10.55.16.110"
 
   docker:
-    image: harbor-prj.vuitton.net/test/trmdind:1.0
+    image: harbor.vuitton.net/lvm/trmdind:1.0
     restart: always
     privileged: true
     environment:
