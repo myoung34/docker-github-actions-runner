@@ -1,4 +1,4 @@
-FROM harbor.vuitton.net/lvm/ubuntu:22.04-v1.5
+FROM harbor.vuitton.net/lvm/ubuntu:u22.04-v1.6
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG DUMB_INIT_VERSION="1.2.2"
@@ -86,3 +86,4 @@ RUN echo en_US.UTF-8 UTF-8 >> /etc/locale.gen \
   && usermod -aG docker runner \
   && echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
   && ( [[ -f /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list ]] && rm /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list || : )
+RUN ls -hal / /home/runner

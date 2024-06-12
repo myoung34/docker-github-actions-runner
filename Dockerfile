@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM harbor.vuitton.net/github/github-ubuntu-base:1.0
+FROM harbor.vuitton.net/github/github-ubuntu-base:1.1
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
@@ -10,6 +10,9 @@ ARG GH_RUNNER_VERSION="2.316.1"
 ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# Install Wiz cli
+RUN curl -o /usr/bin/wizcli https://wizcli.app.wiz.io/latest/wizcli && chmod +x /usr/bin/wizcli
 
 WORKDIR /actions-runner
 COPY install_actions.sh /actions-runner
@@ -23,4 +26,4 @@ COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
+CMD ["/actions-runner/bin/Runner.Listener", "run", "--startuptype", "service"]
