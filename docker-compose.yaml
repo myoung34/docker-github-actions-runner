@@ -14,12 +14,15 @@ volumes:
 
 services:
   az-runner1:
-    image: "harbor.vuitton.net/github/github-az-runner:1.1"
+    image: "harbor.vuitton.net/github/github-az-runner:1.2"
     deploy:
+      mode: replicated
+      replicas: 4
       resources:
         limits:
-          cpus: '1'
+          cpus: '0.50'
     restart: always
+
     volumes:
       - github_docker_certs:/certs/client:ro
       - github_docker_runner:/data/github_runner1/
@@ -27,52 +30,14 @@ services:
       ORG_NAME: "LouisVuitton"
       RUNNER_SCOPE: "org"
       ACCESS_TOKEN: "${RUNNER_CFG_PAT}"
-      DOCKER_HOST: "tcp://docker:2376"
       DOCKER_CERT_PATH: "/certs/client"
+      DOCKER_HOST: "tcp://docker:2376"
       DOCKER_TLS_VERIFY: 0
-      RUNNER_NAME: "azure-docker-1"
-      RUNNER_LABELS: "azure-prd"
+      RUNNER_NAME_PREFIX: "azure-docker"
+      LABELS: "azure-prd,azure,self-hosted"
       RUNNER_GROUP: "azure-prd"
       TARGETPLATFORM: "linux-x64"
-    extra_hosts:
-      - "api.github.com:140.82.121.6"
-      - "github.com:140.82.121.3"
-      - "docs.github.com:185.199.111.154"
-      - "codeload.github.com:140.82.121.9"
-      - "github.githubassets.com:185.199.109.154"
-      - "objects.githubusercontent.com:185.199.110.133"
-      - "objects-origin.githubusercontent.com:140.82.112.22"
-      - "github-releases.githubusercontent.com:185.199.108.154"
-      - "github-registry-files.githubusercontent.com:185.199.110.154"
-      - "ghcr.io:140.82.121.34"
-      - "louisvuitton.actions.githubusercontent.com:13.107.42.16"
-      - "louisvuitton.pkg.github.com:140.82.121.33"
-      - "lvstopocdcxitroadmap.privatelink.blob.core.windows.net:10.55.244.21"
-      - "login.microsoftonline.com:40.126.31.71"
-      - "harbor.vuitton.net:10.55.10.55"
-      - "harbor-prj.vuitton.net:10.55.16.110"
-
-  az-runner2:
-    image: "harbor.vuitton.net/github/github-az-runner:1.1"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-    restart: always
-    volumes:
-      - github_docker_certs:/certs/client:ro
-      - github_docker_runner:/data/github_runner2/
-    environment:
-      ORG_NAME: "LouisVuitton"
-      RUNNER_SCOPE: "org"
-      ACCESS_TOKEN: "${RUNNER_CFG_PAT}"
-      DOCKER_HOST: "tcp://docker:2376"
-      DOCKER_CERT_PATH: "/certs/client"
-      DOCKER_TLS_VERIFY: 0
-      RUNNER_NAME: "azure-docker-2"
-      RUNNER_LABELS: "azure-prd"
-      RUNNER_GROUP: "azure-prd"
-      TARGETPLATFORM: "linux-x64"
+      START_DOCKER_SERVICE: "true"
     extra_hosts:
       - "api.github.com:140.82.121.6"
       - "github.com:140.82.121.3"
@@ -99,7 +64,6 @@ services:
       DOCKER_TLS_CERTDIR: '/certs'
     volumes:
       - github_docker_certs:/certs/client
-#      - github_docker_dind:/var/lib/docker
       - type: "bind"
         source: "/data/github_docker_dind"
         target: "/var/lib/docker"
