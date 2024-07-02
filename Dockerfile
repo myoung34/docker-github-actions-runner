@@ -17,7 +17,6 @@ RUN apt-get update \
     tzdata \
     libmysqlclient-dev
 
-
 WORKDIR /actions-runner
 COPY install_actions.sh /actions-runner
 
