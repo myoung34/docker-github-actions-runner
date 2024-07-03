@@ -2,6 +2,7 @@
 FROM myoung34/github-runner-base:latest
 LABEL maintainer="myoung34@my.apsu.edu"
 
+ENV RUN_AS_ROOT="false"
 ENV DEBIAN_FRONTED="noninteractive"
 ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 RUN mkdir -p /opt/hostedtoolcache
