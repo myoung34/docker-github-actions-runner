@@ -25,6 +25,7 @@ jobs:
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -57,6 +58,7 @@ jobs:
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -89,6 +91,7 @@ jobs:
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
