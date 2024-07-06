@@ -27,7 +27,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Update Dockerfile FROM org
-        run: sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest|' Dockerfile
+        run: sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base:latest|' Dockerfile
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
