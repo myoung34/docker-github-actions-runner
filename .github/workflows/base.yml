@@ -25,7 +25,6 @@ jobs:
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         run: |
           docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
@@ -54,7 +53,6 @@ jobs:
          docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest
       
 
@@ -81,5 +79,4 @@ jobs:
          docker login ${{ vars.REGISTRY_URL }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest
