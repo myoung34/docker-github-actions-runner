@@ -32,7 +32,7 @@ jobs:
           file: Dockerfile.base
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner-base:latest
+          tags:  harbor.thelmalouise.ddns.net/runner-image:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -64,7 +64,7 @@ jobs:
           file: Dockerfile.base.ubuntu-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner-base:ubuntu-${{ matrix.release }}
+          tags:  harbor.thelmalouise.ddns.net/runner-image:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -96,7 +96,7 @@ jobs:
           file: Dockerfile.base.debian-${{ matrix.release }}
           pull: true
           push: true
-          tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }}
+          tags:  harbor.thelmalouise.ddns.net/runner-image:ubuntu-${{ matrix.release }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
