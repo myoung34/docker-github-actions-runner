@@ -26,16 +26,9 @@ jobs:
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.base
-          pull: true
-          push: true
-          tags:  harbor.thelmalouise.ddns.net/runner-image/ubuntu:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
+          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest
 
   ubuntu_base_deploy:
     runs-on: ubuntu-latest
@@ -58,16 +51,10 @@ jobs:
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.base.ubuntu-${{ matrix.release }}
-          pull: true
-          push: true
-          tags:  harbor.thelmalouise.ddns.net/runner-image/ubuntu-${{ matrix.release }}:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
+          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest
+      
 
   debian_base_deploy:
     runs-on: ubuntu-latest
@@ -90,13 +77,6 @@ jobs:
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.base.debian-${{ matrix.release }}
-          pull: true
-          push: true
-          tags:  harbor.thelmalouise.ddns.net/runner-image/ubuntu-${{ matrix.release }}:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
+          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest
