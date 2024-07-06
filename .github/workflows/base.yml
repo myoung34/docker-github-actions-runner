@@ -32,7 +32,7 @@ jobs:
           file: Dockerfile.base
           pull: true
           push: true
-          tags:  harbor.thelmalouise.ddns.net/runner-image/ubuntu-${{ matrix.release }}:latest
+          tags:  harbor.thelmalouise.ddns.net/runner-image/ubuntu:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
