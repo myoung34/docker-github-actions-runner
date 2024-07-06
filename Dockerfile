@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM myoung34/github-runner-base:latest
+FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner
 LABEL maintainer="myoung34@my.apsu.edu"
 
 
