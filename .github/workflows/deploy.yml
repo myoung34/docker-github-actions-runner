@@ -34,7 +34,7 @@ jobs:
          docker login harbor.thelmalouise.ddns.net --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:ubuntu
+          docker build . -f ./Dockerfile  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:ubuntu
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:ubuntu
 
   ubuntu_deploy:
