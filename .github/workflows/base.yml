@@ -27,7 +27,7 @@ jobs:
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
+          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest
 
   ubuntu_base_deploy:
@@ -52,8 +52,8 @@ jobs:
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
-          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest
+          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{matrix.release}}:latest
+          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{matrix.release}}:latest
       
 
   debian_base_deploy:
@@ -78,5 +78,5 @@ jobs:
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
-          docker build . -f ./Dockerfile.base  -t ubuntu-runner:latest
-          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:latest
+          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{matrix.release}}:latest
+          docker push  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{matrix.release}}:latest
