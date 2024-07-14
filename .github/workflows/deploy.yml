@@ -53,7 +53,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
+        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.ubuntu-${{ matrix.release }}
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
@@ -79,7 +79,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Copy Dockerfile
-        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
+         run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.ubuntu-${{ matrix.release }}
       - name: Login helm
         run: |
          helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
