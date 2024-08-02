@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
