@@ -15,7 +15,8 @@ API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
 CONTENT_LENGTH_HEADER="Content-Length: 0"
 
-case ${RUNNER_SCOPE} in
+
+case ${RUNNER_SCOPE:-} in
   org*)
     _FULL_URL="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
     ;;
@@ -27,10 +28,12 @@ case ${RUNNER_SCOPE} in
   *)
     _PROTO="https://"
     # shellcheck disable=SC2116
-    _URL="$(echo "${REPO_URL/${_PROTO}/}")"
+    _URL="$(echo "${REPO_URL:-/${_PROTO}/}" | sed "s#${_PROTO}##")"
     _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
     _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
     _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
+    if [[ -z "${_ACCOUNT}" ]]; then echo "Failed to parse account"; exit 1; fi
+    if [[ -z "${_REPO}" ]]; then echo "Failed to parse repo"; exit 1; fi
     _FULL_URL="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
     ;;
 esac
