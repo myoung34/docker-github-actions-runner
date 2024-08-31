@@ -73,7 +73,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `NO_DEFAULT_LABELS` | Optional environment variable to disable adding the default self-hosted, platform, and architecture labels to the runner. Any value is considered truthy and will disable them. |
 | `DEBUG_ONLY` | Optional boolean to print debug output but not run any actual registration or runner commands. Used in CI and testing. Default: false |
 | `DEBUG_OUTPUT` | Optional boolean to print additional debug output. Default: false |
-
+| `UNSET_CONFIG_VARS` | Optional flag to unset all configuration environment variables after runner setup but before starting the runner. This prevents these variables from leaking into the workflow environment. Set to 'true' to enable. Defaults to 'false' for backward compatibility. |
 
 ## Tests ##
 
