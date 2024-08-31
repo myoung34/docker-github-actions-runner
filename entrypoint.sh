@@ -57,6 +57,7 @@ _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 _START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
+_UNSET_CONFIG_VARS=${UNSET_CONFIG_VARS:="false"}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -151,6 +152,33 @@ configure_runner() {
 
 }
 
+unset_config_vars() {
+  echo "Unsetting configuration environment variables"
+  unset RUN_AS_ROOT
+  unset RUNNER_NAME
+  unset RUNNER_NAME_PREFIX
+  unset RANDOM_RUNNER_SUFFIX
+  unset ACCESS_TOKEN
+  unset APP_ID
+  unset APP_PRIVATE_KEY
+  unset APP_LOGIN
+  unset RUNNER_SCOPE
+  unset ORG_NAME
+  unset ENTERPRISE_NAME
+  unset LABELS
+  unset REPO_URL
+  unset RUNNER_TOKEN
+  unset RUNNER_WORKDIR
+  unset RUNNER_GROUP
+  unset GITHUB_HOST
+  unset DISABLE_AUTOMATIC_DEREGISTRATION
+  unset CONFIGURED_ACTIONS_RUNNER_FILES_DIR
+  unset EPHEMERAL
+  unset DISABLE_AUTO_UPDATE
+  unset START_DOCKER_SERVICE
+  unset NO_DEFAULT_LABELS
+  unset UNSET_CONFIG_VARS
+}
 
 # Opt into runner reusage because a value was given
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
@@ -202,6 +230,11 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   else
     ${_PREFIX} service docker start
   fi
+fi
+
+# Unset configuration environment variables if the flag is set
+if [[ ${_UNSET_CONFIG_VARS} == "true" ]]; then
+  unset_config_vars
 fi
 
 # Container's command (CMD) execution as runner user
