@@ -186,7 +186,9 @@ fi
 
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+  if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+  fi
 fi
 
 # Start docker service if needed (e.g. for docker-in-docker)
@@ -206,6 +208,7 @@ fi
 
 
 if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+  echo ""
   echo "Disable automatic registration: ${_DISABLE_AUTOMATIC_DEREGISTRATION}"
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
   echo "Runner name: ${_RUNNER_NAME}"

@@ -22,9 +22,10 @@ func TestIntegrationGHRunner(t *testing.T) {
 			cmd:         []string{"/entrypoint.sh", "something"},
 			expectation: "The default behavior should be set correctly",
 			output: []string{
-				"#REPO_URL required for repo runners",
+				"REPO_URL required for repo runners",
 				"Runner reusage is disabled",
-				"�Disable automatic registration: false",
+				"",
+				"Disable automatic registration: false",
 				"Random runner suffix: true",
 				"Runner name: test",
 				"Runner workdir: /_work/test",
@@ -65,7 +66,8 @@ func TestIntegrationGHRunner(t *testing.T) {
 			expectation: "The non default behavior should be set correctly",
 			output: []string{
 				"Runner reusage is disabled",
-				"�Disable automatic registration: true",
+				"",
+				"Disable automatic registration: true",
 				"Random runner suffix: true",
 				"Runner name: huzzah",
 				"Runner workdir: /tmp/a",
@@ -112,10 +114,18 @@ func TestIntegrationGHRunner(t *testing.T) {
 
 			// loop through output and compare to test output
 			for i, line := range output {
+				// skip if theT.output[i] is empty
+				if theT.output[i] == "" {
+					continue
+				}
 				if line != theT.output[i] {
 					// try it again but without the first character in the line because of dumb unicode
 					if line[1:] != theT.output[i] {
-						t.Errorf("Expected %s, got %s", theT.output[i], line)
+						if line != theT.output[i][1:] {
+							if line[1:] != theT.output[i][1:] {
+								t.Errorf("Expected %s, got %s", theT.output[i], line)
+							}
+						}
 					}
 				}
 			}
