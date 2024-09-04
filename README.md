@@ -71,6 +71,9 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
 | `START_DOCKER_SERVICE` | Optional flag which automatically starts the docker service if set to `true`. Useful when using [sysbox](https://github.com/nestybox/sysbox). Defaults to `false`. |
 | `NO_DEFAULT_LABELS` | Optional environment variable to disable adding the default self-hosted, platform, and architecture labels to the runner. Any value is considered truthy and will disable them. |
+| `DEBUG_ONLY` | Optional boolean to print debug output but not run any actual registration or runner commands. Used in CI and testing. Default: false |
+| `DEBUG_OUTPUT` | Optional boolean to print additional debug output. Default: false |
+
 
 ## Tests ##
 

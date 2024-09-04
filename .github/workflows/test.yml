@@ -14,7 +14,7 @@ jobs:
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
 
-  ubuntu_base_tests:
+  ubuntu_tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -30,8 +30,6 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM ubuntu:${{ matrix.release }}/' Dockerfile.base.ubuntu-${{ matrix.release }}
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -45,7 +43,10 @@ jobs:
       - name: set testable image environment variable
         id: testvars
         run: echo "GH_RUNNER_IMAGE=ubuntu-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
-      - name: Build
+      # Build the relevant base image from whats in the current gitref as `base-${GH_RUNNER_IMAGE}`
+      - name: Copy Base Dockerfile
+        run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM ubuntu:${{ matrix.release }}/' Dockerfile.base.ubuntu-${{ matrix.release }}
+      - name: Build base image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -53,14 +54,30 @@ jobs:
           pull: true
           push: false
           load: true
-          tags: ${{ env.ORG }}/github-runner-base:ubuntu-${{ matrix.release }},${{ env.GH_RUNNER_IMAGE }}
+          tags: base-${{ env.GH_RUNNER_IMAGE }}
           platforms: ${{ matrix.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      # Build the final image and use FROM `base-${GH_RUNNER_IMAGE}` from above as `${GH_RUNNER_IMAGE}`
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM base-${GH_RUNNER_IMAGE}/" Dockerfile.ubuntu-${{ matrix.release }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.ubuntu-${{ matrix.release }}
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run go tests
         run: go test ./tests/...
 
-  debian_base_tests:
+  debian_tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -76,8 +93,6 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
@@ -91,6 +106,9 @@ jobs:
       - name: set testable image environment variable
         id: testvars
         run: echo "GH_RUNNER_IMAGE=debian-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
+      # Build the relevant base image from whats in the current gitref as `base-${GH_RUNNER_IMAGE}`
+      - name: Copy Dockerfile
+        run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
       - name: Build
         uses: docker/build-push-action@v6
         with:
@@ -99,9 +117,24 @@ jobs:
           pull: true
           push: false
           load: true
-          tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }},${{ env.GH_RUNNER_IMAGE }}
+          tags: base-${{ env.GH_RUNNER_IMAGE }}
           platforms: ${{ matrix.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      # Build the final image and use FROM `base-${GH_RUNNER_IMAGE}` from above as `${GH_RUNNER_IMAGE}`
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM base-${GH_RUNNER_IMAGE}/" Dockerfile.debian-${{ matrix.release }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.debian-${{ matrix.release }}
+          pull: true
+          push: true
+          tags: ${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run go tests
         run: go test ./tests/...

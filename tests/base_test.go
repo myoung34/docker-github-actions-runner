@@ -3,78 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/testcontainers/testcontainers-go"
-	"io"
-	"os"
-	"strings"
 	"testing"
-	"unicode"
 )
 
-type ghaRunnerontainer struct {
-	testcontainers.Container
-}
-
-func cleanString(b []byte) string {
-	s := string(b)
-	return strings.Map(func(r rune) rune {
-		if unicode.IsPrint(r) {
-			return r
-		}
-		return -1
-	}, s)
-}
-
-func runAndReturnOutput(ctr testcontainers.Container, ctx context.Context, cmd []string) ([]string, error) {
-	_, reader, err := ctr.Exec(ctx, cmd)
-	if err != nil {
-		return nil, err
-	}
-	output, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, err
-	}
-	return strings.Split(cleanString(output), "\n"), nil
-}
-
-func setupGHRunner(ctx context.Context) (*ghaRunnerontainer, error) {
-	if os.Getenv("GH_RUNNER_IMAGE") == "" {
-		return nil, fmt.Errorf("GH_RUNNER_IMAGE is not set")
-	}
-	req := testcontainers.ContainerRequest{
-		Image:        os.Getenv("GH_RUNNER_IMAGE"),
-		ExposedPorts: []string{},
-		Entrypoint:   []string{"/usr/bin/sleep"},
-		Cmd:          []string{"60"},
-	}
-
-	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &ghaRunnerontainer{Container: container}, nil
-}
-
-type outputTest struct {
-	name        string
-	cmd         []string
-	output      string
-	statusCode  int
-	expectation string
-}
-
-func TestIntegrationGHRunnerLatestReturn(t *testing.T) {
+func TestIntegrationGHRunnerBase(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping integration test")
 	}
 
 	ctx := context.Background()
 
-	ghaRunner, err := setupGHRunner(ctx)
+	ghaRunner, err := setupGHRunner(ctx, map[string]string{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,49 +68,49 @@ func TestIntegrationGHRunnerLatestReturn(t *testing.T) {
 			name:        "ulimit set",
 			cmd:         []string{"grep", "^\\s*# ulimit -Hn", "/etc/init.d/docker"},
 			expectation: "expected ulimit to be set in /etc/init.d/docker\"",
-			output:      "",
+			output:      []string{""},
 			statusCode:  0,
 		},
 		{
 			name:        "runner user id",
 			cmd:         []string{"id", "-u", "runner"},
 			expectation: "expected runner to exist with uid 1001",
-			output:      "1001",
+			output:      []string{"1001"},
 			statusCode:  0,
 		},
 		{
 			name:        "runner group id",
 			cmd:         []string{"id", "-g", "runner"},
 			expectation: "expected runner to exist with gid 121",
-			output:      "121",
+			output:      []string{"121"},
 			statusCode:  0,
 		},
 		{
 			name:        "runner groups",
 			cmd:         []string{"id", "-Gn", "runner"},
 			expectation: "expected runner to exist with group names runner sudo docker",
-			output:      "runner sudo docker",
+			output:      []string{"runner sudo docker"},
 			statusCode:  0,
 		},
 		{
 			name:        "sudo no password for runner",
 			cmd:         []string{"tail", "-n", "1", "/etc/sudoers"},
 			expectation: "expected runner to have NOPASSWD line in sudoers",
-			output:      "%sudo ALL=(ALL) NOPASSWD: ALL",
+			output:      []string{"%sudo ALL=(ALL) NOPASSWD: ALL"},
 			statusCode:  0,
 		},
 		{
 			name:        "suders defaults",
 			cmd:         []string{"grep", "Defaults env_keep = \"HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy\"", "/etc/sudoers"},
 			expectation: "expected sudoers to have updated Defaults env_keep",
-			output:      "",
+			output:      []string{""},
 			statusCode:  0,
 		},
 		{
 			name:        "locale set",
 			cmd:         []string{"grep", "-v", "^#", "/etc/locale.gen"},
 			expectation: "expected locale to be set in /etc/locale.gen",
-			output:      "en_US.UTF-8 UTF-8",
+			output:      []string{"en_US.UTF-8 UTF-8"},
 			statusCode:  0,
 		},
 	}
@@ -181,12 +120,12 @@ func TestIntegrationGHRunnerLatestReturn(t *testing.T) {
 
 		t.Run(theT.name, func(t *testing.T) {
 
-			if theT.output != "" {
+			if theT.output[0] != "" {
 				output, err := runAndReturnOutput(ghaRunner, ctx, theT.cmd)
 				if err != nil {
 					t.Fatal(err)
 				}
-				if output[0] != theT.output {
+				if output[0] != theT.output[0] {
 					t.Fatalf("expected %s, got %s", theT.output, output[0])
 				}
 			}
