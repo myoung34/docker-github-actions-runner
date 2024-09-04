@@ -198,9 +198,7 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   if [[ ${_DEBUG_ONLY} == "true" ]]; then
     echo ${_PREFIX} service docker start
   else
-    if [[ ${_DEBUG_ONLY} == "false" ]]; then
-      ${_PREFIX} service docker start
-    fi
+    ${_PREFIX} service docker start
   fi
 fi
 
