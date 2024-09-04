@@ -4,6 +4,8 @@ on:
     paths-ignore:
       - Dockerfile.base
       - README.md
+      - tests/**
+      - go.*
     branches:
       - master
       - develop

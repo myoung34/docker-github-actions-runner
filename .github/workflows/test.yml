@@ -13,3 +13,95 @@ jobs:
       - uses: pre-commit/action@v3.0.1
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
+
+  ubuntu_base_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [jammy, focal, noble]
+        platform: [linux/amd64, linux/arm64]
+      fail-fast: false
+    steps:
+      - name: Copy Repo Files
+        uses: actions/checkout@master
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Copy Dockerfile
+        run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM ubuntu:${{ matrix.release }}/' Dockerfile.base.ubuntu-${{ matrix.release }}
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+      - name: Install dependencies
+        run: |
+          go get github.com/testcontainers/testcontainers-go@v0.33.0
+      - name: Get current Git SHA
+        id: vars
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: set testable image environment variable
+        id: testvars
+        run: echo "GH_RUNNER_IMAGE=ubuntu-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.base.ubuntu-${{ matrix.release }}
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.ORG }}/github-runner-base:ubuntu-${{ matrix.release }},${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run go tests
+        run: go test ./tests/...
+
+  debian_base_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [bookworm, sid]
+        platform: [linux/amd64, linux/arm64]
+      fail-fast: false
+    steps:
+      - name: Copy Repo Files
+        uses: actions/checkout@master
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Copy Dockerfile
+        run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+      - name: Install dependencies
+        run: |
+          go get github.com/testcontainers/testcontainers-go@v0.33.0
+      - name: Get current Git SHA
+        id: vars
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: set testable image environment variable
+        id: testvars
+        run: echo "GH_RUNNER_IMAGE=debian-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.base.debian-${{ matrix.release }}
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.ORG }}/github-runner-base:debian-${{ matrix.release }},${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run go tests
+        run: go test ./tests/...

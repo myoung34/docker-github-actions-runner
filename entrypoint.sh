@@ -14,6 +14,7 @@ export -n APP_PRIVATE_KEY
 trap_with_arg() {
     func="$1" ; shift
     for sig ; do
+        # shellcheck disable=SC2064
         trap "$func $sig" "$sig"
     done
 }
