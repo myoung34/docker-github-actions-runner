@@ -14,6 +14,7 @@ export -n APP_PRIVATE_KEY
 trap_with_arg() {
     func="$1" ; shift
     for sig ; do
+        # shellcheck disable=SC2064
         trap "$func $sig" "$sig"
     done
 }
@@ -28,6 +29,8 @@ deregister_runner() {
   exit
 }
 
+_DEBUG_ONLY=${DEBUG_ONLY:-false}
+_DEBUG_OUTPUT=${DEBUG_OUTPUT:-false}
 _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 
 _RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
@@ -162,11 +165,16 @@ if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   if [ -f "/actions-runner/.runner" ]; then
     echo "The runner has already been configured"
   else
-    configure_runner
+
+    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+      configure_runner
+    fi
   fi
 else
   echo "Runner reusage is disabled"
-  configure_runner
+  if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    configure_runner
+  fi
 fi
 
 if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
@@ -178,7 +186,9 @@ fi
 
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+  if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+  fi
 fi
 
 # Start docker service if needed (e.g. for docker-in-docker)
@@ -186,15 +196,39 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
   _PREFIX=""
   [[ ${_RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
-  ${_PREFIX} service docker start
+
+  if [[ ${_DEBUG_ONLY} == "true" ]]; then
+    echo ${_PREFIX} service docker start
+  else
+    ${_PREFIX} service docker start
+  fi
 fi
 
 # Container's command (CMD) execution as runner user
 
 
+if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+  echo ""
+  echo "Disable automatic registration: ${_DISABLE_AUTOMATIC_DEREGISTRATION}"
+  echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
+  echo "Runner name: ${_RUNNER_NAME}"
+  echo "Runner workdir: ${_RUNNER_WORKDIR}"
+  echo "Labels: ${_LABELS}"
+  echo "Runner Group: ${_RUNNER_GROUP}"
+  echo "Github Host: ${_GITHUB_HOST}"
+  echo "Run as root:${_RUN_AS_ROOT}"
+  echo "Start docker: ${_START_DOCKER_SERVICE}"
+fi
+
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
-    "$@"
+    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+      # shellcheck disable=SC2145
+      echo "Running $@"
+    fi
+    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+      "$@"
+    fi
   else
     echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
     exit 1
@@ -205,8 +239,20 @@ else
     chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
-    /usr/sbin/gosu runner "$@"
+    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+      # shellcheck disable=SC2145
+      echo "Running /usr/sbin/gosu runner $@"
+    fi
+    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+      /usr/sbin/gosu runner "$@"
+    fi
   else
-    "$@"
+    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+      # shellcheck disable=SC2145
+      echo "Running $@"
+    fi
+    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+      "$@"
+    fi
   fi
 fi

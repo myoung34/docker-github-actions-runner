@@ -1,0 +1,100 @@
+package:
+    curl:
+        installed: true
+    docker:
+        installed: false
+    docker-compose:
+        installed: false
+    git:
+        installed: true
+    git-lfs:
+        installed: false
+    jq:
+        installed: true
+    lsb_release:
+        installed: false
+    make:
+        installed: true
+    pwsh:
+        installed: false
+    python3:
+        installed: true
+    rsync:
+        installed: true
+    ssh:
+        installed: false
+    sudo:
+        installed: true
+    tar:
+        installed: true
+    unzip:
+        installed: true
+    wget:
+        installed: true
+    yq:
+        installed: false
+file:
+  /usr/bin/gh:
+    exists: true
+  /usr/bin/nodejs:
+    exists: true
+  /usr/sbin/gosu:
+    exists: true
+  /usr/bin/dumb-init:
+    exists: true
+  /etc/init.d/docker:
+    exists: true
+    owner: root
+    group: root
+    filetype: file
+    contains:
+      - /^\s*# ulimit -Hn/
+  /etc/sudoers:
+    exists: true
+    owner: root
+    group: root
+    filetype: file
+    contains:
+      - '/%sudo ALL=\(ALL\) NOPASSWD: ALL/'
+      - '/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/'
+  /etc/locale.gen:
+    exists: true
+    owner: root
+    group: root
+    filetype: file
+    contains:
+      - '/^en_US.UTF-8 UTF-8/'
+
+user:
+    runner:
+        exists: true
+        uid: 1001
+        gid: 121
+        groups:
+            - runner
+            - sudo
+            - docker
+group:
+    runner:
+        exists: true
+        gid: 121
+command:
+    /entrypoint.sh something:
+        exit-status: 0
+        stdout:
+            - REPO_URL required for repo runners
+            - Runner reusage is disabled
+            - ""
+            - 'Disable automatic registration: false'
+            - 'Random runner suffix: true'
+            - 'Runner name: test'
+            - 'Runner workdir: /_work/test'
+            - 'Labels: default'
+            - 'Runner Group: Default'
+            - 'Github Host: github.com'
+            - Run as root:true
+            - 'Start docker: false'
+            - Running something
+            - ""
+        stderr: ""
+        timeout: 2000

@@ -71,3 +71,51 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `DISABLE_AUTO_UPDATE` | Optional environment variable to [disable auto updates](https://github.blog/changelog/2022-02-01-github-actions-self-hosted-runners-can-now-disable-automatic-updates/). Auto updates are enabled by default to preserve past behavior. Any value is considered truthy and will disable them. |
 | `START_DOCKER_SERVICE` | Optional flag which automatically starts the docker service if set to `true`. Useful when using [sysbox](https://github.com/nestybox/sysbox). Defaults to `false`. |
 | `NO_DEFAULT_LABELS` | Optional environment variable to disable adding the default self-hosted, platform, and architecture labels to the runner. Any value is considered truthy and will disable them. |
+| `DEBUG_ONLY` | Optional boolean to print debug output but not run any actual registration or runner commands. Used in CI and testing. Default: false |
+| `DEBUG_OUTPUT` | Optional boolean to print additional debug output. Default: false |
+
+
+## Tests ##
+
+Tests are written in [goss](https://github.com/goss-org/goss/) for general assertions.
+It's expected that all pull-requests have relevant assertions in order to be merged.
+
+Prereqs: Ensure that docker, goss and dgoss are set up
+Note: while testing locally works, github actions will test all variations of operating systems and supported architectures.
+
+The test file expects the image to test as an environment variable `GH_RUNNER_IMAGE` to assist in CI
+
+To test:
+```
+$ docker build -t my-base-test -f Dockerfile.base .
+$ # Run the base test from Dockerfile.base on the current git HEAD
+$ GH_RUNNER_IMAGE="my-base-test" GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true \
+  ${GH_RUNNER_IMAGE} \
+  10
+$ # Use the base image in your final
+$ sed -i.bak 's/^FROM.*/FROM my-base-test/g' Dockerfile
+$ docker build -t my-full-test -f Dockerfile .
+$ # Run the full test from Dockerfile.base on the current git HEAD
+$ GH_RUNNER_IMAGE="my-full-test" GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+  -e DEBUG_ONLY=true \
+  -e RUNNER_NAME=huzzah \
+  -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
+  -e RUN_AS_ROOT=true \
+  -e RUNNER_NAME_PREFIX=asdf \
+  -e ACCESS_TOKEN=1234 \
+  -e APP_ID=5678 \
+  -e APP_PRIVATE_KEY=2345 \
+  -e APP_LOGIN=SOMETHING \
+  -e RUNNER_SCOPE=org \
+  -e ORG_NAME=myoung34 \
+  -e ENTERPRISE_NAME=emyoung34 \
+  -e LABELS=blue,green \
+  -e RUNNER_TOKEN=3456 \
+  -e RUNNER_WORKDIR=tmp/a \
+  -e RUNNER_GROUP=wat \
+  -e GITHUB_HOST=github.example.com \
+  -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+  -e EPHEMERAL=true \
+  -e DISABLE_AUTO_UPDATE=true \
+  ${GH_RUNNER_IMAGE} 10
+```
