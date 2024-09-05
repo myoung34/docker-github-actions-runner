@@ -1,0 +1,20 @@
+command:
+    /entrypoint.sh something:
+        exit-status: 0
+        stdout:
+            - REPO_URL required for repo runners
+            - Runner reusage is disabled
+            - ""
+            - 'Disable automatic registration: false'
+            - 'Random runner suffix: true'
+            - 'Runner name: test'
+            - 'Runner workdir: /_work/test'
+            - 'Labels: default'
+            - 'Runner Group: Default'
+            - 'Github Host: github.com'
+            - Run as root:true
+            - 'Start docker: false'
+            - Running something
+            - ""
+        stderr: ""
+        timeout: 2000
