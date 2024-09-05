@@ -1,0 +1,17 @@
+command:
+  /entrypoint.sh something:
+    exit-status: 0
+    stdout:
+      - "Runner reusage is disabled"
+      - ""
+      - "Disable automatic registration: true"
+      - "Random runner suffix: true"
+      - "Runner name: huzzah"
+      - "Labels: blue,green"
+      - "Runner Group: wat"
+      - "Github Host: github.example.com"
+      - "Run as root:true"
+      - "Start docker: false"
+      - "Running something"
+    stderr: ""
+    timeout: 2000

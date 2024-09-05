@@ -15,8 +15,159 @@ permissions:
   packages: write
 
 jobs:
+  ubuntu_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [jammy, focal, noble]
+        platform: [linux/amd64, linux/arm64]
+      fail-fast: false
+    steps:
+      - name: Copy Repo Files
+        uses: actions/checkout@master
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
+      - name: Install Goss and dgoss
+        run: |
+          curl -fsSL https://goss.rocks/install | sh
+          export PATH=$PATH:/usr/local/bin
+      - name: Get current Git SHA
+        id: vars
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: set testable image environment variable
+        id: testvars
+        run: echo "GH_RUNNER_IMAGE=ubuntu-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.ubuntu-${{ matrix.release }}
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
+      - name: Run goss tests
+        run: |
+          echo "os: ubuntu" >goss_vars_${GH_RUNNER_IMAGE}.yaml
+          echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+          echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+          -e DEBUG_ONLY=true \
+          -e RUNNER_NAME=huzzah \
+          -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
+          -e RUN_AS_ROOT=true \
+          -e RUNNER_NAME_PREFIX=asdf \
+          -e ACCESS_TOKEN=1234 \
+          -e APP_ID=5678 \
+          -e APP_PRIVATE_KEY=2345 \
+          -e APP_LOGIN=SOMETHING \
+          -e RUNNER_SCOPE=org \
+          -e ORG_NAME=myoung34 \
+          -e ENTERPRISE_NAME=emyoung34 \
+          -e LABELS=blue,green \
+          -e RUNNER_TOKEN=3456 \
+          -e RUNNER_WORKDIR=tmp/a \
+          -e RUNNER_GROUP=wat \
+          -e GITHUB_HOST=github.example.com \
+          -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+          -e EPHEMERAL=true \
+          -e DISABLE_AUTO_UPDATE=true \
+          ${GH_RUNNER_IMAGE} 10
+
+  debian_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        release: [bookworm, sid]
+        platform: [linux/amd64, linux/arm64]
+      fail-fast: false
+    steps:
+      - name: Copy Repo Files
+        uses: actions/checkout@master
+      - name: Get GitHub organization or user
+        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Copy Dockerfile
+        run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
+      - name: Install Goss and dgoss
+        run: |
+          curl -fsSL https://goss.rocks/install | sh
+          export PATH=$PATH:/usr/local/bin
+      - name: Get current Git SHA
+        id: vars
+        run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: set testable image environment variable
+        id: testvars
+        run: echo "GH_RUNNER_IMAGE=debian-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.debian-${{ matrix.release }}
+          pull: true
+          push: false
+          load: true
+          tags: ${{ env.GH_RUNNER_IMAGE }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
+      - name: Run goss tests
+        run: |
+          echo "os: debian" >goss_vars_${GH_RUNNER_IMAGE}.yaml
+          echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+          echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+          -e DEBUG_ONLY=true \
+          -e RUNNER_NAME=huzzah \
+          -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
+          -e RUN_AS_ROOT=true \
+          -e RUNNER_NAME_PREFIX=asdf \
+          -e ACCESS_TOKEN=1234 \
+          -e APP_ID=5678 \
+          -e APP_PRIVATE_KEY=2345 \
+          -e APP_LOGIN=SOMETHING \
+          -e RUNNER_SCOPE=org \
+          -e ORG_NAME=myoung34 \
+          -e ENTERPRISE_NAME=emyoung34 \
+          -e LABELS=blue,green \
+          -e RUNNER_TOKEN=3456 \
+          -e RUNNER_WORKDIR=tmp/a \
+          -e RUNNER_GROUP=wat \
+          -e GITHUB_HOST=github.example.com \
+          -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+          -e EPHEMERAL=true \
+          -e DISABLE_AUTO_UPDATE=true \
+          ${GH_RUNNER_IMAGE} 10
+
   ubuntu_latest_deploy:
     runs-on: ubuntu-latest
+    needs: ubuntu_tests
     steps:
       - name: Copy Repo Files
         uses: actions/checkout@master
@@ -53,6 +204,7 @@ jobs:
 
   ubuntu_deploy:
     runs-on: ubuntu-latest
+    needs: ubuntu_tests
     strategy:
       matrix:
         release: [jammy, focal, noble]
@@ -93,6 +245,7 @@ jobs:
 
   debian_deploy:
     runs-on: ubuntu-latest
+    needs: debian_tests
     strategy:
       matrix:
         release: [bookworm, sid]
