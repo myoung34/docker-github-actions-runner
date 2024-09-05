@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         release: [jammy, focal, noble]
-        platform: [linux/amd64, linux/arm64]
+        platform: [amd64, arm64]
       fail-fast: false
     steps:
       - name: Copy Repo Files
@@ -57,7 +57,7 @@ jobs:
           push: false
           load: true
           tags: ${{ env.GH_RUNNER_IMAGE }}
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
@@ -95,7 +95,7 @@ jobs:
     strategy:
       matrix:
         release: [bookworm, sid]
-        platform: [linux/amd64, linux/arm64]
+        platform: [amd64, arm64]
       fail-fast: false
     steps:
       - name: Copy Repo Files
@@ -132,7 +132,7 @@ jobs:
           push: false
           load: true
           tags: ${{ env.GH_RUNNER_IMAGE }}
-          platforms: ${{ matrix.platform }}
+          platforms: linux/${{ matrix.platform }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
