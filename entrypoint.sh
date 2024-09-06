@@ -57,6 +57,8 @@ _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 _START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
+_UNSET_CONFIG_VARS=${UNSET_CONFIG_VARS:="false"}
+_CONFIGURED_ACTIONS_RUNNER_FILES_DIR=${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:-""}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -151,15 +153,42 @@ configure_runner() {
 
 }
 
+unset_config_vars() {
+  echo "Unsetting configuration environment variables"
+  unset RUN_AS_ROOT
+  unset RUNNER_NAME
+  unset RUNNER_NAME_PREFIX
+  unset RANDOM_RUNNER_SUFFIX
+  unset ACCESS_TOKEN
+  unset APP_ID
+  unset APP_PRIVATE_KEY
+  unset APP_LOGIN
+  unset RUNNER_SCOPE
+  unset ORG_NAME
+  unset ENTERPRISE_NAME
+  unset LABELS
+  unset REPO_URL
+  unset RUNNER_TOKEN
+  unset RUNNER_WORKDIR
+  unset RUNNER_GROUP
+  unset GITHUB_HOST
+  unset DISABLE_AUTOMATIC_DEREGISTRATION
+  unset CONFIGURED_ACTIONS_RUNNER_FILES_DIR
+  unset EPHEMERAL
+  unset DISABLE_AUTO_UPDATE
+  unset START_DOCKER_SERVICE
+  unset NO_DEFAULT_LABELS
+  unset UNSET_CONFIG_VARS
+}
 
 # Opt into runner reusage because a value was given
-if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Runner reusage is enabled"
 
   # directory exists, copy the data
-  if [[ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+  if [[ -d "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     echo "Copying previous data"
-    cp -p -r "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+    cp -p -r "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
   fi
 
   if [ -f "/actions-runner/.runner" ]; then
@@ -177,10 +206,10 @@ else
   fi
 fi
 
-if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
-  echo "Reusage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+  echo "Reusage is enabled. Storing data to ${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   # Quoting (even with double-quotes) the regexp brokes the copying
-  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 
@@ -202,6 +231,11 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   else
     ${_PREFIX} service docker start
   fi
+fi
+
+# Unset configuration environment variables if the flag is set
+if [[ ${_UNSET_CONFIG_VARS} == "true" ]]; then
+  unset_config_vars
 fi
 
 # Container's command (CMD) execution as runner user
@@ -235,7 +269,7 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
     chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
