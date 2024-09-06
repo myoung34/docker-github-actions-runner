@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 set -euo pipefail
 
 function bootstrap_sources() {
@@ -54,8 +53,10 @@ function setup_sudoers() {
 echo en_US.UTF-8 UTF-8 >> /etc/locale.gen
 
 scripts_dir=$(dirname "$0")
-. "$scripts_dir/sources.sh"
-. "$scripts_dir/tools.sh"
+# shellcheck source=/dev/null
+source "$scripts_dir/sources.sh"
+# shellcheck source=/dev/null
+source "$scripts_dir/tools.sh"
 
 apt-get update
 bootstrap_sources

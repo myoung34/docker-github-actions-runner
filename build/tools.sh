@@ -7,11 +7,13 @@ function install_git() {
 }
 
 function install_liblttng_ust() {
-  ( [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]] \
-    && apt-get install -y --no-install-recommends liblttng-ust0 || : )
+  if [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]]; then
+    apt-get install -y --no-install-recommends liblttng-ust0
+  fi
 
-  ( [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]] \
-    && apt-get install -y --no-install-recommends liblttng-ust1 || : )
+  if [[ $(apt-cache search -n liblttng-ust1 | awk '{print $1}') == "liblttng-ust1" ]]; then
+    apt-get install -y --no-install-recommends liblttng-ust1
+  fi
 }
 
 function install_awscli() {
@@ -24,12 +26,13 @@ function install_awscli() {
 }
 
 function install_gitlfs() {
-  local DPKG_ARCH="$(dpkg --print-architecture)"
+  local DPKG_ARCH
+  DPKG_ARCH="$(dpkg --print-architecture)"
 
   curl -s "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz
   tar -xzf /tmp/lfs.tar.gz -C /tmp
-  /tmp/git-lfs-${GIT_LFS_VERSION}/install.sh
-  rm -rf /tmp/lfs.tar.gz /tmp/git-lfs-${GIT_LFS_VERSION}
+  "/tmp/git-lfs-${GIT_LFS_VERSION}/install.sh"
+  rm -rf /tmp/lfs.tar.gz "/tmp/git-lfs-${GIT_LFS_VERSION}"
 }
 
 function install_docker() {
@@ -46,7 +49,9 @@ function install_container_tools() {
 }
 
 function install_githubcli() {
-  local DPKG_ARCH="$(dpkg --print-architecture)"
+  local DPKG_ARCH GH_CLI_VERSION GH_CLI_DOWNLOAD_URL
+
+  DPKG_ARCH="$(dpkg --print-architecture)"
 
   GH_CLI_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/cli/cli/releases/latest \
@@ -63,32 +68,31 @@ function install_githubcli() {
 }
 
 function install_yq() {
-  local DPKG_ARCH="$(dpkg --print-architecture)"
+  local DPKG_ARCH YQ_DOWNLOAD_URL
 
-  local YQ_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/mikefarah/yq/releases/latest \
-      | jq -r '.tag_name' \
-      | sed 's/^v//g')
+  DPKG_ARCH="$(dpkg --print-architecture)"
 
-  local YQ_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
+  YQ_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/mikefarah/yq/releases/latest \
       | jq ".assets[] | select(.name == \"yq_linux_${DPKG_ARCH}.tar.gz\")" \
       | jq -r '.browser_download_url')
 
   curl -s "${YQ_DOWNLOAD_URL}" -L -o /tmp/yq.tar.gz
   tar -xzf /tmp/yq.tar.gz -C /tmp
-  mv /tmp/yq_linux_${DPKG_ARCH} /usr/local/bin/yq
+  mv "/tmp/yq_linux_${DPKG_ARCH}" /usr/local/bin/yq
 }
 
 function install_powershell() {
-  local DPKG_ARCH="$(dpkg --print-architecture)"
+  local DPKG_ARCH PWSH_VERSION PWSH_DOWNLOAD_URL
 
-  local PWSH_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
+  DPKG_ARCH="$(dpkg --print-architecture)"
+
+  PWSH_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/PowerShell/PowerShell/releases/latest \
       | jq -r '.tag_name' \
       | sed 's/^v//g')
 
-  local PWSH_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
+  PWSH_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/PowerShell/PowerShell/releases/latest \
       | jq -r ".assets[] | select(.name == \"powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz\") | .browser_download_url")
 
