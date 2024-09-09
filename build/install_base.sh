@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-function bootstrap_sources() {
+function install_bootstrap() {
   apt-get install -y --no-install-recommends \
       ca-certificates \
       curl \
+      jq \
       gnupg
 }
 
@@ -17,7 +18,6 @@ function install_tools_apt() {
     sudo \
     gpg-agent \
     software-properties-common \
-    jq \
     dirmngr \
     locales \
     dumb-init \
@@ -57,19 +57,22 @@ scripts_dir=$(dirname "$0")
 source "$scripts_dir/sources.sh"
 # shellcheck source=/dev/null
 source "$scripts_dir/tools.sh"
+# shellcheck source=/dev/null
+source "$scripts_dir/config.sh"
 
 apt-get update
-bootstrap_sources
+install_bootstrap
 configure_sources
 
 apt-get update
 install_tools_apt
 install_tools
-remove_sources
-remove_caches
 
 setup_sudoers
-groupadd -g 121 runner
-useradd -mr -d /home/runner -u 1001 -g 121 runner
+groupadd -g "$(group_id)" runner
+useradd -mr -d /home/runner -u "$(user_id)" -g "$(group_id)" runner
 usermod -aG sudo runner
 usermod -aG docker runner
+
+remove_sources
+remove_caches
