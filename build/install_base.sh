@@ -1,43 +1,27 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-function install_bootstrap() {
+# Required by the build or runner operation
+function install_essentials() {
   apt-get install -y --no-install-recommends \
       ca-certificates \
       curl \
       jq \
-      gnupg
+      gnupg \
+      tar \
+      unzip \
+      zip \
+      apt-transport-https \
+      sudo \
+      dirmngr \
+      locales \
+      gosu \
+      gpg-agent \
+      dumb-init
 }
 
 function install_tools_apt() {
-  apt-get install -y --no-install-recommends \
-    tar \
-    unzip \
-    zip \
-    apt-transport-https \
-    sudo \
-    gpg-agent \
-    software-properties-common \
-    dirmngr \
-    locales \
-    dumb-init \
-    gosu \
-    build-essential \
-    zlib1g-dev \
-    zstd \
-    gettext \
-    libcurl4-openssl-dev \
-    inetutils-ping \
-    wget \
-    openssh-client \
-    python3-pip \
-    python3-setuptools \
-    python3-venv \
-    python3 \
-    nodejs \
-    rsync \
-    libpq-dev \
-    pkg-config
+  apt_packages | xargs apt-get install -y --no-install-recommends
 }
 
 function remove_caches() {
@@ -61,7 +45,7 @@ source "$scripts_dir/tools.sh"
 source "$scripts_dir/config.sh"
 
 apt-get update
-install_bootstrap
+install_essentials
 configure_sources
 
 apt-get update
