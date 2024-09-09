@@ -16,3 +16,7 @@ function group_id() {
 function apt_packages() {
   jq -r '.install[] | select(.source == "apt") | .packages[]' "$(config_file)" | paste -sd ' ' -
 }
+
+function script_packages() {
+  jq -r '.install[] | select(.source == "script") | .packages[]' "$(config_file)"
+}
