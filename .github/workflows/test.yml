@@ -89,7 +89,7 @@ jobs:
           -e ENTERPRISE_NAME=emyoung34 \
           -e LABELS=blue,green \
           -e RUNNER_TOKEN=3456 \
-          -e RUNNER_WORKDIR=tmp/a \
+          -e RUNNER_WORKDIR=/tmp/a \
           -e RUNNER_GROUP=wat \
           -e GITHUB_HOST=github.example.com \
           -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
@@ -172,7 +172,7 @@ jobs:
           -e ENTERPRISE_NAME=emyoung34 \
           -e LABELS=blue,green \
           -e RUNNER_TOKEN=3456 \
-          -e RUNNER_WORKDIR=tmp/a \
+          -e RUNNER_WORKDIR=/tmp/a \
           -e RUNNER_GROUP=wat \
           -e GITHUB_HOST=github.example.com \
           -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
