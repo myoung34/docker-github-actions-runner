@@ -6,6 +6,7 @@ command:
       - ""
       - "Disable automatic registration: true"
       - "Random runner suffix: true"
+      - "Runner workdir: /tmp/a"
       - "Runner name: huzzah"
       - "Labels: blue,green"
       - "Runner Group: wat"
