@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:noble
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ARG DUMB_INIT_VERSION="1.2.2"
