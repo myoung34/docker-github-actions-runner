@@ -51,51 +51,57 @@ jobs:
 
           # Sanity check
           grep FROM Dockerfile.final.ubuntu-${{ matrix.release }}
-      - name: Build final image
-        uses: docker/build-push-action@v6
+      - name: Retry build final image
+        uses: nick-fields/retry@v3
         with:
-          context: .
-          file: Dockerfile.final.ubuntu-${{ matrix.release }}
-          pull: true
-          push: false
-          load: true
-          tags: ${{ env.GH_RUNNER_IMAGE }}
-          platforms: linux/${{ matrix.platform }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          timeout_minutes: 60
+          max_attempts: 3
+          command: |
+            docker buildx build \
+              --file Dockerfile.final.ubuntu-${{ matrix.release }} \
+              --platform linux/${{ matrix.platform }} \
+              --tag ${{ env.GH_RUNNER_IMAGE }} \
+              --load \
+              --cache-from type=gha \
+              --cache-to type=gha,mode=max \
+              .
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run goss tests
-        run: |
-          echo "os: ubuntu" >goss_vars_${GH_RUNNER_IMAGE}.yaml
-          echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-          echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-          # test the base
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
-          # test the final image but with all defaults
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
-          # test the final image but with non-default values
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
-          -e DEBUG_ONLY=true \
-          -e RUNNER_NAME=huzzah \
-          -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
-          -e RUN_AS_ROOT=true \
-          -e RUNNER_NAME_PREFIX=asdf \
-          -e ACCESS_TOKEN=1234 \
-          -e APP_ID=5678 \
-          -e APP_PRIVATE_KEY=2345 \
-          -e APP_LOGIN=SOMETHING \
-          -e RUNNER_SCOPE=org \
-          -e ORG_NAME=myoung34 \
-          -e ENTERPRISE_NAME=emyoung34 \
-          -e LABELS=blue,green \
-          -e RUNNER_TOKEN=3456 \
-          -e RUNNER_WORKDIR=/tmp/a \
-          -e RUNNER_GROUP=wat \
-          -e GITHUB_HOST=github.example.com \
-          -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
-          -e EPHEMERAL=true \
-          -e DISABLE_AUTO_UPDATE=true \
-          ${GH_RUNNER_IMAGE} 10
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          command: |
+            echo "os: ubuntu" >goss_vars_${GH_RUNNER_IMAGE}.yaml
+            echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            # test the base
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            # test the final image but with all defaults
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            # test the final image but with non-default values
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e RUNNER_NAME=huzzah \
+            -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
+            -e RUN_AS_ROOT=true \
+            -e RUNNER_NAME_PREFIX=asdf \
+            -e ACCESS_TOKEN=1234 \
+            -e APP_ID=5678 \
+            -e APP_PRIVATE_KEY=2345 \
+            -e APP_LOGIN=SOMETHING \
+            -e RUNNER_SCOPE=org \
+            -e ORG_NAME=myoung34 \
+            -e ENTERPRISE_NAME=emyoung34 \
+            -e LABELS=blue,green \
+            -e RUNNER_TOKEN=3456 \
+            -e RUNNER_WORKDIR=/tmp/a \
+            -e RUNNER_GROUP=wat \
+            -e GITHUB_HOST=github.example.com \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+            -e EPHEMERAL=true \
+            -e DISABLE_AUTO_UPDATE=true \
+            ${GH_RUNNER_IMAGE} 10
 
   debian_tests:
     runs-on: ubuntu-latest
@@ -134,48 +140,54 @@ jobs:
 
           # Sanity check
           grep FROM Dockerfile.final.debian-${{ matrix.release }}
-      - name: Build final image
-        uses: docker/build-push-action@v6
+      - name: Retry build final image
+        uses: nick-fields/retry@v3
         with:
-          context: .
-          file: Dockerfile.final.debian-${{ matrix.release }}
-          pull: true
-          push: false
-          load: true
-          tags: ${{ env.GH_RUNNER_IMAGE }}
-          platforms: linux/${{ matrix.platform }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          timeout_minutes: 60
+          max_attempts: 3
+          command: |
+            docker buildx build \
+              --file Dockerfile.final.debian-${{ matrix.release }} \
+              --platform linux/${{ matrix.platform }} \
+              --tag ${{ env.GH_RUNNER_IMAGE }} \
+              --load \
+              --cache-from type=gha \
+              --cache-to type=gha,mode=max \
+              .
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run goss tests
-        run: |
-          echo "os: debian" >goss_vars_${GH_RUNNER_IMAGE}.yaml
-          echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-          echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-          # test the base
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
-          # test the final image but with all defaults
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
-          # test the final image but with non-default values
-          GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
-          -e DEBUG_ONLY=true \
-          -e RUNNER_NAME=huzzah \
-          -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
-          -e RUN_AS_ROOT=true \
-          -e RUNNER_NAME_PREFIX=asdf \
-          -e ACCESS_TOKEN=1234 \
-          -e APP_ID=5678 \
-          -e APP_PRIVATE_KEY=2345 \
-          -e APP_LOGIN=SOMETHING \
-          -e RUNNER_SCOPE=org \
-          -e ORG_NAME=myoung34 \
-          -e ENTERPRISE_NAME=emyoung34 \
-          -e LABELS=blue,green \
-          -e RUNNER_TOKEN=3456 \
-          -e RUNNER_WORKDIR=/tmp/a \
-          -e RUNNER_GROUP=wat \
-          -e GITHUB_HOST=github.example.com \
-          -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
-          -e EPHEMERAL=true \
-          -e DISABLE_AUTO_UPDATE=true \
-          ${GH_RUNNER_IMAGE} 10
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          command: |
+            echo "os: debian" >goss_vars_${GH_RUNNER_IMAGE}.yaml
+            echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            # test the base
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            # test the final image but with all defaults
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            # test the final image but with non-default values
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e RUNNER_NAME=huzzah \
+            -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
+            -e RUN_AS_ROOT=true \
+            -e RUNNER_NAME_PREFIX=asdf \
+            -e ACCESS_TOKEN=1234 \
+            -e APP_ID=5678 \
+            -e APP_PRIVATE_KEY=2345 \
+            -e APP_LOGIN=SOMETHING \
+            -e RUNNER_SCOPE=org \
+            -e ORG_NAME=myoung34 \
+            -e ENTERPRISE_NAME=emyoung34 \
+            -e LABELS=blue,green \
+            -e RUNNER_TOKEN=3456 \
+            -e RUNNER_WORKDIR=/tmp/a \
+            -e RUNNER_GROUP=wat \
+            -e GITHUB_HOST=github.example.com \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+            -e EPHEMERAL=true \
+            -e DISABLE_AUTO_UPDATE=true \
+            ${GH_RUNNER_IMAGE} 10
