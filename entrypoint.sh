@@ -51,9 +51,21 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   fi
 fi
 
+_CREATE_RUNNER_GROUP=${CREATE_RUNNER_GROUP:="false"}
+if [[ -n "${RUNNER_GROUP}" ]] && [[ ${_CREATE_RUNNER_GROUP} == "true" ]]; then
+  ACCESS_TOKEN="${ACCESS_TOKEN}" bash /create_group.sh
+  if [[ $? != 0 ]] ; then
+    echo "ERROR: create_group.sh failed" >&2
+    exit 1
+  fi
+elif [[ ! -n "${RUNNER_GROUP}" ]] && [[ ${_CREATE_RUNNER_GROUP} == "true" ]]; then
+  echo "ERROR: CREATE_RUNNER_GROUP needs RUNNER_GROUP set" >&2
+  exit 1
+fi
+_RUNNER_GROUP=${RUNNER_GROUP:-Default}
+
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work/${_RUNNER_NAME}}
 _LABELS=${LABELS:-default}
-_RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 _START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
@@ -171,6 +183,7 @@ unset_config_vars() {
   unset RUNNER_TOKEN
   unset RUNNER_WORKDIR
   unset RUNNER_GROUP
+  unset CREATE_RUNNER_GROUP
   unset GITHUB_HOST
   unset DISABLE_AUTOMATIC_DEREGISTRATION
   unset CONFIGURED_ACTIONS_RUNNER_FILES_DIR

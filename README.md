@@ -64,6 +64,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_TOKEN` | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred. |
 | `RUNNER_WORKDIR` | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files. |
 | `RUNNER_GROUP` | Name of the runner group to add this runner to (defaults to the default runner group) |
+| `CREATE_RUNNER_GROUP` | Boolean to create the specified runner group. If `true`: will create the group specified in `RUNNER_GROUP`; `RUNNER_GROUP` must be set in this case. If any other value the group specified in `RUNNER_GROUP` must already exist. |
 | `GITHUB_HOST` | Optional URL of the Github Enterprise server e.g github.mycompany.com. Defaults to `github.com`. |
 | `DISABLE_AUTOMATIC_DEREGISTRATION` | Optional flag to disable signal catching for deregistration. Default is `false`. Any value other than exactly `false` is considered `true`. See [here](https://github.com/myoung34/docker-github-actions-runner/issues/94) |
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
