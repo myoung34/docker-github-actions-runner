@@ -56,14 +56,14 @@ file:
     owner: root
     group: root
     filetype: file
-    contains:
+    contents:
       - /^\s*# ulimit -Hn/
   /etc/sudoers:
     exists: true
     owner: root
     group: root
     filetype: file
-    contains:
+    contents:
       - '/%sudo ALL=\(ALL\) NOPASSWD: ALL/'
       - '/Defaults env_keep = "HTTP_PROXY HTTPS_PROXY NO_PROXY FTP_PROXY http_proxy https_proxy no_proxy ftp_proxy"/'
   /etc/locale.gen:
@@ -71,7 +71,7 @@ file:
     owner: root
     group: root
     filetype: file
-    contains:
+    contents:
       - '/^en_US.UTF-8 UTF-8/'
 
 user:
