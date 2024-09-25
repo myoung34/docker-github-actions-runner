@@ -89,18 +89,14 @@ To test:
 ```
 $ # need to set minimum vars for the goss test interpolation
 $ echo "os: ubuntu" >goss_vars.yaml
-$ echo "oscodename: focal >>goss_vars.yaml
+$ echo "oscodename: focal" >>goss_vars.yaml
 $ echo "arch: x86_64" >>goss_vars.yaml
 $ docker build -t my-base-test -f Dockerfile.base .
-$ # Run the base test from Dockerfile.base on the current git HEAD
-$ GH_RUNNER_IMAGE="my-base-test" GOSS_VARS=goss_vars.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true \
-  ${GH_RUNNER_IMAGE} \
-  10
 $ # Use the base image in your final
 $ sed -i.bak 's/^FROM.*/FROM my-base-test/g' Dockerfile
 $ docker build -t my-full-test -f Dockerfile .
 $ # Run the full test from Dockerfile.base on the current git HEAD
-$ GH_RUNNER_IMAGE="my-full-test" GOSS_VARS=goss_vars.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+$ GOSS_VARS=goss_vars.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
   -e DEBUG_ONLY=true \
   -e RUNNER_NAME=huzzah \
   -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
@@ -115,11 +111,11 @@ $ GH_RUNNER_IMAGE="my-full-test" GOSS_VARS=goss_vars.yaml GOSS_FILE=goss_full.ya
   -e ENTERPRISE_NAME=emyoung34 \
   -e LABELS=blue,green \
   -e RUNNER_TOKEN=3456 \
-  -e RUNNER_WORKDIR=tmp/a \
+  -e RUNNER_WORKDIR=/tmp/a \
   -e RUNNER_GROUP=wat \
   -e GITHUB_HOST=github.example.com \
   -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
   -e EPHEMERAL=true \
   -e DISABLE_AUTO_UPDATE=true \
-  ${GH_RUNNER_IMAGE} 10
+  my-full-test 10
 ```
