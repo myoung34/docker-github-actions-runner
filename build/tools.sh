@@ -6,7 +6,7 @@ function install_git() {
    || apt-get install -t stable -y --no-install-recommends git )
 }
 
-function install_liblttng_ust() {
+function install_liblttng-ust() {
   if [[ $(apt-cache search -n liblttng-ust0 | awk '{print $1}') == "liblttng-ust0" ]]; then
     apt-get install -y --no-install-recommends liblttng-ust0
   fi
@@ -16,7 +16,7 @@ function install_liblttng_ust() {
   fi
 }
 
-function install_awscli() {
+function install_aws-cli() {
   ( curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" \
     && unzip -q awscliv2.zip -d /tmp/ \
     && /tmp/aws/install \
@@ -25,7 +25,7 @@ function install_awscli() {
     || pip3 install --no-cache-dir awscli
 }
 
-function install_gitlfs() {
+function install_git-lfs() {
   local DPKG_ARCH
   DPKG_ARCH="$(dpkg --print-architecture)"
 
@@ -33,6 +33,10 @@ function install_gitlfs() {
   tar -xzf /tmp/lfs.tar.gz -C /tmp
   "/tmp/git-lfs-${GIT_LFS_VERSION}/install.sh"
   rm -rf /tmp/lfs.tar.gz "/tmp/git-lfs-${GIT_LFS_VERSION}"
+}
+
+function install_docker-cli() {
+  apt-get install -y docker-ce-cli --no-install-recommends --allow-unauthenticated
 }
 
 function install_docker() {
@@ -44,11 +48,11 @@ function install_docker() {
   sed -i 's/ulimit -Hn/# ulimit -Hn/g' /etc/init.d/docker
 }
 
-function install_container_tools() {
+function install_container-tools() {
   ( apt-get install -y --no-install-recommends podman buildah skopeo || : )
 }
 
-function install_githubcli() {
+function install_github-cli() {
   local DPKG_ARCH GH_CLI_VERSION GH_CLI_DOWNLOAD_URL
 
   DPKG_ARCH="$(dpkg --print-architecture)"
@@ -104,13 +108,17 @@ function install_powershell() {
 }
 
 function install_tools() {
-  install_git
-  install_liblttng_ust
-  install_awscli
-  install_gitlfs
-  install_docker
-  install_container_tools
-  install_githubcli
-  install_yq
-  install_powershell
+  local function_name
+  # shellcheck source=/dev/null
+  source "$(dirname "${BASH_SOURCE[0]}")/config.sh"
+
+  script_packages | while read -r package; do
+    function_name="install_${package}"
+    if declare -f "${function_name}" > /dev/null; then
+      "${function_name}"
+    else
+      echo "No install script found for package: ${package}"
+      exit 1
+    fi
+  done
 }
