@@ -10,6 +10,11 @@ This will run the [new self-hosted github actions runners](https://help.github.c
 Please see [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage)
 Please read [the contributing guidelines](https://github.com/myoung34/docker-github-actions-runner/blob/master/CONTRIBUTING.md)
 
+
+## Included software and configuration ##
+
+While this project is not perfectly 1:1 with the software upstream, the included packages etc are available [here](https://github.com/myoung34/docker-github-actions-runner/blob/master/build/config.json). Documentation can be found in [the wiki](https://github.com/myoung34/docker-github-actions-runner/wiki/Usage#modifications)
+
 ## Notes ##
 
 ### Security ###
