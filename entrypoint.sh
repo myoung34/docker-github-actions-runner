@@ -26,6 +26,7 @@ deregister_runner() {
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
+  [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
   exit
 }
 
@@ -202,9 +203,7 @@ if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
 else
   echo "Runner reusage is disabled"
   if [[ ${_DEBUG_ONLY} == "false" ]]; then
-    # Make sure there is no remnant runner config, that would break registration
-    # Cf. https://github.com/myoung34/docker-github-actions-runner/issues/402
-    rm -f /actions-runner/.runner
+    [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
     configure_runner
   fi
 fi
