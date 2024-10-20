@@ -89,4 +89,3 @@ jobs:
           docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:debian-${{ matrix.release }}
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner:debian-${{ matrix.release }}
       
-      
