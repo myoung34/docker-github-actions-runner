@@ -24,8 +24,8 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Login helm
         run: |
-         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login harbor.thelmalouise.ddns.net --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
           docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base:latest
@@ -50,8 +50,8 @@ jobs:
         run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }};   sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.ubuntu-${{ matrix.release }}
       - name: Login helm
         run: |
-         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login harbor.thelmalouise.ddns.net --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
           docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
@@ -77,8 +77,8 @@ jobs:
         run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }};  sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.debian-${{ matrix.release }}
       - name: Login helm
         run: |
-         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login harbor.thelmalouise.ddns.net --username 'robot$deploy-runner' --password ${{secrets.REGISTRY_PASSWORD }}
+         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+         docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
       - name: Build and push
         run: |
           docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
