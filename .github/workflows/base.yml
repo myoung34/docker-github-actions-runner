@@ -31,55 +31,55 @@ jobs:
           docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base:latest
           docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base:latest
 
-  ubuntu_base_deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        release: [jammy, focal, noble]
-      fail-fast: false
-    steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }};   sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.ubuntu-${{ matrix.release }}
-      - name: Login helm
-        run: |
-         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
-      - name: Build and push
-        run: |
-          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
-          docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
+  # ubuntu_base_deploy:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       release: [jammy, focal, noble]
+  #     fail-fast: false
+  #   steps:
+  #     - name: Copy Repo Files
+  #       uses: actions/checkout@master
+  #     - name: Get GitHub organization or user
+  #       run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Copy Dockerfile
+  #       run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }};   sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.ubuntu-${{ matrix.release }}
+  #     - name: Login helm
+  #       run: |
+  #        helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+  #        docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+  #     - name: Build and push
+  #       run: |
+  #         docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
+  #         docker push harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
       
 
-  debian_base_deploy:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        release: [bookworm, sid]
-      fail-fast: false
-    steps:
-      - name: Copy Repo Files
-        uses: actions/checkout@master
-      - name: Get GitHub organization or user
-        run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Copy Dockerfile
-        run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }};  sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.debian-${{ matrix.release }}
-      - name: Login helm
-        run: |
-         helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
-         docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
-      - name: Build and push
-        run: |
-          docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
-          docker push  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
+  # debian_base_deploy:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       release: [bookworm, sid]
+  #     fail-fast: false
+  #   steps:
+  #     - name: Copy Repo Files
+  #       uses: actions/checkout@master
+  #     - name: Get GitHub organization or user
+  #       run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Copy Dockerfile
+  #       run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }};  sed -i.bak 's|^FROM .*|FROM harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-${{ matrix.release }}:latest|' Dockerfile.base.debian-${{ matrix.release }}
+  #     - name: Login helm
+  #       run: |
+  #        helm registry login ${{ vars.REGISTRY_URL }} --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+  #        docker login harbor.thelmalouise.ddns.net --username 'robot$runner-image-access' --password ${{secrets.REGISTRY_PASSWORD }}
+  #     - name: Build and push
+  #       run: |
+  #         docker build . -f ./Dockerfile.base  -t  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
+  #         docker push  harbor.thelmalouise.ddns.net/runner-image/ubuntu-runner-base-${{matrix.release}}:latest
