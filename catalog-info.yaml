@@ -1,0 +1,31 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: docker-github-actions-runner
+  namespace: webgrip
+  title: GitHub Actions Runner - Docker
+  description: |
+    The GitHub Actions Runner service runs GitHub Actions in a Docker container.
+  labels:
+    tier: "2"
+  annotations:
+    github.com/project-slug: https://github.com/webgrip/docker-github-actions-runner
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-label-selector: 'app.kubernetes.io/name=webhook-initializer'
+  tags:
+    - ci
+    - automation
+    - github
+    - docker
+    - runner
+    - actions
+  links:
+    - url: https://github.com/webgrip/docker-github-actions-runner
+      title: Source Code
+      icon: github
+      type: source
+spec:
+  type: service
+  lifecycle: production
+  owner: group:webgrip/infrastructure
+  system: ci-system
