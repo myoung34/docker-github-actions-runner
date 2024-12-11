@@ -21,5 +21,8 @@ jobs:
     uses: ./.github/workflows/ci-build-push.yml
     secrets: inherit
     with:
+      artifact_registry: europe-west1-docker.pkg.dev
+      project_id: meisterlabs-prod
+      repository: custom-images
       image: ${{ inputs.product }}
       tag: ${{ inputs.tag }}
