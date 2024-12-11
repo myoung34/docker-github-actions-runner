@@ -1,0 +1,22 @@
+name: Docker Build and GCAR Push
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        type: choice
+        options:
+          - ode
+          - accounts
+          - meisternote
+          - meistertask
+          - mindmeister
+          - none
+
+jobs:
+  build_and_push:
+    uses: MeisterLabs/meister-template-helm/.github/workflows/custom_images_publish.yaml@24-12-customimages
+    secrets: inherit
+    with:
+      image: ode
+      tag: testing

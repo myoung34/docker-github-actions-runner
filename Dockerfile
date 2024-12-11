@@ -8,7 +8,7 @@ ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 RUN mkdir -p /opt/hostedtoolcache
 
 ARG GH_RUNNER_VERSION="2.317.0"
-
+ARG TARGET_PRODUCT_FILE
 ARG TARGETPLATFORM
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -28,6 +28,10 @@ RUN chmod +x /actions-runner/install_actions.sh \
 
 COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
+
+COPY /products/$TARGET_PRODUCT_FILE /$TARGET_PRODUCT_FILE
+RUN chmod +x /$TARGET_PRODUCT_FILE
+RUN bash /$TARGET_PRODUCT_FILE
 
 USER runner
 ENTRYPOINT ["/entrypoint.sh"]
