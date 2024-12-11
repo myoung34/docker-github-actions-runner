@@ -6,12 +6,17 @@ function configure_git() {
   source /etc/os-release
 
   local GIT_CORE_PPA_KEY="A1715D88E1DF1F24"
-  apt-key adv --keyserver keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY} \
-    || apt-key adv --keyserver pgp.mit.edu --recv-keys ${GIT_CORE_PPA_KEY} \
-    || apt-key adv --keyserver keyserver.pgp.com --recv-keys ${GIT_CORE_PPA_KEY}
+
+  gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys ${GIT_CORE_PPA_KEY}
+  gpg --export ${GIT_CORE_PPA_KEY} | gpg --dearmor -o /usr/share/keyrings/git-core.gpg
 
   if [[ "${VERSION_CODENAME}" == "focal" ]]; then
-    echo deb http://ppa.launchpad.net/git-core/ppa/ubuntu focal main>/etc/apt/sources.list.d/git-core.list
+    local GIT_CORE_FOCAL_PPA_KEY="E363C90F8F1B6217"
+    local KEYRING_FILE="/usr/share/keyrings/git-core-focal.gpg"
+    gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys ${GIT_CORE_FOCAL_PPA_KEY}
+    gpg --export ${GIT_CORE_FOCAL_PPA_KEY} | gpg --dearmor -o "${KEYRING_FILE}"
+    echo deb [signed-by=${KEYRING_FILE}] http://ppa.launchpad.net/git-core/ppa/ubuntu focal main>/etc/apt/sources.list.d/git-core.list
+
   fi
 }
 
@@ -38,7 +43,7 @@ function configure_container_tools() {
     echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /" \
       | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
     curl -L "https://build.opensuse.org/projects/devel:kubic/signing_keys/download?kind=gpg" \
-      | apt-key add -
+      | /usr/bin/apt-key add -
   fi
 }
 
