@@ -18,7 +18,7 @@ on:
 
 jobs:
   build_and_push:
-    uses: ./.github/workflows/ci-build-push.yaml
+    uses: ./.github/workflows/ci-build-push.yml
     secrets: inherit
     with:
       image: ${{ inputs.product }}
