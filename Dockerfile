@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM myoung34/github-runner-base:latest
+FROM myoung34/github-runner-base:2.321.0-ubuntu-noble
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ENV RUN_AS_ROOT="false"
