@@ -15,7 +15,7 @@ on:
 
 jobs:
   build_and_push:
-    uses: MeisterLabs/meister-template-helm/.github/workflows/custom_images_publish.yaml@24-12-customimages
+    uses: MeisterLabs/meister-template-helm/.github/workflows/custom_images_publish.yaml@main
     secrets: inherit
     with:
       image: ode
