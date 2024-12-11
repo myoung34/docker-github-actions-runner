@@ -12,11 +12,14 @@ on:
           - meistertask
           - mindmeister
           - none
+      tag:
+        type: string
+        required: true
 
 jobs:
   build_and_push:
-    uses: MeisterLabs/meister-template-helm/.github/workflows/custom_images_publish.yaml@main
+    uses: ./.github/workflows/ci-build-push.yaml
     secrets: inherit
     with:
-      image: ode
-      tag: testing
+      image: ${{ inputs.product }}
+      tag: ${{ inputs.tag }}
