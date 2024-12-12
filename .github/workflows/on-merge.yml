@@ -1,0 +1,44 @@
+name: Docker Build and GCAR Push
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/products/**'
+
+jobs:
+  get-changes:
+    runs-on: [self-hosted, keda, default]
+    outputs:
+      changed_products: ${{ steps.set-output.outputs.changed_directories }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          dir_names: false
+          dir_names_max_depth: 2
+          json: true
+          quotepath: false
+
+      - name: 'Set output in the matrix format'
+        id: set-output
+        run: echo "changed_products={\"product\":${{ steps.changed-files.outputs.all_changed_files }}}" >> "$GITHUB_OUTPUT"
+
+  build_and_push:
+    if: ${{ needs.get-changes.outputs.changed_directories != '' }}
+    strategy:
+      matrix: ${{fromJson(needs.get-changes.outputs.changed_products)}}
+    uses: ./.github/workflows/ci-build-push.yml
+    secrets: inherit
+    with:
+      artifact_registry: europe-west1-docker.pkg.dev
+      project_id: meisterlabs-prod
+      repository: custom-images
+      image: ${{ matrix.product }}
+      tag: ${{ inputs.tag }}
