@@ -1,0 +1,37 @@
+name: "Setup and Run Renovate"
+description: "Checkout code, set up Node.js, request Github Token and install & run Renovate."
+
+inputs:
+  RENOVATE_GH_APP_ID:
+    description: "Renovate GitHub App ID for authentication"
+    required: true
+  RENOVATE_GH_APP_PRIVATE_KEY:
+    description: "Renovate GitHub App Private Key for authentication"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install Renovate
+      shell: bash
+      run: npm install renovate@38.7.1
+
+    - uses: actions/create-github-app-token@v1
+      id: app-token
+      with:
+        app-id: ${{ inputs.RENOVATE_GH_APP_ID }}
+        private-key: ${{ inputs.RENOVATE_GH_APP_PRIVATE_KEY }}
+
+    - name: Run Renovate
+      shell: bash
+      env:
+        RENOVATE_TOKEN: ${{ steps.app-token.outputs.token }}
+      run: npx renovate --autodiscover

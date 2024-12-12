@@ -11,7 +11,7 @@
     
         steps:
           - name: Use Custom Renovate Action
-            uses: MeisterLabs/meister-template-helm/.github/actions/renovate@main
+            uses: ./.github/actions/renovate@main
             with:
               RENOVATE_GH_APP_ID: ${{ secrets.RENOVATE_GH_APP_ID }}
               RENOVATE_GH_APP_PRIVATE_KEY: ${{ secrets.RENOVATE_GH_APP_PRIVATE_KEY }}
