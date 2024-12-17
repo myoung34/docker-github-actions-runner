@@ -1,5 +1,5 @@
 # hadolint ignore=DL3007
-FROM myoung34/github-runner-base:2.321.0-ubuntu-noble
+FROM myoung34/github-runner-base:ubuntu-noble
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ENV RUN_AS_ROOT="false"
@@ -29,6 +29,12 @@ RUN chmod +x /actions-runner/install_actions.sh \
 COPY token.sh entrypoint.sh app_token.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
 
+#Install common packages
+COPY /commons/common.sh /common.sh
+RUN chmod +x /common.sh
+RUN bash /common.sh
+
+#Install product specifics
 COPY /products/$TARGET_PRODUCT_FILE /$TARGET_PRODUCT_FILE
 RUN chmod +x /$TARGET_PRODUCT_FILE
 RUN bash /$TARGET_PRODUCT_FILE
