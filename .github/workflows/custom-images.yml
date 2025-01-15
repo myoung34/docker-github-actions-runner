@@ -22,7 +22,7 @@ jobs:
     secrets: inherit
     with:
       artifact_registry: europe-west1-docker.pkg.dev
-      project_id: meisterlabs-prod
+      project_id: meisterlabs-ci
       repository: custom-images
       image: ${{ inputs.product }}
       tag: ${{ inputs.tag }}
