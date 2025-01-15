@@ -37,7 +37,3 @@ yarn run playwright-setup
 #Python install and checks
 apt-get install python3 -y
 apt-get update
-
-#MySQL 9
-apt-get install -y mysql-server 
-apt-get update

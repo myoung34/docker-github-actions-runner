@@ -10,7 +10,7 @@ on:
       project_id:
         required: true
         type: string
-        default: meisterlabs-prod
+        default: meisterlabs-ci
       repository:
         required: true
         type: string
