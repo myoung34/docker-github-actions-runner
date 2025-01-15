@@ -39,7 +39,8 @@ COPY /products/$TARGET_PRODUCT_FILE /$TARGET_PRODUCT_FILE
 RUN chmod +x /$TARGET_PRODUCT_FILE
 RUN bash /$TARGET_PRODUCT_FILE
 
+RUN sudo usermod -aG docker runner
 USER runner
-RUN sudo usermod -aG docker ${USER}
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
