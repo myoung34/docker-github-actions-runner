@@ -40,5 +40,6 @@ RUN chmod +x /$TARGET_PRODUCT_FILE
 RUN bash /$TARGET_PRODUCT_FILE
 
 USER runner
+RUN sudo usermod -aG docker ${USER}
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["./bin/Runner.Listener", "run", "--startuptype", "service"]
