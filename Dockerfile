@@ -8,6 +8,7 @@ ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 RUN mkdir -p /opt/hostedtoolcache
 
 ARG GH_RUNNER_VERSION="2.322.0"
+ARG TARGET_BASE_FILE
 ARG TARGET_PRODUCT_FILE
 ARG TARGETPLATFORM
 
@@ -36,6 +37,16 @@ COPY permissions.sh /runner
 COPY /commons/common.sh /common.sh
 RUN chmod +x /common.sh
 RUN bash /common.sh
+
+#Install base packages
+COPY /bases/$TARGET_BASE_FILE /$TARGET_BASE_FILE
+RUN chmod +x /$TARGET_BASE_FILE
+RUN bash /$TARGET_BASE_FILE
+
+#Install product specifics
+COPY /products/$TARGET_PRODUCT_FILE /$TARGET_PRODUCT_FILE
+RUN chmod +x /$TARGET_PRODUCT_FILE
+RUN bash /$TARGET_PRODUCT_FILE
 
 USER runner
 
