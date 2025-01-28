@@ -56,7 +56,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        build-args: TARGET_PRODUCT_FILE=${{ inputs.product }}-packages.sh,TARGET_BASE_FILE=${{ inputs.base }}-packages.sh
+        build-args: TARGET_PRODUCT_FILE=${{ inputs.image }}-packages.sh,TARGET_BASE_FILE=${{ inputs.base }}-packages.sh
         tags: |
            ${{ inputs.artifact_registry }}/${{ inputs.project_id }}/${{ inputs.repository }}/${{ inputs.image }}:${{ steps.get-tag.outputs.short_ref }}
            ${{ inputs.artifact_registry }}/${{ inputs.project_id }}/${{ inputs.repository }}/${{ inputs.image }}:${{ inputs.tag }}
