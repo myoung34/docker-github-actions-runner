@@ -3,6 +3,12 @@ name: Docker Build and GCAR Push
 on:
   workflow_dispatch:
     inputs:
+      base:
+        type: choice
+        options:
+          - elixir
+          - ruby
+          - python
       product:
         type: choice
         options:
@@ -25,4 +31,5 @@ jobs:
       project_id: meisterlabs-ci
       repository: custom-images
       image: ${{ inputs.product }}
+      base: ${{ inputs.base }}
       tag: ${{ inputs.tag }}
