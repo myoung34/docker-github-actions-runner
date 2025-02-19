@@ -17,7 +17,8 @@ function install_essentials() {
       locales \
       gosu \
       gpg-agent \
-      dumb-init
+      dumb-init \
+      libc-bin
 }
 
 function install_tools_apt() {
