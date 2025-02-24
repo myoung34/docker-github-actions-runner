@@ -10,4 +10,4 @@ curl -L "https://github.com/actions/runner/releases/download/v${GH_RUNNER_VERSIO
 tar -zxf actions.tar.gz
 rm -f actions.tar.gz
 ./bin/installdependencies.sh
-mkdir /_work
+mkdir -p /_work

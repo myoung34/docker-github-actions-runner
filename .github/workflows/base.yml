@@ -72,6 +72,9 @@ jobs:
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
 
   debian_base_tests:
     runs-on: ubuntu-latest
@@ -133,6 +136,9 @@ jobs:
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
 
 
   ubuntu_base_latest_deploy:

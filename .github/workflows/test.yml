@@ -77,10 +77,31 @@ jobs:
             echo "os: ubuntu" >goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            # test the edge case from deregistration on reusable runners
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e ACCESS_TOKEN=notreal \
+            -e LABELS=linux,x64 \
+            -e REPO_URL=https://github.com/octokode/test1 \
+            -e RUNNER_NAME=sustainjane-runner-1 \
+            -e RUNNER_SCOPE=repo \
+            -e RUNNER_WORKDIR=/tmp/runner/work \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            -e CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/runner/data \
+            ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the base
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the final image but with all defaults
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the final image but with non-default values
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=true \
@@ -104,7 +125,9 @@ jobs:
             -e EPHEMERAL=true \
             -e DISABLE_AUTO_UPDATE=true \
             ${GH_RUNNER_IMAGE} 10
-
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
   debian_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -168,6 +191,21 @@ jobs:
             echo "os: debian" >goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
+            # test the edge case from deregistration on reusable runners
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e ACCESS_TOKEN=notreal \
+            -e LABELS=linux,x64 \
+            -e REPO_URL=https://github.com/octokode/test1 \
+            -e RUNNER_NAME=sustainjane-runner-1 \
+            -e RUNNER_SCOPE=repo \
+            -e RUNNER_WORKDIR=/tmp/runner/work \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            -e CONFIGURED_ACTIONS_RUNNER_FILES_DIR=/runner/data \
+            ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the base
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             # test the final image but with all defaults
