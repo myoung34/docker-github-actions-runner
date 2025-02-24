@@ -1,0 +1,9 @@
+command:
+  /entrypoint.sh something:
+    exit-status: 1
+    stdout:
+      - "Runner reusage is enabled"
+      - "Reusage is enabled. Storing data to /runner/data"
+      - "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner."
+    stderr: ""
+    timeout: 2000

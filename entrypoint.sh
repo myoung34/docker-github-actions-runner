@@ -210,6 +210,10 @@ fi
 
 if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Reusage is enabled. Storing data to ${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
+    echo "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner."
+    exit 1
+  fi
   # Quoting (even with double-quotes) the regexp brokes the copying
   cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
