@@ -1,7 +1,8 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    "helpers:pinGitHubActionDigests"
   ],
   "packageRules": [
     {
@@ -11,6 +12,11 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchPackagePatterns": [".*"],
+      "versioning": "digest"
     }
   ],
   "platformAutomerge": true
