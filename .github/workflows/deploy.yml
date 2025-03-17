@@ -28,11 +28,11 @@ jobs:
       - name: Get GitHub organization or user
         run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
         with:
           image: tonistiigi/binfmt:qemu-v7.0.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
       - name: Install Goss and dgoss
@@ -46,12 +46,12 @@ jobs:
         id: testvars
         run: echo "GH_RUNNER_IMAGE=ubuntu-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Retry build and load
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -67,7 +67,7 @@ jobs:
               .
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run goss tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -140,11 +140,11 @@ jobs:
       - name: Get GitHub organization or user
         run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
         with:
           image: tonistiigi/binfmt:qemu-v7.0.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
       - name: Install Goss and dgoss
@@ -158,12 +158,12 @@ jobs:
         id: testvars
         run: echo "GH_RUNNER_IMAGE=debian-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Retry build and load
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -179,7 +179,7 @@ jobs:
               .
       # Tests will run against the final `${GH_RUNNER_IMAGE}` laid on top of `base-${GH_RUNNER_IMAGE}`
       - name: Run goss tests
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -239,26 +239,26 @@ jobs:
       - name: Get GitHub organization or user
         run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
         with:
           image: tonistiigi/binfmt:qemu-v7.0.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Update Dockerfile FROM org
         run: sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:latest/" Dockerfile
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Retry build and push
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -287,26 +287,26 @@ jobs:
       - name: Get GitHub organization or user
         run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
         with:
           image: tonistiigi/binfmt:qemu-v7.0.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Retry build and push
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
@@ -335,26 +335,26 @@ jobs:
       - name: Get GitHub organization or user
         run: echo 'ORG='$(echo $(dirname ${GITHUB_REPOSITORY}) | awk '{print tolower($0)}') >> $GITHUB_ENV
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
         with:
           image: tonistiigi/binfmt:qemu-v7.0.0
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Retry build and push
-        uses: nick-fields/retry@v3
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3
         with:
           timeout_minutes: 60
           max_attempts: 3
