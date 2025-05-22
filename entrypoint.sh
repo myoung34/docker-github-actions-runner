@@ -150,7 +150,7 @@ configure_runner() {
       --replace \
       "${ARGS[@]}"
 
-  [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir "${_RUNNER_WORKDIR}"
+  [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir -p "${_RUNNER_WORKDIR}"
 
 }
 
