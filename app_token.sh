@@ -61,7 +61,7 @@ base64url() {
 }
 
 rs256_sign() {
-    openssl dgst -binary -sha256 -sign <(echo "$1")
+    openssl dgst -binary -sha256 -sign echo "$1"
 }
 
 request_access_token() {
