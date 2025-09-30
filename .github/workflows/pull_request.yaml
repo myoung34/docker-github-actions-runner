@@ -1,0 +1,21 @@
+---
+name: Check for Linear ref
+
+on: # yamllint disable-line rule:truthy
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+
+  linear_ref:
+    runs-on: [self-hosted, keda, default]
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v5
+      - uses: MeisterLabs/meister-template-helm/.github/actions/linear-ref@main
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
