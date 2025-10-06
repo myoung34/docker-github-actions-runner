@@ -21,8 +21,7 @@
         "gettext",
         "libcurl4-openssl-dev",
         "libpq-dev",
-        "pkg-config",
-        "software-properties-common"
+        "pkg-config"
       ]
     },
     {
