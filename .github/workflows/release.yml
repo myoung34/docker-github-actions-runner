@@ -125,7 +125,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: [bookworm, sid]
+        release: [bookworm, trixie]
       fail-fast: false
     needs: create-release
     steps:
