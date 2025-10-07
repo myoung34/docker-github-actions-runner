@@ -9,6 +9,7 @@ on:
       - develop
   schedule:
     - cron:  '59 23 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read

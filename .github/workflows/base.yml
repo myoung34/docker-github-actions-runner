@@ -10,6 +10,7 @@ on:
       - develop
   schedule:
     - cron:  '0 22 * * *'
+  workflow_dispatch:
 
 jobs:
   ubuntu_base_tests:
@@ -220,7 +221,7 @@ jobs:
     needs: debian_base_tests
     strategy:
       matrix:
-        release: [bookworm, trixig]
+        release: [bookworm, trixie]
       fail-fast: false
     steps:
       - name: Copy Repo Files
