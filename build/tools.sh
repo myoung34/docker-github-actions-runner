@@ -28,6 +28,9 @@ function install_aws-cli() {
 function install_git-lfs() {
   local DPKG_ARCH
   DPKG_ARCH="$(dpkg --print-architecture)"
+  GIT_LFS_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
+    https://api.github.com/repos/git-lfs/git-lfs/releases/latest \
+      | jq -r '.tag_name' | sed 's/^v//g')
 
   curl -s "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz
   tar -xzf /tmp/lfs.tar.gz -C /tmp
