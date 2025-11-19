@@ -22,6 +22,19 @@ trap_with_arg() {
 deregister_runner() {
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
+    # If using GitHub App authentication, refresh the access token before deregistration
+    if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
+      echo "Refreshing access token for deregistration"
+      nl="
+"
+      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+      if [[ -z "${NEW_ACCESS_TOKEN}" ]] || [[ "${NEW_ACCESS_TOKEN}" == "null" ]]; then
+        echo "ERROR: Failed to refresh access token for deregistration"
+        exit 1
+      fi
+      ACCESS_TOKEN="${NEW_ACCESS_TOKEN}"
+      echo "Access token refreshed successfully"
+    fi
     _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
     RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
   fi
