@@ -55,7 +55,7 @@ jobs:
           max_attempts: 3
           command: |
             docker buildx build \
-              --file Dockerfile \
+              --file Dockerfile.base.ubuntu-${{ matrix.release }} \
               --platform linux/${{ matrix.platform }} \
               --tag ${{ env.GH_RUNNER_IMAGE }} \
               --load \
