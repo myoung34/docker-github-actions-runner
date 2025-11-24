@@ -87,3 +87,6 @@ group:
     runner:
         exists: true
         gid: 121
+    docker:
+        exists: true
+        gid: 500
