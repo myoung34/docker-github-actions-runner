@@ -38,25 +38,11 @@ function install_git-lfs() {
   rm -rf /tmp/lfs.tar.gz "/tmp/git-lfs-${GIT_LFS_VERSION}"
 }
 
-function configure_docker_group_id() {
-  local desired_gid="$(docker_group_id)"
-  local current_gid=$(getent group docker | cut -d: -f3)
-
-  if [[ "$current_gid" != "$desired_gid" ]]; then
-    # Expected to fail if the group already exists or the GID is already in use
-    groupadd --system --gid "$desired_gid" docker 2>/dev/null || true
-  fi
-}
-
 function install_docker-cli() {
-  configure_docker_group_id
-
   apt-get install -y docker-ce-cli --no-install-recommends --allow-unauthenticated
 }
 
 function install_docker() {
-  configure_docker_group_id
-
   apt-get install -y docker-ce docker-ce-cli docker-buildx-plugin containerd.io docker-compose-plugin --no-install-recommends --allow-unauthenticated
 
   echo -e '#!/bin/sh\ndocker compose --compatibility "$@"' > /usr/local/bin/docker-compose
