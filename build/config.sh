@@ -13,6 +13,10 @@ function group_id() {
   jq -r '.user."group-id"' "$(config_file)"
 }
 
+function docker_group_id() {
+  jq -r '.user."docker-group-id"' "$(config_file)"
+}
+
 function apt_packages() {
   jq -r '.install[] | select(.source == "apt") | .packages[]' "$(config_file)" | paste -sd ' ' -
 }

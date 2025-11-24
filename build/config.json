@@ -1,7 +1,8 @@
 {
   "user": {
     "user-id": 1001,
-    "group-id": 121
+    "group-id": 121,
+    "docker-group-id": 500
   },
   "install": [
     {
