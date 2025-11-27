@@ -4,6 +4,21 @@
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
 
+# Function to read secrets from file in a Docker Swarm setup
+read_secret() {
+  local secret_name="$1"
+  local secret_file="/run/secrets/${secret_name}"
+  if [ -f "${secret_file}" ]; then
+    export "${secret_name}"="$(cat ${secret_file})"
+  fi
+}
+
+# Read Docker secrets if available
+read_secret "ACCESS_TOKEN"
+read_secret "RUNNER_TOKEN"
+read_secret "APP_ID"
+read_secret "APP_PRIVATE_KEY"
+
 # Un-export these, so that they must be passed explicitly to the environment of
 # any command that needs them.  This may help prevent leaks.
 export -n ACCESS_TOKEN
