@@ -17,6 +17,7 @@
       "source": "apt",
       "packages": [
         "build-essential",
+        "lsb-release",
         "zlib1g-dev",
         "zstd",
         "gettext",
