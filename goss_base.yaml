@@ -11,8 +11,8 @@ package:
         installed: false
     jq:
         installed: true
-    lsb_release:
-        installed: false
+    lsb-release:
+        installed: true
     make:
         installed: true
     pwsh:
