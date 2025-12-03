@@ -81,6 +81,13 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `DEBUG_OUTPUT` | Optional boolean to print additional debug output. Default: false |
 | `UNSET_CONFIG_VARS` | Optional flag to unset all configuration environment variables after runner setup but before starting the runner. This prevents these variables from leaking into the workflow environment. Set to 'true' to enable. Defaults to 'false' for backward compatibility. |
 
+## Docker Swarm Secrets ##
+
+Docker Swarm secrets configuration is available to be configured for `ACCESS_TOKEN`, `RUNNER_TOKEN`, `APP_ID` and `APP_PRIVATE_KEY`.
+
+If a docker secret is configured for the variable then that environment variable will be overrided.
+See https://docs.docker.com/engine/swarm/secrets for more details on how to use secrets.
+
 ## Tests ##
 
 Tests are written in [goss](https://github.com/goss-org/goss/) for general assertions.
