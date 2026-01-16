@@ -67,7 +67,7 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
 fi
 
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work/${_RUNNER_NAME}}
-_LABELS=${LABELS:-default}
+_LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
