@@ -2,7 +2,7 @@ name: GitHub Actions Runner in Docker - Release
 on:
   push:
     tags:
-      - '*'
+      - "*"
 
 permissions:
   contents: write
@@ -11,23 +11,23 @@ permissions:
 jobs:
   create-release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-    - name: Checkout code
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
+      - name: Checkout code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
 
   ubuntu_latest_tag:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: create-release
     steps:
       - name: Copy Repo Files
@@ -73,7 +73,7 @@ jobs:
               .
 
   ubuntu_tag:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: create-release
     strategy:
       matrix:
@@ -122,7 +122,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   debian_tag:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [bookworm, trixie]
