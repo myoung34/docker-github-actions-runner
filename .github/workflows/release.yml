@@ -11,7 +11,7 @@ permissions:
 jobs:
   create-release:
     name: Create Release
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -27,7 +27,7 @@ jobs:
           prerelease: false
 
   ubuntu_latest_tag:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
     needs: create-release
     steps:
       - name: Copy Repo Files
@@ -73,7 +73,7 @@ jobs:
               .
 
   ubuntu_tag:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
     needs: create-release
     strategy:
       matrix:
@@ -122,7 +122,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   debian_tag:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux, x64]
     strategy:
       matrix:
         release: [bookworm, trixie]
