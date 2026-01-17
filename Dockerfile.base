@@ -1,5 +1,5 @@
 FROM ubuntu:focal
-LABEL maintainer="myoung34@my.apsu.edu"
+LABEL maintainer="rs.lukawski@gmail.com"
 
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US.UTF-8

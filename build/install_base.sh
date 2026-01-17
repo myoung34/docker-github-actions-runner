@@ -18,7 +18,8 @@ function install_essentials() {
       gosu \
       gpg-agent \
       dumb-init \
-      libc-bin
+      libc-bin \
+      npm
 }
 
 function install_tools_apt() {
