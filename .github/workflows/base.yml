@@ -14,7 +14,7 @@ on:
 
 jobs:
   ubuntu_base_tests:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [jammy, focal, noble]
@@ -78,7 +78,7 @@ jobs:
             fi
 
   debian_base_tests:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [bookworm, trixie]
@@ -142,7 +142,7 @@ jobs:
             fi
 
   ubuntu_base_latest_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: ubuntu_base_tests
     steps:
       - name: Copy Repo Files
@@ -176,7 +176,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   ubuntu_base_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: ubuntu_base_tests
     strategy:
       matrix:
@@ -216,7 +216,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   debian_base_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: debian_base_tests
     strategy:
       matrix:

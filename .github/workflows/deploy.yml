@@ -17,7 +17,7 @@ permissions:
 
 jobs:
   ubuntu_tests:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [jammy, focal, noble]
@@ -129,7 +129,7 @@ jobs:
             fi
 
   debian_tests:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [bookworm, trixie]
@@ -232,7 +232,7 @@ jobs:
             ${GH_RUNNER_IMAGE} 10
 
   ubuntu_latest_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: ubuntu_tests
     steps:
       - name: Copy Repo Files
@@ -276,7 +276,7 @@ jobs:
               .
 
   ubuntu_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: ubuntu_tests
     strategy:
       matrix:
@@ -324,7 +324,7 @@ jobs:
               .
 
   debian_deploy:
-    runs-on: [self-hosted, linux, x64]
+    runs-on: self-hosted
     needs: debian_tests
     strategy:
       matrix:
