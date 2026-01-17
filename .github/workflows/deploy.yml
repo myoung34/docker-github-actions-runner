@@ -50,11 +50,11 @@ jobs:
       - name: set testable image environment variable
         id: testvars
         run: echo "GH_RUNNER_IMAGE=ubuntu-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      #   with:
-      #     username: ${{ secrets.DOCKER_USER }}
-      #     password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Retry build and load
         uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08 # v3.0.2
         with:
@@ -161,11 +161,11 @@ jobs:
       - name: set testable image environment variable
         id: testvars
         run: echo "GH_RUNNER_IMAGE=debian-${{ matrix.release }}-${{ env.GIT_SHA }}-${{ matrix.platform }}" >> $GITHUB_ENV
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      #   with:
-      #     username: ${{ secrets.DOCKER_USER }}
-      #     password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -255,11 +255,11 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Update Dockerfile FROM org
         run: sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:latest/" Dockerfile
-      # - name: Login to DockerHub
-      # uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      # with:
-      #   username: ${{ secrets.DOCKER_USER }}
-      #   password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
@@ -303,11 +303,11 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      #   with:
-      #     username: ${{ secrets.DOCKER_USER }}
-      #     password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
@@ -351,11 +351,11 @@ jobs:
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
       - name: Copy Dockerfile
         run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
-      # - name: Login to DockerHub
-      #   uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
-      #   with:
-      #     username: ${{ secrets.DOCKER_USER }}
-      #     password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Login to DockerHub
+        uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
