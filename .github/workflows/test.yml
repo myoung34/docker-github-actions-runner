@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: [jammy, focal, noble]
+        release: [jammy, noble]
         platform: [amd64, arm64]
       fail-fast: false
     steps:

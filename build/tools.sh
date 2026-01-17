@@ -70,16 +70,32 @@ function install_github-cli() {
 
   DPKG_ARCH="$(dpkg --print-architecture)"
 
+  echo "Fetching GitHub CLI latest release info..."
   GH_CLI_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/cli/cli/releases/latest \
       | jq -r '.tag_name' | sed 's/^v//g')
 
+  if [[ -z "${GH_CLI_VERSION}" || "${GH_CLI_VERSION}" == "null" ]]; then
+    echo "Error: Failed to get GitHub CLI version (possible API rate limit)"
+    exit 1
+  fi
+
+  echo "Installing GitHub CLI v${GH_CLI_VERSION}..."
   GH_CLI_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/cli/cli/releases/latest \
       | jq ".assets[] | select(.name == \"gh_${GH_CLI_VERSION}_linux_${DPKG_ARCH}.deb\")" \
       | jq -r '.browser_download_url')
 
-  curl -sSLo /tmp/ghcli.deb "${GH_CLI_DOWNLOAD_URL}"
+  if [[ -z "${GH_CLI_DOWNLOAD_URL}" || "${GH_CLI_DOWNLOAD_URL}" == "null" ]]; then
+    echo "Error: Failed to get GitHub CLI download URL"
+    exit 1
+  fi
+
+  if ! curl -fsSLo /tmp/ghcli.deb "${GH_CLI_DOWNLOAD_URL}"; then
+    echo "Error: Failed to download GitHub CLI"
+    exit 1
+  fi
+
   apt-get -y install /tmp/ghcli.deb
   rm /tmp/ghcli.deb
 }
