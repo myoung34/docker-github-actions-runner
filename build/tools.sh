@@ -32,7 +32,17 @@ function install_git-lfs() {
     https://api.github.com/repos/git-lfs/git-lfs/releases/latest \
       | jq -r '.tag_name' | sed 's/^v//g')
 
-  curl -s "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz
+  if [[ -z "${GIT_LFS_VERSION}" ]]; then
+    echo "Error: Failed to get git-lfs version"
+    exit 1
+  fi
+
+  echo "Downloading git-lfs v${GIT_LFS_VERSION}"
+  if ! curl -fsSL "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -o /tmp/lfs.tar.gz; then
+    echo "Error: Failed to download git-lfs"
+    exit 1
+  fi
+
   tar -xzf /tmp/lfs.tar.gz -C /tmp
   "/tmp/git-lfs-${GIT_LFS_VERSION}/install.sh"
   rm -rf /tmp/lfs.tar.gz "/tmp/git-lfs-${GIT_LFS_VERSION}"
@@ -84,7 +94,17 @@ function install_yq() {
       | jq ".assets[] | select(.name == \"yq_linux_${DPKG_ARCH}.tar.gz\")" \
       | jq -r '.browser_download_url')
 
-  curl -s "${YQ_DOWNLOAD_URL}" -L -o /tmp/yq.tar.gz
+  if [[ -z "${YQ_DOWNLOAD_URL}" ]]; then
+    echo "Error: Failed to get yq download URL"
+    exit 1
+  fi
+
+  echo "Downloading yq from: ${YQ_DOWNLOAD_URL}"
+  if ! curl -fsSL "${YQ_DOWNLOAD_URL}" -o /tmp/yq.tar.gz; then
+    echo "Error: Failed to download yq"
+    exit 1
+  fi
+
   tar -xzf /tmp/yq.tar.gz -C /tmp
   mv "/tmp/yq_linux_${DPKG_ARCH}" /usr/local/bin/yq
 }
@@ -99,11 +119,26 @@ function install_powershell() {
       | jq -r '.tag_name' \
       | sed 's/^v//g')
 
+  if [[ -z "${PWSH_VERSION}" ]]; then
+    echo "Error: Failed to get PowerShell version"
+    exit 1
+  fi
+
   PWSH_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
     https://api.github.com/repos/PowerShell/PowerShell/releases/latest \
       | jq -r ".assets[] | select(.name == \"powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz\") | .browser_download_url")
 
-  curl -L -o /tmp/powershell.tar.gz "$PWSH_DOWNLOAD_URL"
+  if [[ -z "${PWSH_DOWNLOAD_URL}" ]]; then
+    echo "Error: Failed to get PowerShell download URL"
+    exit 1
+  fi
+
+  echo "Downloading PowerShell v${PWSH_VERSION} from: ${PWSH_DOWNLOAD_URL}"
+  if ! curl -fsSL -o /tmp/powershell.tar.gz "$PWSH_DOWNLOAD_URL"; then
+    echo "Error: Failed to download PowerShell"
+    exit 1
+  fi
+
   mkdir -p /opt/powershell
   tar zxf /tmp/powershell.tar.gz -C /opt/powershell
   chmod +x /opt/powershell/pwsh

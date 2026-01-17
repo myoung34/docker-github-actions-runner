@@ -7,7 +7,7 @@ on:
 jobs:
   analyze:
     name: Analyze GitHub Actions YAML
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       actions: read
