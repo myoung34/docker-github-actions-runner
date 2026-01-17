@@ -9,12 +9,12 @@ on:
       - master
       - develop
   schedule:
-    - cron:  '0 22 * * *'
+    - cron: "0 22 * * *"
   workflow_dispatch:
 
 jobs:
   ubuntu_base_tests:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [jammy, focal, noble]
@@ -78,7 +78,7 @@ jobs:
             fi
 
   debian_base_tests:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         release: [bookworm, trixie]
@@ -141,9 +141,8 @@ jobs:
               exit 1
             fi
 
-
   ubuntu_base_latest_deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: ubuntu_base_tests
     steps:
       - name: Copy Repo Files
@@ -177,7 +176,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   ubuntu_base_deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: ubuntu_base_tests
     strategy:
       matrix:
@@ -217,7 +216,7 @@ jobs:
               --cache-to type=gha,mode=max \
               .
   debian_base_deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: debian_base_tests
     strategy:
       matrix:
