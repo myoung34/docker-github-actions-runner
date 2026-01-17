@@ -47,14 +47,27 @@ function configure_container_tools() {
   fi
 }
 
+function configure_nodejs() {
+  # Add NodeSource repository for Node.js 20
+  local NODE_MAJOR=20
+  local KEYRING_FILE="/etc/apt/keyrings/nodesource.gpg"
+
+  mkdir -p /etc/apt/keyrings
+  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o "${KEYRING_FILE}"
+  echo "deb [signed-by=${KEYRING_FILE}] https://deb.nodesource.com/node_${NODE_MAJOR}.x nodistro main" \
+    | tee /etc/apt/sources.list.d/nodesource.list > /dev/null
+}
+
 function configure_sources() {
   configure_git
   configure_docker
   configure_container_tools
+  configure_nodejs
 }
 
 function remove_sources() {
   rm -f /etc/apt/sources.list.d/git-core.list
   rm -f /etc/apt/sources.list.d/docker.list
   rm -f /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+  rm -f /etc/apt/sources.list.d/nodesource.list
 }
