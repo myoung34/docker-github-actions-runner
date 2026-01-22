@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
     - name: Create Release
       id: create_release
       uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1.1.4
@@ -31,7 +31,7 @@ jobs:
     needs: create-release
     steps:
       - name: Copy Repo Files
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: get version
         run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
       - name: Get GitHub organization or user
@@ -81,7 +81,7 @@ jobs:
       fail-fast: false
     steps:
       - name: Copy Repo Files
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: get version
         run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
       - name: Get GitHub organization or user
@@ -130,7 +130,7 @@ jobs:
     needs: create-release
     steps:
       - name: Copy Repo Files
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: get version
         run: echo 'TAG='${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
       - name: Get GitHub organization or user
