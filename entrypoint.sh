@@ -137,17 +137,17 @@ configure_runner() {
   fi
 
   # shellcheck disable=SC2153
-  if [ -n "${EPHEMERAL}" ]; then
+  if [ "${EPHEMERAL}" = "true" ] || [ "${EPHEMERAL}" = "1" ]; then
     echo "Ephemeral option is enabled"
     ARGS+=("--ephemeral")
   fi
 
-  if [ -n "${DISABLE_AUTO_UPDATE}" ]; then
+  if [ "${DISABLE_AUTO_UPDATE}" = "true" ] || [ "${DISABLE_AUTO_UPDATE}" = "1" ]; then
     echo "Disable auto update option is enabled"
     ARGS+=("--disableupdate")
   fi
 
-  if [ -n "${NO_DEFAULT_LABELS}" ]; then
+  if [ "${NO_DEFAULT_LABELS}" = "true" ] || [ "${NO_DEFAULT_LABELS}" = "1" ]; then
     echo "Disable adding the default self-hosted, platform, and architecture labels"
     ARGS+=("--no-default-labels")
   fi
