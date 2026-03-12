@@ -10,6 +10,7 @@
 #
 
 set -o pipefail
+source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
 : "${GITHUB_HOST:=github.com}"
 
@@ -70,7 +71,7 @@ request_access_token() {
     local jwt_payload encoded_jwt_parts encoded_mac generated_jwt auth_header
     local app_installations_response access_token_url
 
-    jwt_payload=$(build_jwt_payload) || exit $?
+    jwt_payload=$(build_jwt_payload) || fail "JWT payload construction failed w/ $?"
     encoded_jwt_parts=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${jwt_payload}")
     encoded_mac=$(echo -n "${encoded_jwt_parts}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
     generated_jwt="${encoded_jwt_parts}.${encoded_mac}"
@@ -81,15 +82,15 @@ request_access_token() {
         -H "${auth_header}" \
         -H "${API_HEADER}" \
         "${APP_INSTALLATIONS_URI}" \
-    ) || { echo "FAIL: curling $APP_INSTALLATIONS_URI failed w/ $?" >&2; exit 1; }
+    ) || fail "fetching $APP_INSTALLATIONS_URI failed w/ $?"
     access_token_url=$(echo "${app_installations_response}" | \
-        jq -re '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url') || exit $?
+        jq -re '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url') || fail "no [.access_token_url] found"
 
     curl -fsX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
         -H "${auth_header}" \
         -H "${API_HEADER}" \
-        "${access_token_url}" | jq -re .token || exit $?
+        "${access_token_url}" | jq -re .token || fail "$access_token_url fetch & [.token] extraction failed with $?"
 }
 
 request_access_token

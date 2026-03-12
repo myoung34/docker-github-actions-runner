@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -o pipefail
+source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
 : "${GITHUB_HOST:=github.com}"
 
@@ -40,6 +41,6 @@ RUNNER_TOKEN="$(curl -XPOST -fsSL \
   -H "${CONTENT_LENGTH_HEADER}" \
   -H "${AUTH_HEADER}" \
   -H "${API_HEADER}" \
-  "${_FULL_URL}" | jq -re .token)" || exit $?
+  "${_FULL_URL}" | jq -re .token)" || fail "$_FULL_URL fetch & [.token] extraction failed with $?"
 
 printf '{"token": "%s", "full_url": "%s"}' "$RUNNER_TOKEN" "$_FULL_URL"
