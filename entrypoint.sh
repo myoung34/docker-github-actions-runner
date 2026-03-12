@@ -34,7 +34,7 @@ trap_with_arg() {
 }
 
 deregister_runner() {
-  local nl new_access_token token
+  local nl token
 
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
@@ -43,16 +43,15 @@ deregister_runner() {
       echo "Refreshing access token for deregistration"
       nl='
 '
-      new_access_token=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
-          APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
-      if [[ -z "${new_access_token}" || "${new_access_token}" == "null" ]]; then
+      ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+          APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
+      if [[ -z "${ACCESS_TOKEN}" || "${ACCESS_TOKEN}" == "null" ]]; then
         fail "Failed to refresh access token for deregistration"
       fi
-      ACCESS_TOKEN="${new_access_token}"
       echo "Access token refreshed successfully"
     fi
-    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(jq -r .token <<< "$token")
+    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
+    RUNNER_TOKEN=$(jq -re .token <<< "$token") || fail "[.token] not found in token.sh output"
   fi
 
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -145,15 +144,15 @@ configure_runner() {
     nl='
 '
     ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
-        APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+        APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
     fail "either all or none of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified"
   fi
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(jq -r .token <<< "$token")
+    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
+    RUNNER_TOKEN=$(jq -re .token <<< "$token") || fail "[.token] not found in token.sh output"
   fi
 
   # shellcheck disable=SC2153

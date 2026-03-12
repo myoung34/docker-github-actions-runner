@@ -40,7 +40,6 @@ RUNNER_TOKEN="$(curl -XPOST -fsSL \
   -H "${CONTENT_LENGTH_HEADER}" \
   -H "${AUTH_HEADER}" \
   -H "${API_HEADER}" \
-  "${_FULL_URL}" \
-| jq -r '.token')"
+  "${_FULL_URL}" | jq -re .token)" || exit $?
 
 printf '{"token": "%s", "full_url": "%s"}' "$RUNNER_TOKEN" "$_FULL_URL"

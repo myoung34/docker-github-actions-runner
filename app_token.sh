@@ -44,7 +44,7 @@ build_jwt_payload() {
 
     now=$(date +%s)
     iat=$((now - JWT_IAT_DRIFT))
-    jq -c \
+    jq -ce \
         --arg iat_str "${iat}" \
         --arg exp_delta_str "${JWT_EXP_DELTA}" \
         --arg app_id_str "${APP_ID}" \
@@ -70,27 +70,26 @@ request_access_token() {
     local jwt_payload encoded_jwt_parts encoded_mac generated_jwt auth_header
     local app_installations_response access_token_url
 
-    jwt_payload=$(build_jwt_payload)
+    jwt_payload=$(build_jwt_payload) || exit $?
     encoded_jwt_parts=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${jwt_payload}")
     encoded_mac=$(echo -n "${encoded_jwt_parts}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
     generated_jwt="${encoded_jwt_parts}.${encoded_mac}"
 
     auth_header="Authorization: Bearer ${generated_jwt}"
 
-    app_installations_response=$(curl -sX GET \
+    app_installations_response=$(curl -fs \
         -H "${auth_header}" \
         -H "${API_HEADER}" \
         "${APP_INSTALLATIONS_URI}" \
-    )
+    ) || { echo "FAIL: curling $APP_INSTALLATIONS_URI failed w/ $?" >&2; exit 1; }
     access_token_url=$(echo "${app_installations_response}" | \
-        jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
+        jq -re '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url') || exit $?
 
-    curl -sX POST \
+    curl -fsX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
         -H "${auth_header}" \
         -H "${API_HEADER}" \
-        "${access_token_url}" | \
-        jq --raw-output .token
+        "${access_token_url}" | jq -re .token || exit $?
 }
 
 request_access_token
