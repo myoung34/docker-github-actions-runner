@@ -13,25 +13,7 @@ export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
 
-log() {
-    local level
-    level="$1"; shift
-    echo -e "$level: $*" 1>&2
-}
-
-fail() {
-    log FAIL "$*"
-    exit 1
-}
-
-trap_with_arg() {
-    local func
-    func="$1"; shift
-    for sig; do
-        # shellcheck disable=SC2064
-        trap "$func $sig" "$sig"
-    done
-}
+source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
 deregister_runner() {
   local nl token
