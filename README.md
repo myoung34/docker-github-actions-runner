@@ -65,7 +65,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_SCOPE` | The scope the runner will be registered on. Valid values are `repo`, `org` and `ent`. For 'org' and 'enterprise', `ACCESS_TOKEN` is required and `REPO_URL` is unnecessary. If 'org', requires `ORG_NAME`; if 'ent', requires `ENTERPRISE_NAME`. Default is 'repo'. |
 | `ORG_NAME` | The organization name for the runner to register under. Requires `RUNNER_SCOPE` to be 'org'. No default value. |
 | `ENTERPRISE_NAME` | The enterprise name for the runner to register under. Requires `RUNNER_SCOPE` to be 'enterprise'. No default value. |
-| `LABELS` | A comma separated string to indicate the labels. Default is 'default' |
+| `LABELS` | A comma separated string to indicate the labels. Default is 'default'. Overridden by `RUNNER_LABELS` env var if defined, see the [change](https://github.com/myoung34/docker-github-actions-runner/commit/ac80687f5e2a3a34b11a80daa6089281f186c2d5) |
 | `REPO_URL` | If using a non-organization runner this is the full repository url to register under such as 'https://github.com/myoung34/repo' |
 | `RUNNER_TOKEN` | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred. |
 | `RUNNER_WORKDIR` | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files. |
