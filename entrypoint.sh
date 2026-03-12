@@ -164,7 +164,6 @@ configure_runner() {
 
 unset_config_vars() {
   echo "Unsetting configuration environment variables"
-  unset RUN_AS_ROOT
   unset RUNNER_NAME
   unset RUNNER_NAME_PREFIX
   unset RANDOM_RUNNER_SUFFIX
@@ -224,14 +223,6 @@ if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   cp -pr "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
-
-
-if [[ ${DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  if [[ ${DEBUG_ONLY} == "false" ]]; then
-    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
-  fi
-fi
-
 # Start docker service if needed (e.g. for docker-in-docker)
 if [[ ${START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
@@ -245,13 +236,7 @@ if [[ ${START_DOCKER_SERVICE} == "true" ]]; then
   fi
 fi
 
-# Unset configuration environment variables if the flag is set
-if [[ ${UNSET_CONFIG_VARS} == "true" ]]; then
-  unset_config_vars
-fi
-
 # Container's command (CMD) execution as runner user
-
 
 if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
   echo ''
@@ -262,8 +247,14 @@ if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
   echo "Labels: ${LABELS}"
   echo "Runner Group: ${RUNNER_GROUP}"
   echo "Github Host: ${GITHUB_HOST}"
-  echo "Run as root:${RUN_AS_ROOT}"
+  echo "Run as root: ${RUN_AS_ROOT}"
   echo "Start docker: ${START_DOCKER_SERVICE}"
+fi
+
+if [[ ${DISABLE_AUTOMATIC_DEREGISTRATION} == "false" && ${DEBUG_ONLY} == "false" ]]; then
+  trap_with_sig  deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+elif [[ ${UNSET_CONFIG_VARS} == "true" ]]; then
+  unset_config_vars
 fi
 
 if [[ ${RUN_AS_ROOT} == "true" ]]; then

@@ -11,8 +11,8 @@ fail() {
     exit 1
 }
 
-trap_with_arg() {
-    local func
+trap_with_sig() {
+    local func sig
     func="$1"; shift
     for sig; do
         # shellcheck disable=SC2064
