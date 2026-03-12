@@ -1,5 +1,6 @@
 #!/usr/bin/dumb-init /bin/bash
 # shellcheck shell=bash
+set -o pipefail
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
@@ -23,12 +24,13 @@ deregister_runner() {
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
-    if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
+    if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
       echo "Refreshing access token for deregistration"
       nl="
 "
-      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
-      if [[ -z "${NEW_ACCESS_TOKEN}" ]] || [[ "${NEW_ACCESS_TOKEN}" == "null" ]]; then
+      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+          APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+      if [[ -z "${NEW_ACCESS_TOKEN}" || "${NEW_ACCESS_TOKEN}" == "null" ]]; then
         echo "ERROR: Failed to refresh access token for deregistration"
         exit 1
       fi
@@ -52,7 +54,7 @@ _RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
 _RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
 if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   # In some cases this file does not exist
-  if [[ -f "/etc/hostname" ]]; then
+  if [[ -s "/etc/hostname" ]]; then
     # in some cases it can also be empty
     if [[ $(stat --printf="%s" /etc/hostname) -ne 0 ]]; then
       _RUNNER_NAME_PREFIX=${RUNNER_NAME_PREFIX-"github-runner"}
@@ -78,21 +80,21 @@ _CONFIGURED_ACTIONS_RUNNER_FILES_DIR=${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:-""}
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
   if [[ ${ORG_RUNNER} == "true" ]]; then
-    echo 'ORG_RUNNER is now deprecated. Please use RUNNER_SCOPE="org" instead.'
-    export RUNNER_SCOPE="org"
+    echo 'ORG_RUNNER env var is now deprecated. Please use RUNNER_SCOPE="org" instead.'
+    RUNNER_SCOPE="org"
   else
-    export RUNNER_SCOPE="repo"
+    RUNNER_SCOPE="repo"
   fi
 fi
 
-RUNNER_SCOPE="${RUNNER_SCOPE,,}" # to lowercase
+RUNNER_SCOPE="${RUNNER_SCOPE,,}"  # to lowercase
 
-case ${RUNNER_SCOPE} in
+case "${RUNNER_SCOPE}" in
   org*)
     [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
     _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
     RUNNER_SCOPE="org"
-    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+    if [[ -n "${APP_ID}" && -z "${APP_LOGIN}" ]]; then
       APP_LOGIN=${ORG_NAME}
     fi
     ;;
@@ -107,25 +109,28 @@ case ${RUNNER_SCOPE} in
     [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
     _SHORT_URL=${REPO_URL}
     RUNNER_SCOPE="repo"
-    if [[ -n "${APP_ID}" ]] && [[ -z "${APP_LOGIN}" ]]; then
+    if [[ -n "${APP_ID}" && -z "${APP_LOGIN}" ]]; then
       APP_LOGIN=${REPO_URL%/*}
       APP_LOGIN=${APP_LOGIN##*/}
     fi
     ;;
 esac
 
+export RUNNER_SCOPE
+
 configure_runner() {
   ARGS=()
-  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
-    if [[ -n "${ACCESS_TOKEN}" ]] || [[ -n "${RUNNER_TOKEN}" ]]; then
+  if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
+    if [[ -n "${ACCESS_TOKEN}" || -n "${RUNNER_TOKEN}" ]]; then
       echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID, APP_PRIVATE_KEY and APP_LOGIN." >&2
       exit 1
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
     nl="
 "
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
-  elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+        APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+  elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
     echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
     exit 1
   fi
@@ -137,17 +142,17 @@ configure_runner() {
   fi
 
   # shellcheck disable=SC2153
-  if [ -n "${EPHEMERAL}" ]; then
+  if [[ -n "${EPHEMERAL}" ]]; then
     echo "Ephemeral option is enabled"
     ARGS+=("--ephemeral")
   fi
 
-  if [ -n "${DISABLE_AUTO_UPDATE}" ]; then
+  if [[ -n "${DISABLE_AUTO_UPDATE}" ]]; then
     echo "Disable auto update option is enabled"
     ARGS+=("--disableupdate")
   fi
 
-  if [ -n "${NO_DEFAULT_LABELS}" ]; then
+  if [[ -n "${NO_DEFAULT_LABELS}" ]]; then
     echo "Disable adding the default self-hosted, platform, and architecture labels"
     ARGS+=("--no-default-labels")
   fi
@@ -203,10 +208,10 @@ if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   # directory exists, copy the data
   if [[ -d "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     echo "Copying previous data"
-    cp -p -r "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+    cp -pr -- "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
   fi
 
-  if [ -f "/actions-runner/.runner" ]; then
+  if [[ -f "/actions-runner/.runner" ]]; then
     echo "The runner has already been configured"
   else
 
@@ -261,7 +266,7 @@ fi
 # Container's command (CMD) execution as runner user
 
 
-if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
   echo ""
   echo "Disable automatic registration: ${_DISABLE_AUTOMATIC_DEREGISTRATION}"
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
@@ -276,7 +281,7 @@ fi
 
 if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
-    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi
@@ -293,7 +298,7 @@ else
     chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
-    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running /usr/sbin/gosu runner $@"
     fi
@@ -301,7 +306,7 @@ else
       /usr/sbin/gosu runner "$@"
     fi
   else
-    if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
+    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi

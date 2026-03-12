@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -o pipefail
+
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
 # If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} = "github.com" ]]; then
+if [[ ${GITHUB_HOST} == "github.com" ]]; then
   URI="https://api.${_GITHUB_HOST}"
 else
   URI="https://${_GITHUB_HOST}/api/v3"
@@ -41,4 +43,4 @@ RUNNER_TOKEN="$(curl -XPOST -fsSL \
   "${_FULL_URL}" \
 | jq -r '.token')"
 
-echo "{\"token\": \"${RUNNER_TOKEN}\", \"full_url\": \"${_FULL_URL}\"}"
+printf '{"token": "%s", "full_url": "%s"}' "$RUNNER_TOKEN" "$_FULL_URL"

@@ -14,7 +14,7 @@ set -o pipefail
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 
 # If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} = "github.com" ]]; then
+if [[ ${GITHUB_HOST} == "github.com" ]]; then
   URI="https://api.${_GITHUB_HOST}"
 else
   URI="https://${_GITHUB_HOST}/api/v3"
@@ -53,7 +53,7 @@ build_jwt_payload() {
         | .iat = $iat
         | .exp = ($iat + $exp_delta)
         | .iss = $app_id
-    ' <<< "{}" | tr -d '\n'
+    ' <<< '{}' | tr -d '\n'
 }
 
 base64url() {
@@ -77,7 +77,8 @@ request_access_token() {
         -H "${API_HEADER}" \
         "${APP_INSTALLATIONS_URI}" \
     )
-    access_token_url=$(echo "${app_installations_response}" | jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
+    access_token_url=$(echo "${app_installations_response}" | \
+        jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
     curl -sX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
         -H "${auth_header}" \
