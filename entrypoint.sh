@@ -12,9 +12,21 @@ export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
 
+err() {
+    local level
+    level="$1"; shift
+    echo -e "$level: $*" 1>&2
+}
+
+fail() {
+    err FAIL "$*"
+    exit 1
+}
+
 trap_with_arg() {
-    func="$1" ; shift
-    for sig ; do
+    local func
+    func="$1"; shift
+    for sig; do
         # shellcheck disable=SC2064
         trap "$func $sig" "$sig"
     done
@@ -31,8 +43,7 @@ deregister_runner() {
       NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
       if [[ -z "${NEW_ACCESS_TOKEN}" || "${NEW_ACCESS_TOKEN}" == "null" ]]; then
-        echo "ERROR: Failed to refresh access token for deregistration"
-        exit 1
+        fail "Failed to refresh access token for deregistration"
       fi
       ACCESS_TOKEN="${NEW_ACCESS_TOKEN}"
       echo "Access token refreshed successfully"
@@ -51,7 +62,7 @@ _DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
 
 _RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
 
-_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}
+_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13; echo '')}
 if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   # In some cases this file does not exist
   if [[ -s "/etc/hostname" ]]; then
@@ -61,10 +72,10 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
       _RUNNER_NAME=${RUNNER_NAME:-${_RUNNER_NAME_PREFIX:+${_RUNNER_NAME_PREFIX}-}$(cat /etc/hostname)}
       echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${_RUNNER_NAME}"
     else
-      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname."
+      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname"
     fi
   else
-    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname does not exist. Not using /etc/hostname."
+    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname does not exist. Not using /etc/hostname"
   fi
 fi
 
@@ -91,7 +102,7 @@ RUNNER_SCOPE="${RUNNER_SCOPE,,}"  # to lowercase
 
 case "${RUNNER_SCOPE}" in
   org*)
-    [[ -z ${ORG_NAME} ]] && ( echo "ORG_NAME required for org runners"; exit 1 )
+    [[ -z ${ORG_NAME} ]] && fail "ORG_NAME required for org runners"
     _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
     RUNNER_SCOPE="org"
     if [[ -n "${APP_ID}" && -z "${APP_LOGIN}" ]]; then
@@ -100,13 +111,13 @@ case "${RUNNER_SCOPE}" in
     ;;
 
   ent*)
-    [[ -z ${ENTERPRISE_NAME} ]] && ( echo "ENTERPRISE_NAME required for enterprise runners"; exit 1 )
+    [[ -z ${ENTERPRISE_NAME} ]] && fail "ENTERPRISE_NAME required for enterprise runners"
     _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
     RUNNER_SCOPE="enterprise"
     ;;
 
   *)
-    [[ -z ${REPO_URL} ]] && ( echo "REPO_URL required for repo runners"; exit 1 )
+    [[ -z ${REPO_URL} ]] && fail "REPO_URL required for repo runners"
     _SHORT_URL=${REPO_URL}
     RUNNER_SCOPE="repo"
     if [[ -n "${APP_ID}" && -z "${APP_LOGIN}" ]]; then
@@ -122,8 +133,7 @@ configure_runner() {
   ARGS=()
   if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
     if [[ -n "${ACCESS_TOKEN}" || -n "${RUNNER_TOKEN}" ]]; then
-      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID, APP_PRIVATE_KEY and APP_LOGIN." >&2
-      exit 1
+      fail "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with {APP_ID, APP_PRIVATE_KEY, APP_LOGIN}"
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
     nl="
@@ -131,8 +141,7 @@ configure_runner() {
     ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
         APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
-    echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
-    exit 1
+    fail "ERROR: either all or none of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified"
   fi
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
@@ -230,8 +239,7 @@ fi
 if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Reusage is enabled. Storing data to ${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
   if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-    echo "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner."
-    exit 1
+    fail "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner"
   fi
   # Quoting (even with double-quotes) the regexp brokes the copying
   cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
@@ -289,8 +297,7 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
       "$@"
     fi
   else
-    echo "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID '$(id -u)'"
-    exit 1
+    fail "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID [$(id -u)]"
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
