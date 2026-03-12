@@ -11,13 +11,13 @@
 
 set -o pipefail
 
-_GITHUB_HOST=${GITHUB_HOST:="github.com"}
+: "${GITHUB_HOST:=github.com}"
 
 # If URL is not github.com then use the enterprise api endpoint
 if [[ ${GITHUB_HOST} == "github.com" ]]; then
-  URI="https://api.${_GITHUB_HOST}"
+  URI="https://api.${GITHUB_HOST}"
 else
-  URI="https://${_GITHUB_HOST}/api/v3"
+  URI="https://${GITHUB_HOST}/api/v3"
 fi
 
 API_VERSION=v3

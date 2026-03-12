@@ -41,37 +41,31 @@ deregister_runner() {
   exit
 }
 
-_DEBUG_ONLY=${DEBUG_ONLY:-false}
-_DEBUG_OUTPUT=${DEBUG_OUTPUT:-false}
-_DISABLE_AUTOMATIC_DEREGISTRATION=${DISABLE_AUTOMATIC_DEREGISTRATION:-false}
+: "${DEBUG_ONLY:=false}"
+: "${DEBUG_OUTPUT:=false}"
+: "${DISABLE_AUTOMATIC_DEREGISTRATION:=false}"
+: "${RANDOM_RUNNER_SUFFIX:=true}"
 
-_RANDOM_RUNNER_SUFFIX=${RANDOM_RUNNER_SUFFIX:="true"}
-
-_RUNNER_NAME=${RUNNER_NAME:-${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13; echo '')}
-if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
-  # In some cases this file does not exist
+if [[ -z "$RUNNER_NAME" && ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   if [[ -s "/etc/hostname" ]]; then
-    # in some cases it can also be empty
-    if [[ $(stat --printf="%s" /etc/hostname) -ne 0 ]]; then
-      _RUNNER_NAME_PREFIX=${RUNNER_NAME_PREFIX-"github-runner"}
-      _RUNNER_NAME=${RUNNER_NAME:-${_RUNNER_NAME_PREFIX:+${_RUNNER_NAME_PREFIX}-}$(cat /etc/hostname)}
-      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${_RUNNER_NAME}"
-    else
-      echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} ./etc/hostname exists but is empty. Not using /etc/hostname"
-    fi
+    _RUNNER_NAME_PREFIX=${RUNNER_NAME_PREFIX-'github-runner'}
+    RUNNER_NAME=${_RUNNER_NAME_PREFIX:+${_RUNNER_NAME_PREFIX}-}$(cat /etc/hostname)
+    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${RUNNER_NAME}"
   else
-    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname does not exist. Not using /etc/hostname"
+    echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname is not a non-empty file. Not using it"
   fi
 fi
+: "${RUNNER_NAME:=${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}"
 
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work/${_RUNNER_NAME}}
-_LABELS=${RUNNER_LABELS:-${LABELS:-default}}
-_RUNNER_GROUP=${RUNNER_GROUP:-Default}
-_GITHUB_HOST=${GITHUB_HOST:="github.com"}
-_RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
-_START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
-_UNSET_CONFIG_VARS=${UNSET_CONFIG_VARS:="false"}
-_CONFIGURED_ACTIONS_RUNNER_FILES_DIR=${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:-''}
+: "${RUNNER_WORKDIR:=/_work/${RUNNER_NAME}}"
+: "${RUNNER_GROUP:=Default}"
+: "${GITHUB_HOST:=github.com}"
+: "${RUN_AS_ROOT:=true}"
+: "${START_DOCKER_SERVICE:=false}"
+: "${UNSET_CONFIG_VARS:=false}"
+: "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:=''}"
+# as to why $RUNNER_LABELS is used, see https://github.com/myoung34/docker-github-actions-runner/commit/ac80687f5e2a3a34b11a80daa6089281f186c2d5
+LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -88,7 +82,7 @@ RUNNER_SCOPE="${RUNNER_SCOPE,,}"  # to lowercase
 case "${RUNNER_SCOPE}" in
   org*)
     [[ -z ${ORG_NAME} ]] && fail "ORG_NAME required for org runners"
-    _SHORT_URL="https://${_GITHUB_HOST}/${ORG_NAME}"
+    _SHORT_URL="https://${GITHUB_HOST}/${ORG_NAME}"
     RUNNER_SCOPE="org"
     if [[ -n "${APP_ID}" && -z "${APP_LOGIN}" ]]; then
       APP_LOGIN=${ORG_NAME}
@@ -97,7 +91,7 @@ case "${RUNNER_SCOPE}" in
 
   ent*)
     [[ -z ${ENTERPRISE_NAME} ]] && fail "ENTERPRISE_NAME required for enterprise runners"
-    _SHORT_URL="https://${_GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
+    _SHORT_URL="https://${GITHUB_HOST}/enterprises/${ENTERPRISE_NAME}"
     RUNNER_SCOPE="enterprise"
     ;;
 
@@ -157,15 +151,15 @@ configure_runner() {
   ./config.sh \
       --url "${_SHORT_URL}" \
       --token "${RUNNER_TOKEN}" \
-      --name "${_RUNNER_NAME}" \
-      --work "${_RUNNER_WORKDIR}" \
-      --labels "${_LABELS}" \
-      --runnergroup "${_RUNNER_GROUP}" \
+      --name "${RUNNER_NAME}" \
+      --work "${RUNNER_WORKDIR}" \
+      --labels "${LABELS}" \
+      --runnergroup "${RUNNER_GROUP}" \
       --unattended \
       --replace \
       "${args[@]}"
 
-  [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir -p "${_RUNNER_WORKDIR}"
+  [[ ! -d "${RUNNER_WORKDIR}" ]] && mkdir -p "${RUNNER_WORKDIR}"
 }
 
 unset_config_vars() {
@@ -197,55 +191,54 @@ unset_config_vars() {
 }
 
 # Opt into runner reusage because a value was given
-if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
   echo "Runner reusage is enabled"
 
   # directory exists, copy the data
-  if [[ -d "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+  if [[ -d "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     echo "Copying previous data"
-    cp -pr -- "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
+    cp -pr -- "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}/." "/actions-runner"
   fi
 
   if [[ -f "/actions-runner/.runner" ]]; then
     echo "The runner has already been configured"
   else
-
-    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    if [[ ${DEBUG_ONLY} == "false" ]]; then
       configure_runner
     fi
   fi
 else
   echo "Runner reusage is disabled"
-  if [[ ${_DEBUG_ONLY} == "false" ]]; then
+  if [[ ${DEBUG_ONLY} == "false" ]]; then
     [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
     configure_runner
   fi
 fi
 
-if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
-  echo "Reusage is enabled. Storing data to ${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-  if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
+if [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
+  echo "Reusage is enabled. Storing data to ${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  if [[ ${DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
     fail "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner"
   fi
   # Quoting (even with double-quotes) the regexp brokes the copying
-  cp -pr "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -pr "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 
 
-if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
-  if [[ ${_DEBUG_ONLY} == "false" ]]; then
+if [[ ${DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
+  if [[ ${DEBUG_ONLY} == "false" ]]; then
     trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
   fi
 fi
 
 # Start docker service if needed (e.g. for docker-in-docker)
-if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
+if [[ ${START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
   _PREFIX=''
-  [[ ${_RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
+  [[ ${RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
 
-  if [[ ${_DEBUG_ONLY} == "true" ]]; then
+  if [[ ${DEBUG_ONLY} == "true" ]]; then
     echo ${_PREFIX} service docker start
   else
     ${_PREFIX} service docker start
@@ -253,33 +246,33 @@ if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
 fi
 
 # Unset configuration environment variables if the flag is set
-if [[ ${_UNSET_CONFIG_VARS} == "true" ]]; then
+if [[ ${UNSET_CONFIG_VARS} == "true" ]]; then
   unset_config_vars
 fi
 
 # Container's command (CMD) execution as runner user
 
 
-if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
+if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
   echo ''
-  echo "Disable automatic registration: ${_DISABLE_AUTOMATIC_DEREGISTRATION}"
-  echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
-  echo "Runner name: ${_RUNNER_NAME}"
-  echo "Runner workdir: ${_RUNNER_WORKDIR}"
-  echo "Labels: ${_LABELS}"
-  echo "Runner Group: ${_RUNNER_GROUP}"
-  echo "Github Host: ${_GITHUB_HOST}"
-  echo "Run as root:${_RUN_AS_ROOT}"
-  echo "Start docker: ${_START_DOCKER_SERVICE}"
+  echo "Disable automatic registration: ${DISABLE_AUTOMATIC_DEREGISTRATION}"
+  echo "Random runner suffix: ${RANDOM_RUNNER_SUFFIX}"
+  echo "Runner name: ${RUNNER_NAME}"
+  echo "Runner workdir: ${RUNNER_WORKDIR}"
+  echo "Labels: ${LABELS}"
+  echo "Runner Group: ${RUNNER_GROUP}"
+  echo "Github Host: ${GITHUB_HOST}"
+  echo "Run as root:${RUN_AS_ROOT}"
+  echo "Start docker: ${START_DOCKER_SERVICE}"
 fi
 
-if [[ ${_RUN_AS_ROOT} == "true" ]]; then
+if [[ ${RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
-    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
+    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi
-    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    if [[ ${DEBUG_ONLY} == "false" ]]; then
       "$@"
     fi
   else
@@ -287,23 +280,23 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then
-    [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
+    [[ -n "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+    chown -R runner "${RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
-    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
+    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running /usr/sbin/gosu runner $@"
     fi
-    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    if [[ ${DEBUG_ONLY} == "false" ]]; then
       /usr/sbin/gosu runner "$@"
     fi
   else
-    if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
+    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi
-    if [[ ${_DEBUG_ONLY} == "false" ]]; then
+    if [[ ${DEBUG_ONLY} == "false" ]]; then
       "$@"
     fi
   fi
