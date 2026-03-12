@@ -1,5 +1,6 @@
 #!/usr/bin/dumb-init /bin/bash
 # shellcheck shell=bash
+
 set -o pipefail
 
 export RUNNER_ALLOW_RUNASROOT=1
@@ -12,14 +13,14 @@ export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
 
-err() {
+log() {
     local level
     level="$1"; shift
     echo -e "$level: $*" 1>&2
 }
 
 fail() {
-    err FAIL "$*"
+    log FAIL "$*"
     exit 1
 }
 
@@ -33,24 +34,27 @@ trap_with_arg() {
 }
 
 deregister_runner() {
+  local nl new_access_token token
+
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
     if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
       echo "Refreshing access token for deregistration"
-      nl="
-"
-      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+      nl='
+'
+      new_access_token=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
-      if [[ -z "${NEW_ACCESS_TOKEN}" || "${NEW_ACCESS_TOKEN}" == "null" ]]; then
+      if [[ -z "${new_access_token}" || "${new_access_token}" == "null" ]]; then
         fail "Failed to refresh access token for deregistration"
       fi
-      ACCESS_TOKEN="${NEW_ACCESS_TOKEN}"
+      ACCESS_TOKEN="${new_access_token}"
       echo "Access token refreshed successfully"
     fi
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    RUNNER_TOKEN=$(jq -r .token <<< "$token")
   fi
+
   ./config.sh remove --token "${RUNNER_TOKEN}"
   [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
   exit
@@ -86,7 +90,7 @@ _GITHUB_HOST=${GITHUB_HOST:="github.com"}
 _RUN_AS_ROOT=${RUN_AS_ROOT:="true"}
 _START_DOCKER_SERVICE=${START_DOCKER_SERVICE:="false"}
 _UNSET_CONFIG_VARS=${UNSET_CONFIG_VARS:="false"}
-_CONFIGURED_ACTIONS_RUNNER_FILES_DIR=${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:-""}
+_CONFIGURED_ACTIONS_RUNNER_FILES_DIR=${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:-''}
 
 # ensure backwards compatibility
 if [[ -z ${RUNNER_SCOPE} ]]; then
@@ -130,40 +134,42 @@ esac
 export RUNNER_SCOPE
 
 configure_runner() {
-  ARGS=()
+  local args nl token
+
+  args=()
   if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
     if [[ -n "${ACCESS_TOKEN}" || -n "${RUNNER_TOKEN}" ]]; then
-      fail "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with {APP_ID, APP_PRIVATE_KEY, APP_LOGIN}"
+      fail "ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with {APP_ID, APP_PRIVATE_KEY, APP_LOGIN}"
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
-    nl="
-"
+    nl='
+'
     ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
         APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
-    fail "ERROR: either all or none of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified"
+    fail "either all or none of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified"
   fi
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     echo "Obtaining the token of the runner"
-    _TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
-    RUNNER_TOKEN=$(echo "${_TOKEN}" | jq -r .token)
+    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh)
+    RUNNER_TOKEN=$(jq -r .token <<< "$token")
   fi
 
   # shellcheck disable=SC2153
   if [[ -n "${EPHEMERAL}" ]]; then
     echo "Ephemeral option is enabled"
-    ARGS+=("--ephemeral")
+    args+=("--ephemeral")
   fi
 
   if [[ -n "${DISABLE_AUTO_UPDATE}" ]]; then
     echo "Disable auto update option is enabled"
-    ARGS+=("--disableupdate")
+    args+=("--disableupdate")
   fi
 
   if [[ -n "${NO_DEFAULT_LABELS}" ]]; then
     echo "Disable adding the default self-hosted, platform, and architecture labels"
-    ARGS+=("--no-default-labels")
+    args+=("--no-default-labels")
   fi
 
   echo "Configuring"
@@ -176,10 +182,9 @@ configure_runner() {
       --runnergroup "${_RUNNER_GROUP}" \
       --unattended \
       --replace \
-      "${ARGS[@]}"
+      "${args[@]}"
 
   [[ ! -d "${_RUNNER_WORKDIR}" ]] && mkdir -p "${_RUNNER_WORKDIR}"
-
 }
 
 unset_config_vars() {
@@ -242,7 +247,7 @@ if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
     fail "DISABLE_AUTOMATIC_DEREGISTRATION should be set to true to avoid issues with re-using a deregistered runner"
   fi
   # Quoting (even with double-quotes) the regexp brokes the copying
-  cp -p -r "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
+  cp -pr "/actions-runner/_diag" "/actions-runner/svc.sh" /actions-runner/.[^.]* "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
 fi
 
 
@@ -256,7 +261,7 @@ fi
 # Start docker service if needed (e.g. for docker-in-docker)
 if [[ ${_START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
-  _PREFIX=""
+  _PREFIX=''
   [[ ${_RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
 
   if [[ ${_DEBUG_ONLY} == "true" ]]; then
@@ -275,7 +280,7 @@ fi
 
 
 if [[ ${_DEBUG_ONLY} == "true" || ${_DEBUG_OUTPUT} == "true" ]]; then
-  echo ""
+  echo ''
   echo "Disable automatic registration: ${_DISABLE_AUTOMATIC_DEREGISTRATION}"
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
   echo "Runner name: ${_RUNNER_NAME}"
@@ -297,7 +302,7 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
       "$@"
     fi
   else
-    fail "ERROR: RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID [$(id -u)]"
+    fail "RUN_AS_ROOT env var is set to true but the user has been overridden and is not running as root, but UID [$(id -u)]"
   fi
 else
   if [[ $(id -u) -eq 0 ]]; then

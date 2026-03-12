@@ -40,6 +40,8 @@ JWT_JOSE_HEADER='{
 
 
 build_jwt_payload() {
+    local now iat
+
     now=$(date +%s)
     iat=$((now - JWT_IAT_DRIFT))
     jq -c \
@@ -65,6 +67,9 @@ rs256_sign() {
 }
 
 request_access_token() {
+    local jwt_payload encoded_jwt_parts encoded_mac generated_jwt auth_header
+    local app_installations_response access_token_url
+
     jwt_payload=$(build_jwt_payload)
     encoded_jwt_parts=$(base64url <<<"${JWT_JOSE_HEADER}").$(base64url <<<"${jwt_payload}")
     encoded_mac=$(echo -n "${encoded_jwt_parts}" | rs256_sign "${APP_PRIVATE_KEY}" | base64url)
@@ -79,6 +84,7 @@ request_access_token() {
     )
     access_token_url=$(echo "${app_installations_response}" | \
         jq --raw-output '.[] | select (.account.login == "'"${APP_LOGIN}"'" and .app_id  == '"${APP_ID}"') .access_tokens_url')
+
     curl -sX POST \
         -H "${CONTENT_LENGTH_HEADER}" \
         -H "${auth_header}" \
