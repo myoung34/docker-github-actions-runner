@@ -3,36 +3,27 @@
 set -o pipefail
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
-# If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} == "github.com" ]]; then
-  URI="https://api.${GITHUB_HOST}"
-else
-  URI="https://${GITHUB_HOST}/api/v3"
-fi
-
-API_VERSION=v3
 API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
 AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
 CONTENT_LENGTH_HEADER="Content-Length: 0"
 
 case ${RUNNER_SCOPE} in
-  org*)
-    _FULL_URL="${URI}/orgs/${ORG_NAME}/actions/runners/registration-token"
+  org)
+    _FULL_URL="${GH_API_ROOT}/orgs/${ORG_NAME}/actions/runners/registration-token"
     ;;
-
-  ent*)
-    _FULL_URL="${URI}/enterprises/${ENTERPRISE_NAME}/actions/runners/registration-token"
+  enterprise)
+    _FULL_URL="${GH_API_ROOT}/enterprises/${ENTERPRISE_NAME}/actions/runners/registration-token"
     ;;
-
-  *)
+  repo)
     _PROTO='https://'
     # shellcheck disable=SC2116
     _URL="$(echo "${REPO_URL/${_PROTO}/}")"
     _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
     _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
     _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
-    _FULL_URL="${URI}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
+    _FULL_URL="${GH_API_ROOT}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
     ;;
+  *) fail "unexpected runner scope [$RUNNER_SCOPE] -- report this issue to project upstream" ;;
 esac
 
 RUNNER_TOKEN="$(curl -XPOST -fsSL \

@@ -3,6 +3,8 @@
 
 set -o pipefail
 
+API_VERSION=v3
+
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
 
@@ -58,6 +60,14 @@ fi
 : "${RUNNER_WORKDIR:=/_work/${RUNNER_NAME}}"
 : "${RUNNER_GROUP:=Default}"
 : "${GITHUB_HOST:=github.com}"
+
+# If URL is not github.com then use the enterprise api endpoint
+if [[ ${GITHUB_HOST} == github.com ]]; then
+  GH_API_ROOT="https://api.${GITHUB_HOST}"
+else
+  GH_API_ROOT="https://${GITHUB_HOST}/api/$API_VERSION"
+fi
+
 : "${RUN_AS_ROOT:=true}"
 : "${START_DOCKER_SERVICE:=false}"
 : "${UNSET_CONFIG_VARS:=false}"
@@ -104,7 +114,7 @@ case "${RUNNER_SCOPE}" in
     ;;
 esac
 
-export RUNNER_SCOPE GITHUB_HOST
+export RUNNER_SCOPE GH_API_ROOT API_VERSION
 
 configure_runner() {
   local args token
