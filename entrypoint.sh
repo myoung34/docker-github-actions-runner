@@ -3,7 +3,7 @@
 
 set -o pipefail
 
-API_VERSION=v3
+export GH_API_VER=v3
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
@@ -14,6 +14,7 @@ export -n ACCESS_TOKEN
 export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
+export -n APP_LOGIN
 
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
@@ -27,9 +28,6 @@ deregister_runner() {
       echo "Refreshing access token for deregistration"
       ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}" \
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
-      if [[ -z "${ACCESS_TOKEN}" || "${ACCESS_TOKEN}" == "null" ]]; then
-        fail "Failed to refresh access token for deregistration"
-      fi
       echo "Access token refreshed successfully"
     fi
     token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
@@ -55,7 +53,7 @@ if [[ -z "$RUNNER_NAME" && ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
     echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname is not a non-empty file. Not using it"
   fi
 fi
-: "${RUNNER_NAME:=${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13 ; echo '')}"
+: "${RUNNER_NAME:=${RUNNER_NAME_PREFIX:-github-runner}-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 13; echo '')}"
 
 : "${RUNNER_WORKDIR:=/_work/${RUNNER_NAME}}"
 : "${RUNNER_GROUP:=Default}"
@@ -65,7 +63,7 @@ fi
 if [[ ${GITHUB_HOST} == github.com ]]; then
   GH_API_ROOT="https://api.${GITHUB_HOST}"
 else
-  GH_API_ROOT="https://${GITHUB_HOST}/api/$API_VERSION"
+  GH_API_ROOT="https://${GITHUB_HOST}/api/$GH_API_VER"
 fi
 
 : "${RUN_AS_ROOT:=true}"
@@ -114,7 +112,7 @@ case "${RUNNER_SCOPE}" in
     ;;
 esac
 
-export RUNNER_SCOPE GH_API_ROOT API_VERSION
+export RUNNER_SCOPE GH_API_ROOT
 
 configure_runner() {
   local args token
@@ -129,9 +127,12 @@ configure_runner() {
         APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
     fail "either all or none of {APP_ID, APP_PRIVATE_KEY, APP_LOGIN} must be specified"
+  elif [[ -z "$ACCESS_TOKEN" && -z "$RUNNER_TOKEN" ]]; then
+    fail "either {ACCESS_TOKEN or RUNNER_TOKEN} or {APP_ID and APP_PRIVATE_KEY} need to be provided"
   fi
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
+    [[ -n "$RUNNER_TOKEN" ]] && fail "RUNNER_TOKEN is mutually exclusive with ACCESS_TOKEN"
     echo "Obtaining the token of the runner"
     token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
     RUNNER_TOKEN=$(jq -re .token <<< "$token") || fail "[.token] not found in token.sh output"
@@ -154,6 +155,7 @@ configure_runner() {
   fi
 
   echo "Configuring"
+  [[ ! -d "${RUNNER_WORKDIR}" ]] && mkdir -p "${RUNNER_WORKDIR}"
   ./config.sh \
       --url "${_SHORT_URL}" \
       --token "${RUNNER_TOKEN}" \
@@ -164,27 +166,21 @@ configure_runner() {
       --unattended \
       --replace \
       "${args[@]}"
-
-  [[ ! -d "${RUNNER_WORKDIR}" ]] && mkdir -p "${RUNNER_WORKDIR}"
 }
 
 unset_config_vars() {
-  echo "Unsetting configuration environment variables"
+  echo "Unsetting some configuration environment variables"
   unset RUNNER_NAME
   unset RUNNER_NAME_PREFIX
   unset RANDOM_RUNNER_SUFFIX
-  unset ACCESS_TOKEN
-  unset APP_ID
-  unset APP_PRIVATE_KEY
-  unset APP_LOGIN
   unset RUNNER_SCOPE
   unset ORG_NAME
   unset ENTERPRISE_NAME
   unset LABELS
   unset REPO_URL
-  unset RUNNER_TOKEN
   unset RUNNER_GROUP
   unset GITHUB_HOST
+  unset GH_API_ROOT
   unset DISABLE_AUTOMATIC_DEREGISTRATION
   unset EPHEMERAL
   unset DISABLE_AUTO_UPDATE
@@ -230,13 +226,12 @@ fi
 # Start docker service if needed (e.g. for docker-in-docker)
 if [[ ${START_DOCKER_SERVICE} == "true" ]]; then
   echo "Starting docker service"
-  _PREFIX=''
-  [[ ${RUN_AS_ROOT} != "true" ]] && _PREFIX="sudo"
+  [[ ${RUN_AS_ROOT} != "true" ]] && _SUDO=sudo || _SUDO=''
 
   if [[ ${DEBUG_ONLY} == "true" ]]; then
-    echo ${_PREFIX} service docker start
+    echo ${_SUDO} service docker start
   else
-    ${_PREFIX} service docker start
+    ${_SUDO} service docker start || fail "[docker start] failed w/ $?"
   fi
 fi
 
@@ -257,7 +252,9 @@ fi
 
 if [[ ${DISABLE_AUTOMATIC_DEREGISTRATION} == "false" && ${DEBUG_ONLY} == "false" ]]; then
   trap_with_sig  deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
-elif [[ ${UNSET_CONFIG_VARS} == "true" ]]; then
+fi
+
+if [[ ${UNSET_CONFIG_VARS} == "true" ]]; then
   unset_config_vars
 fi
 

@@ -12,7 +12,7 @@
 set -o pipefail
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
-API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+API_HEADER="Accept: application/vnd.github.${GH_API_VER}+json"
 CONTENT_LENGTH_HEADER="Content-Length: 0"
 APP_INSTALLATIONS_URI="${GH_API_ROOT}/app/installations"  # https://docs.github.com/en/rest/apps/apps#list-installations-for-the-authenticated-app
 

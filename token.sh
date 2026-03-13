@@ -3,12 +3,13 @@
 set -o pipefail
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
-API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
+API_HEADER="Accept: application/vnd.github.${GH_API_VER}+json"
 AUTH_HEADER="Authorization: token ${ACCESS_TOKEN}"
 CONTENT_LENGTH_HEADER="Content-Length: 0"
 
 case ${RUNNER_SCOPE} in
   org)
+    # https://docs.github.com/en/rest/actions/self-hosted-runners#create-a-registration-token-for-an-organization
     _FULL_URL="${GH_API_ROOT}/orgs/${ORG_NAME}/actions/runners/registration-token"
     ;;
   enterprise)
@@ -21,6 +22,7 @@ case ${RUNNER_SCOPE} in
     _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
     _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
     _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
+    # https://docs.github.com/en/rest/actions/self-hosted-runners#create-a-registration-token-for-a-repository
     _FULL_URL="${GH_API_ROOT}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
     ;;
   *) fail "unexpected runner scope [$RUNNER_SCOPE] -- report this issue to project upstream" ;;
