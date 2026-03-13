@@ -3,8 +3,6 @@
 set -o pipefail
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
-: "${GITHUB_HOST:=github.com}"
-
 # If URL is not github.com then use the enterprise api endpoint
 if [[ ${GITHUB_HOST} == "github.com" ]]; then
   URI="https://api.${GITHUB_HOST}"

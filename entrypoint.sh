@@ -16,16 +16,14 @@ export -n APP_PRIVATE_KEY
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
 deregister_runner() {
-  local nl token
+  local token
 
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
     if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
       echo "Refreshing access token for deregistration"
-      nl='
-'
-      ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+      ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}" \
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
       if [[ -z "${ACCESS_TOKEN}" || "${ACCESS_TOKEN}" == "null" ]]; then
         fail "Failed to refresh access token for deregistration"
@@ -48,8 +46,8 @@ deregister_runner() {
 
 if [[ -z "$RUNNER_NAME" && ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   if [[ -s "/etc/hostname" ]]; then
-    _RUNNER_NAME_PREFIX=${RUNNER_NAME_PREFIX-'github-runner'}
-    RUNNER_NAME=${_RUNNER_NAME_PREFIX:+${_RUNNER_NAME_PREFIX}-}$(cat /etc/hostname)
+    _runner_name_prefix=${RUNNER_NAME_PREFIX-'github-runner'}
+    RUNNER_NAME=${_runner_name_prefix:+${_runner_name_prefix}-}$(cat /etc/hostname)
     echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX}. /etc/hostname exists and has content. Setting runner name to ${RUNNER_NAME}"
   else
     echo "RANDOM_RUNNER_SUFFIX is ${RANDOM_RUNNER_SUFFIX} but /etc/hostname is not a non-empty file. Not using it"
@@ -106,10 +104,10 @@ case "${RUNNER_SCOPE}" in
     ;;
 esac
 
-export RUNNER_SCOPE
+export RUNNER_SCOPE GITHUB_HOST
 
 configure_runner() {
-  local args nl token
+  local args token
 
   args=()
   if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
@@ -117,12 +115,10 @@ configure_runner() {
       fail "ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with {APP_ID, APP_PRIVATE_KEY, APP_LOGIN}"
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
-    nl='
-'
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" \
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}" \
         APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
-    fail "either all or none of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified"
+    fail "either all or none of {APP_ID, APP_PRIVATE_KEY, APP_LOGIN} must be specified"
   fi
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
@@ -177,11 +173,9 @@ unset_config_vars() {
   unset LABELS
   unset REPO_URL
   unset RUNNER_TOKEN
-  unset RUNNER_WORKDIR
   unset RUNNER_GROUP
   unset GITHUB_HOST
   unset DISABLE_AUTOMATIC_DEREGISTRATION
-  unset CONFIGURED_ACTIONS_RUNNER_FILES_DIR
   unset EPHEMERAL
   unset DISABLE_AUTO_UPDATE
   unset START_DOCKER_SERVICE
