@@ -19,7 +19,7 @@ RUN chmod +x /actions-runner/install_actions.sh \
   && rm /actions-runner/install_actions.sh \
   && chown runner /_work /actions-runner /opt/hostedtoolcache
 
-COPY token.sh entrypoint.sh app_token.sh common.sh /
+COPY          token.sh  entrypoint.sh  app_token.sh common.sh /
 RUN chmod +x /token.sh /entrypoint.sh /app_token.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

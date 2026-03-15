@@ -16,12 +16,9 @@ case ${RUNNER_SCOPE} in
     _FULL_URL="${GH_API_ROOT}/enterprises/${ENTERPRISE_NAME}/actions/runners/registration-token"
     ;;
   repo)
-    _PROTO='https://'
-    # shellcheck disable=SC2116
-    _URL="$(echo "${REPO_URL/${_PROTO}/}")"
-    _PATH="$(echo "${_URL}" | grep / | cut -d/ -f2-)"
-    _ACCOUNT="$(echo "${_PATH}" | cut -d/ -f1)"
-    _REPO="$(echo "${_PATH}" | cut -d/ -f2)"
+    _URL="${REPO_URL#*://}"  # strip the protocol
+    _ACCOUNT="$(cut -d/ -f2 <<< "$_URL")"
+    _REPO="$(cut -d/ -f3 <<< "$_URL")"
     # https://docs.github.com/en/rest/actions/self-hosted-runners#create-a-registration-token-for-a-repository
     _FULL_URL="${GH_API_ROOT}/repos/${_ACCOUNT}/${_REPO}/actions/runners/registration-token"
     ;;
