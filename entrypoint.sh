@@ -19,8 +19,6 @@ export -n APP_LOGIN
 source /common.sh || { echo -e "ERROR: failed to import /common.sh"; exit 1; }
 
 deregister_runner() {
-  local token
-
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
@@ -30,8 +28,7 @@ deregister_runner() {
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
       echo "Access token refreshed successfully"
     fi
-    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
-    RUNNER_TOKEN=$(jq -re .token <<< "$token") || fail "[.token] not found in token.sh output"
+    RUNNER_TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
   fi
 
   ./config.sh remove --token "${RUNNER_TOKEN}"
@@ -115,7 +112,7 @@ esac
 export RUNNER_SCOPE GH_API_ROOT
 
 configure_runner() {
-  local args token
+  local args
 
   args=()
   if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
@@ -134,8 +131,7 @@ configure_runner() {
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     [[ -n "$RUNNER_TOKEN" ]] && fail "RUNNER_TOKEN is mutually exclusive with ACCESS_TOKEN"
     echo "Obtaining the token of the runner"
-    token=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
-    RUNNER_TOKEN=$(jq -re .token <<< "$token") || fail "[.token] not found in token.sh output"
+    RUNNER_TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
   fi
 
   # shellcheck disable=SC2153

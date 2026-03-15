@@ -25,10 +25,8 @@ case ${RUNNER_SCOPE} in
   *) fail "unexpected runner scope [$RUNNER_SCOPE] -- report this issue to project upstream" ;;
 esac
 
-RUNNER_TOKEN="$(curl -XPOST -fsSL \
+curl -XPOST -fsSL \
   -H "${CONTENT_LENGTH_HEADER}" \
   -H "${AUTH_HEADER}" \
   -H "${API_HEADER}" \
-  "${_FULL_URL}" | jq -re .token)" || fail "$_FULL_URL fetch & [.token] extraction failed with $?"
-
-printf '{"token": "%s", "full_url": "%s"}' "$RUNNER_TOKEN" "$_FULL_URL"
+  "${_FULL_URL}" | jq -re .token || fail "$_FULL_URL fetch & [.token] extraction failed with $?"
