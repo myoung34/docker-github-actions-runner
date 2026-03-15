@@ -258,8 +258,7 @@ fi
 if [[ ${RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
     if [[ "$DEBUG" == true ]]; then
-      # shellcheck disable=SC2145
-      echo "Running $@"
+      echo "Running $*"
     fi
     if [[ ${DEBUG_ONLY} == "false" ]]; then
       "$@"
@@ -274,16 +273,14 @@ else
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
     if [[ "$DEBUG" == true ]]; then
-      # shellcheck disable=SC2145
-      echo "Running /usr/sbin/gosu runner $@"
+      echo "Running /usr/sbin/gosu runner $*"
     fi
     if [[ ${DEBUG_ONLY} == "false" ]]; then
       /usr/sbin/gosu runner "$@"
     fi
   else
     if [[ "$DEBUG" == true ]]; then
-      # shellcheck disable=SC2145
-      echo "Running $@"
+      echo "Running $*"
     fi
     if [[ ${DEBUG_ONLY} == "false" ]]; then
       "$@"
