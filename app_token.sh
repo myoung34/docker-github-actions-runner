@@ -35,7 +35,7 @@ build_jwt_payload() {
 
     now=$(date +%s)
     iat=$((now - JWT_IAT_DRIFT))
-    jq -ce \
+    jq -cej \
         --arg iat_str "${iat}" \
         --arg exp_delta_str "${JWT_EXP_DELTA}" \
         --arg app_id_str "${APP_ID}" \
@@ -46,7 +46,7 @@ build_jwt_payload() {
         | .iat = $iat
         | .exp = ($iat + $exp_delta)
         | .iss = $app_id
-    ' <<< '{}' | tr -d '\n'
+    ' <<< '{}'
 }
 
 base64url() {

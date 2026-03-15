@@ -7,6 +7,7 @@ export GH_API_VER=v3
 
 export RUNNER_ALLOW_RUNASROOT=1
 export PATH=${PATH}:/actions-runner
+export NO_COLOR=true  # make sure jq does not produce color output
 
 # Un-export these, so that they must be passed explicitly to the environment of
 # any command that needs them.  This may help prevent leaks.
