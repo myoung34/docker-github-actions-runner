@@ -38,6 +38,7 @@ deregister_runner() {
 
 : "${DEBUG_ONLY:=false}"
 : "${DEBUG_OUTPUT:=false}"
+[[ "$DEBUG_ONLY" == true || "$DEBUG_OUTPUT" == true ]] && DEBUG=true
 : "${DISABLE_AUTOMATIC_DEREGISTRATION:=false}"
 : "${RANDOM_RUNNER_SUFFIX:=true}"
 
@@ -233,7 +234,7 @@ fi
 
 # Container's command (CMD) execution as runner user
 
-if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
+if [[ "$DEBUG" == true ]]; then
   echo ''
   echo "Disable automatic registration: ${DISABLE_AUTOMATIC_DEREGISTRATION}"
   echo "Random runner suffix: ${RANDOM_RUNNER_SUFFIX}"
@@ -256,7 +257,7 @@ fi
 
 if [[ ${RUN_AS_ROOT} == "true" ]]; then
   if [[ $(id -u) -eq 0 ]]; then
-    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
+    if [[ "$DEBUG" == true ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi
@@ -272,7 +273,7 @@ else
     chown -R runner "${RUNNER_WORKDIR}" /actions-runner
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
-    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
+    if [[ "$DEBUG" == true ]]; then
       # shellcheck disable=SC2145
       echo "Running /usr/sbin/gosu runner $@"
     fi
@@ -280,7 +281,7 @@ else
       /usr/sbin/gosu runner "$@"
     fi
   else
-    if [[ ${DEBUG_ONLY} == "true" || ${DEBUG_OUTPUT} == "true" ]]; then
+    if [[ "$DEBUG" == true ]]; then
       # shellcheck disable=SC2145
       echo "Running $@"
     fi
