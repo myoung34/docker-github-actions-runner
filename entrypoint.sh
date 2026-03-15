@@ -24,7 +24,7 @@ deregister_runner() {
     # If using GitHub App authentication, refresh the access token before deregistration
     if [[ -n "${APP_ID}" && -n "${APP_PRIVATE_KEY}" && -n "${APP_LOGIN}" ]]; then
       echo "Refreshing access token for deregistration"
-      ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}" \
+      ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY}" \
           APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
       echo "Access token refreshed successfully"
     fi
@@ -68,6 +68,7 @@ fi
 : "${START_DOCKER_SERVICE:=false}"
 : "${UNSET_CONFIG_VARS:=false}"
 : "${CONFIGURED_ACTIONS_RUNNER_FILES_DIR:=''}"
+APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}"
 # as to why $RUNNER_LABELS is used, see https://github.com/myoung34/docker-github-actions-runner/commit/ac80687f5e2a3a34b11a80daa6089281f186c2d5
 LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 
@@ -121,7 +122,7 @@ configure_runner() {
       fail "ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with {APP_ID, APP_PRIVATE_KEY, APP_LOGIN}"
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/$'\n'}" \
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY}" \
         APP_LOGIN="${APP_LOGIN}" bash /app_token.sh) || fail "app_token.sh failed with $?"
   elif [[ -n "${APP_ID}" || -n "${APP_PRIVATE_KEY}" || -n "${APP_LOGIN}" ]]; then
     fail "either all or none of {APP_ID, APP_PRIVATE_KEY, APP_LOGIN} must be specified"
