@@ -135,7 +135,6 @@ configure_runner() {
     RUNNER_TOKEN=$(ACCESS_TOKEN="${ACCESS_TOKEN}" bash /token.sh) || fail "token.sh failed with $?"
   fi
 
-  # shellcheck disable=SC2153
   if [[ -n "${EPHEMERAL}" ]]; then
     echo "Ephemeral option is enabled"
     args+=("--ephemeral")
