@@ -233,3 +233,15 @@ jobs:
             -e EPHEMERAL=true \
             -e DISABLE_AUTO_UPDATE=true \
             ${GH_RUNNER_IMAGE} 10
+
+      - name: Test EXIT trap on crash
+        run: |
+          # Run the container with a dummy token and force it to exit with code 1
+          docker run --name trap-test \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUNNER_TOKEN=faketoken \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            ${GH_RUNNER_IMAGE} /bin/bash -c "exit 1" || true
+            
+          # Check the logs to ensure the trap fired
+          docker logs trap-test | grep "Caught EXIT - Deregistering runner"

@@ -236,7 +236,7 @@ fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   if [[ ${_DEBUG_ONLY} == "false" ]]; then
-    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
+    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT EXIT
   fi
 fi
 
