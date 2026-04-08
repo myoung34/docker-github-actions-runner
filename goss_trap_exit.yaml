@@ -1,0 +1,7 @@
+command:
+  /entrypoint.sh /bin/bash -c "exit 1":
+    exit-status: 1
+    stdout:
+      - "Runner reusage is disabled"
+      - "Caught EXIT - Deregistering runner"
+    timeout: 10000
