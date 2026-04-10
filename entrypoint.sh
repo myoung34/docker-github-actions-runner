@@ -20,6 +20,7 @@ trap_with_arg() {
 }
 
 deregister_runner() {
+  COMMAND_EXIT_CODE=$?
   echo "Caught $1 - Deregistering runner"
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
@@ -40,7 +41,11 @@ deregister_runner() {
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
   [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
-  exit
+
+  # Simply calling `exit` on different environments will either return the exit code of the passed-in $@ command, or
+  # the exit code of the last executed command in this function.  To ensure that the behavior is consistent, we always
+  # return the exit code of the passed-in command, which is stored in COMMAND_EXIT_CODE.
+  exit ${COMMAND_EXIT_CODE}
 }
 
 _DEBUG_ONLY=${DEBUG_ONLY:-false}
