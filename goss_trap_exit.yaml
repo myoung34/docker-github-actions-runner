@@ -4,4 +4,7 @@ command:
     stdout:
       - "Runner reusage is disabled"
       - "Caught EXIT - Deregistering runner"
-    timeout: 10000
+    # We need to run this test with DEBUG_ONLY=false in order for entrypoint.sh to set up the trap.
+    # DEBUG_ONLY causes configure runner to run, which runs the .NET runtime.  Running the .NET runtime
+    # is very slow when emulating arm64 on x86_64, so we need to use a longer timeout for this test to pass on arm64.
+    timeout: 120000
