@@ -290,7 +290,14 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
 else
   if [[ $(id -u) -eq 0 ]]; then
     [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
-    chown -R runner "${_RUNNER_WORKDIR}" /actions-runner
+    # /actions-runner/{bin,externals} ship runner-owned from the image
+    # (~380 MB / 9k+ files). Recursing over them triggers overlay copy-up
+    # per file even when ownership already matches, which dominates startup
+    # under parallel runners. Only config.sh (run as root earlier) may have
+    # written new root-owned files at the top level — chown those plus
+    # /actions-runner itself and ${_RUNNER_WORKDIR}, but not the big dirs.
+    chown runner /actions-runner "${_RUNNER_WORKDIR}"
+    find /actions-runner -mindepth 1 -maxdepth 1 ! -name bin ! -name externals -exec chown -R runner {} + 2>/dev/null || true
     # The toolcache is not recursively chowned to avoid recursing over prepulated tooling in derived docker images
     chown runner /opt/hostedtoolcache/
     if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
