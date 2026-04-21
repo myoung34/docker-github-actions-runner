@@ -5,7 +5,7 @@ LABEL maintainer="myoung34@my.apsu.edu"
 ENV AGENT_TOOLSDIRECTORY=/opt/hostedtoolcache
 RUN mkdir -p /opt/hostedtoolcache
 
-ARG GH_RUNNER_VERSION="2.333.1"
+ARG GH_RUNNER_VERSION="2.334.0"
 
 ARG TARGETPLATFORM
 
