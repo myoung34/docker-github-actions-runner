@@ -1,4 +1,4 @@
-FROM ubuntu:focal
+FROM ubuntu:resolute
 LABEL maintainer="myoung34@my.apsu.edu"
 
 ENV LANG=en_US.UTF-8
