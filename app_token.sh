@@ -12,9 +12,12 @@
 set -o pipefail
 
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
+_GITHUB_HOST="${_GITHUB_HOST#https://}"
+_GITHUB_HOST="${_GITHUB_HOST#http://}"
 
-# If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} = "github.com" ]]; then
+if [[ "${_GITHUB_HOST}" = "github.com" ]]; then
+  URI="https://api.github.com"
+elif [[ "${_GITHUB_HOST}" == *.ghe.com ]]; then
   URI="https://api.${_GITHUB_HOST}"
 else
   URI="https://${_GITHUB_HOST}/api/v3"
