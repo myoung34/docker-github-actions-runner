@@ -71,6 +71,8 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `RUNNER_WORKDIR` | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files. |
 | `RUNNER_GROUP` | Name of the runner group to add this runner to (defaults to the default runner group) |
 | `GITHUB_HOST` | Optional URL of the Github Enterprise server e.g github.mycompany.com. Defaults to `github.com`. |
+| `GITHUB_API_HOST` | Optional API host to use for token generation. Useful when the API host differs from `GITHUB_HOST`, e.g. `api.mycompany.ghe.com` for GitHub Enterprise Cloud with data residency. |
+| `GITHUB_API_V3` | Optional flag to append `/api/v3` to the API host. Defaults to `true` for non-`github.com` hosts and `false` when `GITHUB_API_HOST` is set. |
 | `DISABLE_AUTOMATIC_DEREGISTRATION` | Optional flag to disable signal catching for deregistration. Default is `false`. Any value other than exactly `false` is considered `true`. See [here](https://github.com/myoung34/docker-github-actions-runner/issues/94) |
 | `CONFIGURED_ACTIONS_RUNNER_FILES_DIR` | Path to use for runner data. It allows avoiding reregistration each the start of the runner. No default value. |
 | `EPHEMERAL` | Optional flag to configure runner with [`--ephemeral` option](https://docs.github.com/en/actions/hosting-your-own-runners/autoscaling-with-self-hosted-runners#using-ephemeral-runners-for-autoscaling). Ephemeral runners are suitable for autoscaling. |
@@ -120,6 +122,8 @@ $ GOSS_VARS=goss_vars.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --ent
   -e RUNNER_WORKDIR=/tmp/a \
   -e RUNNER_GROUP=wat \
   -e GITHUB_HOST=github.example.com \
+  -e GITHUB_API_HOST=github.example.com \
+  -e GITHUB_API_V3=true \
   -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
   -e EPHEMERAL=true \
   -e DISABLE_AUTO_UPDATE=true \

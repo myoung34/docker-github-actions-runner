@@ -1,12 +1,27 @@
 #!/bin/bash
 
-_GITHUB_HOST=${GITHUB_HOST:="github.com"}
+normalize_host() {
+  local host="${1#http://}"
+  host="${host#https://}"
+  echo "${host%%/}"
+}
 
-# If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} = "github.com" ]]; then
-  URI="https://api.${_GITHUB_HOST}"
+_GITHUB_HOST=$(normalize_host "${GITHUB_HOST:="github.com"}")
+
+if [[ -n ${GITHUB_API_HOST} ]]; then
+  _GITHUB_API_HOST=$(normalize_host "${GITHUB_API_HOST}")
+  _GITHUB_API_V3=${GITHUB_API_V3:-false}
+elif [[ ${_GITHUB_HOST} = "github.com" ]]; then
+  _GITHUB_API_HOST="api.${_GITHUB_HOST}"
+  _GITHUB_API_V3=${GITHUB_API_V3:-false}
 else
-  URI="https://${_GITHUB_HOST}/api/v3"
+  _GITHUB_API_HOST="${_GITHUB_HOST}"
+  _GITHUB_API_V3=${GITHUB_API_V3:-true}
+fi
+
+URI="https://${_GITHUB_API_HOST}"
+if [[ ${_GITHUB_API_V3} == "true" ]]; then
+  URI="${URI}/api/v3"
 fi
 
 API_VERSION=v3
