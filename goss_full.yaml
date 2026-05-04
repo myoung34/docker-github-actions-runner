@@ -1,4 +1,11 @@
 command:
+  /bin/bash -c 'curl(){ printf %s "{\"token\":\"abc\"}"; }; export -f curl; ACCESS_TOKEN=123 RUNNER_SCOPE=org ORG_NAME=myoung34 GITHUB_HOST=github.example.com GITHUB_API_HOST=api.github.example.com GITHUB_API_PATH=/foo /token.sh':
+    exit-status: 0
+    stdout:
+      - '"full_url": "https://api.github.example.com/foo/orgs/myoung34/actions/runners/registration-token"'
+    stderr: ""
+    timeout: 2000
+
   /entrypoint.sh something:
     exit-status: 0
     stdout:
