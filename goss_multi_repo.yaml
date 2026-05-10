@@ -1,0 +1,22 @@
+command:
+  /entrypoint.sh something:
+    exit-status: 0
+    stdout:
+      - "Preparing /actions-runner-1"
+      - "Preparing /actions-runner-2"
+      - "Multi-repo mode: 2 runner"
+      - "Disable automatic registration: false"
+      - "Random runner suffix: false"
+      - "Labels: linux,x64"
+      - "Runner Group: Default"
+      - "Github Host: github.com"
+      - "Run as root:true"
+      - "Start docker: false"
+      - "Runner 1/2:"
+      - "  Repo URL: https://github.com/foo/repo1"
+      - "  Runner dir: /actions-runner-1"
+      - "Runner 2/2:"
+      - "  Repo URL: https://github.com/foo/repo2"
+      - "  Runner dir: /actions-runner-2"
+    stderr: ""
+    timeout: 5000
