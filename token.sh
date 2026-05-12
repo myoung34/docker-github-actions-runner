@@ -1,13 +1,35 @@
 #!/bin/bash
 
-_GITHUB_HOST=${GITHUB_HOST:="github.com"}
+normalize_host() {
+  local host="${1#http://}"
+  host="${host#https://}"
+  echo "${host%%/}"
+}
 
-# If URL is not github.com then use the enterprise api endpoint
-if [[ ${GITHUB_HOST} = "github.com" ]]; then
-  URI="https://api.${_GITHUB_HOST}"
+normalize_api_path() {
+  local path="${1:-}"
+  if [[ -z ${path} ]] || [[ ${path} == "/" ]]; then
+    echo ""
+    return
+  fi
+
+  path="/${path#/}"
+  echo "${path%/}"
+}
+
+_GITHUB_HOST=$(normalize_host "${GITHUB_HOST:="github.com"}")
+
+if [[ -n ${GITHUB_API_HOST} ]]; then
+  _GITHUB_API_HOST=$(normalize_host "${GITHUB_API_HOST}")
+  _GITHUB_API_PATH=$(normalize_api_path "${GITHUB_API_PATH:-/api/v3}")
+elif [[ ${_GITHUB_HOST} = "github.com" ]]; then
+  _GITHUB_API_HOST="api.${_GITHUB_HOST}"
+  _GITHUB_API_PATH=$(normalize_api_path "${GITHUB_API_PATH:-/}")
 else
-  URI="https://${_GITHUB_HOST}/api/v3"
+  _GITHUB_API_HOST="${_GITHUB_HOST}"
+  _GITHUB_API_PATH=$(normalize_api_path "${GITHUB_API_PATH:-/api/v3}")
 fi
+URI="https://${_GITHUB_API_HOST}${_GITHUB_API_PATH}"
 
 API_VERSION=v3
 API_HEADER="Accept: application/vnd.github.${API_VERSION}+json"
