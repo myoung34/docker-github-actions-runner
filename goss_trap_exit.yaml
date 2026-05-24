@@ -1,0 +1,10 @@
+command:
+  /entrypoint.sh /bin/bash -c "exit 1":
+    exit-status: 1
+    stdout:
+      - "Runner reusage is disabled"
+      - "Caught EXIT - Deregistering runner"
+    # DEBUG_ONLY=false is required so configure_runner runs and sets up the trap.
+    # The .NET runtime (config.sh) is slow under qemu arm64 emulation on x86_64,
+    # so a longer timeout is needed for this test to pass on arm64.
+    timeout: 120000
