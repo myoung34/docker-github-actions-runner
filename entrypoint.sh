@@ -305,6 +305,15 @@ if [[ ${_RUN_AS_ROOT} == "true" ]]; then
     exit 1
   fi
 else
+  # Ensure the docker group GID matches the mounted docker socket
+  if [[ -e /var/run/docker.sock ]]; then
+    _DOCKER_SOCK_GID=$(stat -c '%g' /var/run/docker.sock)
+    _CURRENT_DOCKER_GID=$(getent group docker | cut -d: -f3 2>/dev/null || echo "")
+    if [[ -n "${_DOCKER_SOCK_GID}" ]] && [[ "${_DOCKER_SOCK_GID}" != "${_CURRENT_DOCKER_GID}" ]]; then
+      echo "Adjusting docker group GID to match socket (${_DOCKER_SOCK_GID})"
+      groupmod -g "${_DOCKER_SOCK_GID}" docker 2>/dev/null || true
+    fi
+  fi
   if [[ $(id -u) -eq 0 ]]; then
     [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]] && chown -R runner "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}"
     # /actions-runner/{bin,externals} ship runner-owned from the image
