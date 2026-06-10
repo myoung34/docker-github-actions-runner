@@ -22,13 +22,13 @@ trap_with_arg() {
 _DEREGISTERED=false
 
 deregister_runner() {
+  local CAUGHT="${1:-EXIT}"
+  echo "Caught ${CAUGHT} - Deregistering runner"
+
   if [[ "${_DEREGISTERED}" == "true" ]]; then
     return
   fi
   _DEREGISTERED=true
-
-  local CAUGHT="${1:-EXIT}"
-  echo "Caught ${CAUGHT} - Deregistering runner"
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
@@ -51,7 +51,10 @@ deregister_runner() {
   [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
 
   if [[ "${CAUGHT}" != "EXIT" ]]; then
-    exit
+    exit 1
+  else
+    # For EXIT trap, preserve the original exit code
+    exit "${LAST_EXIT_CODE:-0}"
   fi
 }
 
@@ -253,7 +256,8 @@ fi
 
 if [[ ${_DISABLE_AUTOMATIC_DEREGISTRATION} == "false" ]]; then
   if [[ ${_DEBUG_ONLY} == "false" ]]; then
-    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT EXIT
+    trap 'LAST_EXIT_CODE=$?; deregister_runner EXIT' EXIT
+    trap_with_arg deregister_runner SIGINT SIGQUIT SIGTERM INT TERM QUIT
   fi
 fi
 
