@@ -29,7 +29,8 @@ deregister_runner() {
   fi
   _DEREGISTERED=true
 
-  echo "Caught ${1:-EXIT} - Deregistering runner"
+  local CAUGHT="${1:-EXIT}"
+  echo "Caught ${CAUGHT} - Deregistering runner"
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
