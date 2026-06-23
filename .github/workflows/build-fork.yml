@@ -1,0 +1,48 @@
+name: Build fork image (ubuntu-noble, amd64)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - 'entrypoint.sh'
+      - 'Dockerfile'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # The upstream deploy.yml rewrites the FROM line to use their org's base
+      # image. We point it at the public upstream base image instead.
+      - name: Prepare Dockerfile
+        run: |
+          cp Dockerfile Dockerfile.ubuntu-noble
+          sed -i.bak "s|FROM.*|FROM myoung34/github-runner-base:ubuntu-noble|" Dockerfile.ubuntu-noble
+
+      - name: Build and push ubuntu-noble (amd64)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.ubuntu-noble
+          platforms: linux/amd64
+          push: true
+          tags: ghcr.io/${{ github.repository }}:ubuntu-noble
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
