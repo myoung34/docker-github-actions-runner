@@ -139,6 +139,19 @@ jobs:
             if [ $? -ne 0 ]; then
               exit 1
             fi
+            # test ENABLE_RUNNER_WORKDIR_SUFFIX suffixes and cleans up the per-runner workdir on exit
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_workdir_suffix.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=false \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUNNER_TOKEN=faketoken \
+            -e RUN_AS_ROOT=true \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            -e ENABLE_RUNNER_WORKDIR_SUFFIX=true \
+            -e RUNNER_WORKDIR=/tmp/suffix \
+            ${GH_RUNNER_IMAGE} 300
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
   debian_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -251,6 +264,19 @@ jobs:
             -e RUNNER_TOKEN=faketoken \
             -e RUN_AS_ROOT=true \
             -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            ${GH_RUNNER_IMAGE} 300
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
+            # test ENABLE_RUNNER_WORKDIR_SUFFIX suffixes and cleans up the per-runner workdir on exit
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_workdir_suffix.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=false \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUNNER_TOKEN=faketoken \
+            -e RUN_AS_ROOT=true \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
+            -e ENABLE_RUNNER_WORKDIR_SUFFIX=true \
+            -e RUNNER_WORKDIR=/tmp/suffix \
             ${GH_RUNNER_IMAGE} 300
             if [ $? -ne 0 ]; then
               exit 1

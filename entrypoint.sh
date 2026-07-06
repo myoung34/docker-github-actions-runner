@@ -21,6 +21,19 @@ trap_with_arg() {
 
 _DEREGISTERED=false
 
+cleanup_runner_workdir() {
+  # Only owns/cleans a unique per-runner path when the suffix feature is on;
+  # otherwise the workdir may be shared or externally managed and must be
+  # left untouched.
+  if [[ "${_ENABLE_RUNNER_WORKDIR_SUFFIX}" != "true" ]]; then
+    return
+  fi
+  if [[ -n "${_RUNNER_WORKDIR}" ]] && [[ -d "${_RUNNER_WORKDIR}" ]]; then
+    echo "Cleaning up runner workdir ${_RUNNER_WORKDIR}"
+    rm -rf "${_RUNNER_WORKDIR}" || echo "WARNING: Failed to clean up runner workdir ${_RUNNER_WORKDIR}"
+  fi
+}
+
 deregister_runner() {
   local CAUGHT="${1:-EXIT}"
   echo "Caught ${CAUGHT} - Deregistering runner"
@@ -49,6 +62,8 @@ deregister_runner() {
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
   [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
+
+  cleanup_runner_workdir
 
   if [[ "${CAUGHT}" != "EXIT" ]]; then
     exit 1
@@ -82,6 +97,13 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
 fi
 
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work/${_RUNNER_NAME}}
+_ENABLE_RUNNER_WORKDIR_SUFFIX=${ENABLE_RUNNER_WORKDIR_SUFFIX:-false}
+if [[ ${_ENABLE_RUNNER_WORKDIR_SUFFIX} == "true" ]]; then
+  # Give each runner its own subdirectory under the (potentially shared)
+  # workdir so runners don't collide on a shared build cache. The unique
+  # path is cleaned up on container exit (see cleanup_runner_workdir).
+  _RUNNER_WORKDIR="${_RUNNER_WORKDIR}/${_RUNNER_NAME}"
+fi
 _LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
@@ -288,6 +310,7 @@ if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
   echo "Runner name: ${_RUNNER_NAME}"
   echo "Runner workdir: ${_RUNNER_WORKDIR}"
+  echo "Runner workdir suffix: ${_ENABLE_RUNNER_WORKDIR_SUFFIX}"
   echo "Labels: ${_LABELS}"
   echo "Runner Group: ${_RUNNER_GROUP}"
   echo "Github Host: ${_GITHUB_HOST}"
