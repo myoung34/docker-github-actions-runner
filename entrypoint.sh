@@ -96,12 +96,16 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   fi
 fi
 
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work/${_RUNNER_NAME}}
+# Base workdir defaults to /_work; an explicit RUNNER_WORKDIR overrides it.
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
 _ENABLE_RUNNER_WORKDIR_SUFFIX=${ENABLE_RUNNER_WORKDIR_SUFFIX:-false}
-if [[ ${_ENABLE_RUNNER_WORKDIR_SUFFIX} == "true" ]]; then
-  # Give each runner its own subdirectory under the (potentially shared)
-  # workdir so runners don't collide on a shared build cache. The unique
-  # path is cleaned up on container exit (see cleanup_runner_workdir).
+# Append the runner name (<workdir>/<runner name>) so each runner gets its own
+# subdirectory and runners don't collide on a shared workdir/build cache. Do
+# this when the suffix feature is enabled, or when no explicit RUNNER_WORKDIR
+# was given (preserving the historical /_work/<runner name> default). When the
+# suffix feature is on, the unique path is cleaned up on container exit (see
+# cleanup_runner_workdir).
+if [[ ${_ENABLE_RUNNER_WORKDIR_SUFFIX} == "true" ]] || [[ -z "${RUNNER_WORKDIR}" ]]; then
   _RUNNER_WORKDIR="${_RUNNER_WORKDIR}/${_RUNNER_NAME}"
 fi
 _LABELS=${RUNNER_LABELS:-${LABELS:-default}}
