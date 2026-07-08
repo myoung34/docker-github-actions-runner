@@ -21,19 +21,6 @@ trap_with_arg() {
 
 _DEREGISTERED=false
 
-cleanup_runner_workdir() {
-  # Only owns/cleans a unique per-runner path when the suffix feature is on;
-  # otherwise the workdir may be shared or externally managed and must be
-  # left untouched.
-  if [[ "${_ENABLE_RUNNER_WORKDIR_SUFFIX}" != "true" ]]; then
-    return
-  fi
-  if [[ -n "${_RUNNER_WORKDIR}" ]] && [[ -d "${_RUNNER_WORKDIR}" ]]; then
-    echo "Cleaning up runner workdir ${_RUNNER_WORKDIR}"
-    rm -rf "${_RUNNER_WORKDIR}" || echo "WARNING: Failed to clean up runner workdir ${_RUNNER_WORKDIR}"
-  fi
-}
-
 deregister_runner() {
   local CAUGHT="${1:-EXIT}"
   echo "Caught ${CAUGHT} - Deregistering runner"
@@ -62,8 +49,6 @@ deregister_runner() {
   fi
   ./config.sh remove --token "${RUNNER_TOKEN}"
   [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
-
-  cleanup_runner_workdir
 
   if [[ "${CAUGHT}" != "EXIT" ]]; then
     exit 1
@@ -96,18 +81,11 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
   fi
 fi
 
-# Base workdir defaults to /_work; an explicit RUNNER_WORKDIR overrides it.
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-/_work}
-_ENABLE_RUNNER_WORKDIR_SUFFIX=${ENABLE_RUNNER_WORKDIR_SUFFIX:-false}
-# Append the runner name (<workdir>/<runner name>) so each runner gets its own
-# subdirectory and runners don't collide on a shared workdir/build cache. Do
-# this when the suffix feature is enabled, or when no explicit RUNNER_WORKDIR
-# was given (preserving the historical /_work/<runner name> default). When the
-# suffix feature is on, the unique path is cleaned up on container exit (see
-# cleanup_runner_workdir).
-if [[ ${_ENABLE_RUNNER_WORKDIR_SUFFIX} == "true" ]] || [[ -z "${RUNNER_WORKDIR}" ]]; then
-  _RUNNER_WORKDIR="${_RUNNER_WORKDIR}/${_RUNNER_NAME}"
-fi
+# An explicit RUNNER_WORKDIR is used as-is. Otherwise the default workdir is
+# <RUNNER_WORKDIR_ROOT>/<runner name> (RUNNER_WORKDIR_ROOT defaults to /_work),
+# so each runner gets its own subdirectory and replicas sharing a mount (e.g. a
+# common build cache) don't collide on the same path.
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-${RUNNER_WORKDIR_ROOT:-/_work}/${_RUNNER_NAME}}
 _LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
@@ -314,7 +292,7 @@ if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
   echo "Runner name: ${_RUNNER_NAME}"
   echo "Runner workdir: ${_RUNNER_WORKDIR}"
-  echo "Runner workdir suffix: ${_ENABLE_RUNNER_WORKDIR_SUFFIX}"
+  echo "Runner workdir root: ${RUNNER_WORKDIR_ROOT:-/_work}"
   echo "Labels: ${_LABELS}"
   echo "Runner Group: ${_RUNNER_GROUP}"
   echo "Github Host: ${_GITHUB_HOST}"

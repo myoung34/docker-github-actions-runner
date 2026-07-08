@@ -1,0 +1,11 @@
+command:
+  /entrypoint.sh /bin/bash -c "true":
+    exit-status: 0
+    stdout:
+      # RUNNER_WORKDIR is unset, so the default workdir is built from
+      # RUNNER_WORKDIR_ROOT (/tmp/root) plus the runner name (test).
+      - "Runner workdir: /tmp/root/test"
+      - "Runner workdir root: /tmp/root"
+    # DEBUG_ONLY=true short-circuits configure_runner but still emits the debug
+    # output block, so this test stays fast and does not run config.sh.
+    timeout: 120000
