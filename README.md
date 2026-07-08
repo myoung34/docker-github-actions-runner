@@ -69,6 +69,7 @@ These containers are built via Github actions that [copy the dockerfile](https:/
 | `REPO_URL` | If using a non-organization runner this is the full repository url to register under such as 'https://github.com/myoung34/repo' |
 | `RUNNER_TOKEN` | If not using a PAT for `ACCESS_TOKEN` this will be the runner token provided by the Add Runner UI (a manual process). Note: This token is short lived and will change frequently. `ACCESS_TOKEN` is likely preferred. |
 | `RUNNER_WORKDIR` | The working directory for the runner. Runners on the same host should not share this directory. Default is '/_work'. This must match the source path for the bind-mounted volume at RUNNER_WORKDIR, in order for container actions to access files. |
+| `RUNNER_WORKDIR_ROOT` | Optional. Base directory used to build the default per-runner workdir when `RUNNER_WORKDIR` is not set: each runner gets `<RUNNER_WORKDIR_ROOT>/<runner name>`, so replicas sharing a mount (e.g. a common build cache) do not collide. Defaults to `/_work`. Ignored when `RUNNER_WORKDIR` is set explicitly. |
 | `RUNNER_GROUP` | Name of the runner group to add this runner to (defaults to the default runner group) |
 | `GITHUB_HOST` | Optional URL of the Github Enterprise server e.g github.mycompany.com. Defaults to `github.com`. |
 | `GITHUB_API_HOST` | Optional API host to use for token generation. Useful when the API host differs from `GITHUB_HOST`, e.g. `api.mycompany.ghe.com` for GitHub Enterprise Cloud with data residency. |

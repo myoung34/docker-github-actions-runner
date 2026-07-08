@@ -139,6 +139,16 @@ jobs:
             if [ $? -ne 0 ]; then
               exit 1
             fi
+            # test RUNNER_WORKDIR_ROOT overrides the /_work base for the default per-runner workdir
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_workdir_root.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUNNER_NAME=test \
+            -e RUNNER_WORKDIR_ROOT=/tmp/root \
+            ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
   debian_tests:
     runs-on: ubuntu-latest
     strategy:
@@ -252,6 +262,16 @@ jobs:
             -e RUN_AS_ROOT=true \
             -e DISABLE_AUTOMATIC_DEREGISTRATION=false \
             ${GH_RUNNER_IMAGE} 300
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
+            # test RUNNER_WORKDIR_ROOT overrides the /_work base for the default per-runner workdir
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_workdir_root.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=true \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUNNER_NAME=test \
+            -e RUNNER_WORKDIR_ROOT=/tmp/root \
+            ${GH_RUNNER_IMAGE} 10
             if [ $? -ne 0 ]; then
               exit 1
             fi
