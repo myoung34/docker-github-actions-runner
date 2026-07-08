@@ -82,9 +82,7 @@ if [[ ${RANDOM_RUNNER_SUFFIX} != "true" ]]; then
 fi
 
 # An explicit RUNNER_WORKDIR is used as-is. Otherwise the default workdir is
-# <RUNNER_WORKDIR_ROOT>/<runner name> (RUNNER_WORKDIR_ROOT defaults to /_work),
-# so each runner gets its own subdirectory and replicas sharing a mount (e.g. a
-# common build cache) don't collide on the same path.
+# <RUNNER_WORKDIR_ROOT>/<runner name> (RUNNER_WORKDIR_ROOT defaults to /_work)
 _RUNNER_WORKDIR_ROOT=${RUNNER_WORKDIR_ROOT:-/_work}
 _RUNNER_WORKDIR=${RUNNER_WORKDIR:-${_RUNNER_WORKDIR_ROOT}/${_RUNNER_NAME}}
 _LABELS=${RUNNER_LABELS:-${LABELS:-default}}
