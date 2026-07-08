@@ -85,7 +85,8 @@ fi
 # <RUNNER_WORKDIR_ROOT>/<runner name> (RUNNER_WORKDIR_ROOT defaults to /_work),
 # so each runner gets its own subdirectory and replicas sharing a mount (e.g. a
 # common build cache) don't collide on the same path.
-_RUNNER_WORKDIR=${RUNNER_WORKDIR:-${RUNNER_WORKDIR_ROOT:-/_work}/${_RUNNER_NAME}}
+_RUNNER_WORKDIR_ROOT=${RUNNER_WORKDIR_ROOT:-/_work}
+_RUNNER_WORKDIR=${RUNNER_WORKDIR:-${_RUNNER_WORKDIR_ROOT}/${_RUNNER_NAME}}
 _LABELS=${RUNNER_LABELS:-${LABELS:-default}}
 _RUNNER_GROUP=${RUNNER_GROUP:-Default}
 _GITHUB_HOST=${GITHUB_HOST:="github.com"}
@@ -292,7 +293,7 @@ if [[ ${_DEBUG_ONLY} == "true" ]] || [[ ${_DEBUG_OUTPUT} == "true" ]] ; then
   echo "Random runner suffix: ${_RANDOM_RUNNER_SUFFIX}"
   echo "Runner name: ${_RUNNER_NAME}"
   echo "Runner workdir: ${_RUNNER_WORKDIR}"
-  echo "Runner workdir root: ${RUNNER_WORKDIR_ROOT:-/_work}"
+  echo "Runner workdir root: ${_RUNNER_WORKDIR_ROOT}"
   echo "Labels: ${_LABELS}"
   echo "Runner Group: ${_RUNNER_GROUP}"
   echo "Github Host: ${_GITHUB_HOST}"
