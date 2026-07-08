@@ -35,8 +35,31 @@ jobs:
         run: cp Dockerfile.base Dockerfile.base.ubuntu-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM ubuntu:${{ matrix.release }}/' Dockerfile.base.ubuntu-${{ matrix.release }}
       - name: Install Goss and dgoss
         run: |
-          curl -fsSL https://goss.rocks/install | sh
-          export PATH=$PATH:/usr/local/bin
+          set -euo pipefail
+
+          VERSION="v0.4.9"
+          BIN_DIR="$HOME/.local/bin"
+
+          mkdir -p "$BIN_DIR"
+          echo "$BIN_DIR" >> "$GITHUB_PATH"
+
+          ARCH="${{ matrix.platform }}"
+          if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
+            echo "Unsupported platform: $ARCH"
+            exit 1
+          fi
+
+          curl -fsSL \
+            -o "$BIN_DIR/goss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+
+          curl -fsSL \
+            -o "$BIN_DIR/dgoss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/dgoss"
+
+          chmod +x "$BIN_DIR/goss" "$BIN_DIR/dgoss"
+
+          "$BIN_DIR/goss" --version
       - name: Get current Git SHA
         id: vars
         run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -72,7 +95,7 @@ jobs:
             echo "os: ubuntu" >goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             if [ $? -ne 0 ]; then
               exit 1
             fi
@@ -99,8 +122,31 @@ jobs:
         run: cp Dockerfile.base Dockerfile.base.debian-${{ matrix.release }}; sed -i.bak 's/FROM.*/FROM debian:${{ matrix.release }}/' Dockerfile.base.debian-${{ matrix.release }}
       - name: Install Goss and dgoss
         run: |
-          curl -fsSL https://goss.rocks/install | sh
-          export PATH=$PATH:/usr/local/bin
+          set -euo pipefail
+
+          VERSION="v0.4.9"
+          BIN_DIR="$HOME/.local/bin"
+
+          mkdir -p "$BIN_DIR"
+          echo "$BIN_DIR" >> "$GITHUB_PATH"
+
+          ARCH="${{ matrix.platform }}"
+          if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
+            echo "Unsupported platform: $ARCH"
+            exit 1
+          fi
+
+          curl -fsSL \
+            -o "$BIN_DIR/goss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+
+          curl -fsSL \
+            -o "$BIN_DIR/dgoss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/dgoss"
+
+          chmod +x "$BIN_DIR/goss" "$BIN_DIR/dgoss"
+
+          "$BIN_DIR/goss" --version
       - name: Get current Git SHA
         id: vars
         run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -136,7 +182,7 @@ jobs:
             echo "os: debian" >goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             if [ $? -ne 0 ]; then
               exit 1
             fi

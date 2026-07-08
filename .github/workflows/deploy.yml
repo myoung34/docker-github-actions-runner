@@ -38,8 +38,31 @@ jobs:
         run: cp Dockerfile Dockerfile.ubuntu-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:ubuntu-${{ matrix.release }}/" Dockerfile.ubuntu-${{ matrix.release }}
       - name: Install Goss and dgoss
         run: |
-          curl -fsSL https://goss.rocks/install | sh
-          export PATH=$PATH:/usr/local/bin
+          set -euo pipefail
+
+          VERSION="v0.4.9"
+          BIN_DIR="$HOME/.local/bin"
+
+          mkdir -p "$BIN_DIR"
+          echo "$BIN_DIR" >> "$GITHUB_PATH"
+
+          ARCH="${{ matrix.platform }}"
+          if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
+            echo "Unsupported platform: $ARCH"
+            exit 1
+          fi
+
+          curl -fsSL \
+            -o "$BIN_DIR/goss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+
+          curl -fsSL \
+            -o "$BIN_DIR/dgoss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/dgoss"
+
+          chmod +x "$BIN_DIR/goss" "$BIN_DIR/dgoss"
+
+          "$BIN_DIR/goss" --version
       - name: Get current Git SHA
         id: vars
         run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -77,7 +100,7 @@ jobs:
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             # test the edge case from deregistration on reusable runners
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=true \
             -e ACCESS_TOKEN=notreal \
             -e LABELS=linux,x64 \
@@ -92,17 +115,17 @@ jobs:
               exit 1
             fi
             # test the base
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             if [ $? -ne 0 ]; then
               exit 1
             fi
             # test the final image but with all defaults
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             if [ $? -ne 0 ]; then
               exit 1
             fi
             # test the final image but with non-default values
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=true \
             -e RUNNER_NAME=huzzah \
             -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
@@ -150,8 +173,31 @@ jobs:
         run: cp Dockerfile Dockerfile.debian-${{ matrix.release }}; sed -i.bak "s/FROM.*/FROM ${ORG}\/github-runner-base:debian-${{ matrix.release }}/" Dockerfile.debian-${{ matrix.release }}
       - name: Install Goss and dgoss
         run: |
-          curl -fsSL https://goss.rocks/install | sh
-          export PATH=$PATH:/usr/local/bin
+          set -euo pipefail
+
+          VERSION="v0.4.9"
+          BIN_DIR="$HOME/.local/bin"
+
+          mkdir -p "$BIN_DIR"
+          echo "$BIN_DIR" >> "$GITHUB_PATH"
+
+          ARCH="${{ matrix.platform }}"
+          if [ "$ARCH" != "amd64" ] && [ "$ARCH" != "arm64" ]; then
+            echo "Unsupported platform: $ARCH"
+            exit 1
+          fi
+
+          curl -fsSL \
+            -o "$BIN_DIR/goss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+
+          curl -fsSL \
+            -o "$BIN_DIR/dgoss" \
+            "https://github.com/goss-org/goss/releases/download/${VERSION}/dgoss"
+
+          chmod +x "$BIN_DIR/goss" "$BIN_DIR/dgoss"
+
+          "$BIN_DIR/goss" --version
       - name: Get current Git SHA
         id: vars
         run: echo "GIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
@@ -189,7 +235,7 @@ jobs:
             echo "oscodename: ${{ matrix.release }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             echo "arch: ${{ matrix.platform }}" >>goss_vars_${GH_RUNNER_IMAGE}.yaml
             # test the edge case from deregistration on reusable runners
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_reusage_fail.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=true \
             -e ACCESS_TOKEN=notreal \
             -e LABELS=linux,x64 \
@@ -204,11 +250,11 @@ jobs:
               exit 1
             fi
             # test the base
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_base.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             # test the final image but with all defaults
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full_defaults.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep -e RUNNER_NAME=test -e DEBUG_ONLY=true ${GH_RUNNER_IMAGE} 10
             # test the final image but with non-default values
-            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 dgoss run --entrypoint /usr/bin/sleep \
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_full.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=true \
             -e RUNNER_NAME=huzzah \
             -e REPO_URL=https://github.com/myoung34/docker-github-actions-runner \
