@@ -240,7 +240,7 @@ if [[ -n "${_CONFIGURED_ACTIONS_RUNNER_FILES_DIR}" ]]; then
 else
   echo "Runner reusage is disabled"
   if [[ ${_DEBUG_ONLY} == "false" ]]; then
-    [[ -f "/actions-runner/.runner" ]] && rm -f /actions-runner/.runner
+    rm -f /actions-runner/.runner /actions-runner/.runner_migrated /actions-runner/.credentials /actions-runner/.credentials_migrated /actions-runner/.credentials_rsaparams
     configure_runner
   fi
 fi
