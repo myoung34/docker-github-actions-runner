@@ -12,13 +12,6 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true
-    },
-    {
-      "matchManagers": ["github-actions"],
-      "versioning": "digest",
-      "matchPackageNames": [
-        "/.*/"
-      ]
     }
   ],
   "platformAutomerge": true
