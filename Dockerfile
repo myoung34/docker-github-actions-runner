@@ -12,11 +12,15 @@ ARG TARGETPLATFORM
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /actions-runner
-COPY install_actions.sh /actions-runner
+COPY install_actions.sh build/install_runner_npm.sh build/test_runner_npm.sh /actions-runner/
+COPY build/runner-npm/ /actions-runner/runner-npm/
 
 RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
-  && rm /actions-runner/install_actions.sh \
+  && bash /actions-runner/install_runner_npm.sh /actions-runner /actions-runner/runner-npm \
+  && bash /actions-runner/test_runner_npm.sh /actions-runner \
+  && rm /actions-runner/install_actions.sh /actions-runner/install_runner_npm.sh /actions-runner/test_runner_npm.sh \
+  && rm -rf /actions-runner/runner-npm \
   && chown -R runner /_work /actions-runner /opt/hostedtoolcache
 
 COPY token.sh entrypoint.sh app_token.sh /

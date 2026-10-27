@@ -1,0 +1,9 @@
+{
+  "name": "runner-bundled-npm",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": {
+    "npm": "11.21.1",
+    "undici": "6.29.1"
+  }
+}
