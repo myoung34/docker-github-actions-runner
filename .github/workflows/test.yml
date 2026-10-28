@@ -36,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="v0.4.9"
+          VERSION="v0.4.10"
           BIN_DIR="$HOME/.local/bin"
 
           mkdir -p "$BIN_DIR"
@@ -194,7 +194,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="v0.4.9"
+          VERSION="v0.4.10"
           BIN_DIR="$HOME/.local/bin"
 
           mkdir -p "$BIN_DIR"
