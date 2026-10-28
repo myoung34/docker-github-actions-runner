@@ -2,7 +2,27 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended",
-    "helpers:pinGitHubActionDigests"
+    "helpers:pinGitHubActionDigests",
+    ":enablePreCommit"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "actions/runner version",
+      "managerFilePatterns": ["/^Dockerfile$/"],
+      "matchStrings": ["ARG GH_RUNNER_VERSION=\"(?<currentValue>[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "actions/runner",
+      "extractVersionTemplate": "^v(?<version>.+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "goss version in test workflow",
+      "managerFilePatterns": ["/^\\.github/workflows/test\\.yml$/"],
+      "matchStrings": ["VERSION=\"(?<currentValue>v[^\"]+)\""],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "goss-org/goss"
+    }
   ],
   "packageRules": [
     {
