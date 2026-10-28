@@ -23,3 +23,56 @@ command:
       - "Running something"
     stderr: ""
     timeout: 2000
+
+  /actions-runner/externals/node20/bin/node -e 'console.log("node20 runtime works")':
+    exit-status: 0
+    stdout:
+      - "node20 runtime works"
+    stderr: ""
+    timeout: 5000
+
+  /actions-runner/externals/node24/bin/node -e 'console.log("node24 runtime works")':
+    exit-status: 0
+    stdout:
+      - "node24 runtime works"
+    stderr: ""
+    timeout: 5000
+
+file:
+  /actions-runner/externals/node20/bin/node:
+    exists: true
+    filetype: file
+
+  /actions-runner/externals/node20/lib/node_modules/npm:
+    exists: false
+
+  /actions-runner/externals/node20/lib/node_modules/corepack:
+    exists: false
+
+  /actions-runner/externals/node20/bin/npm:
+    exists: false
+
+  /actions-runner/externals/node20/bin/npx:
+    exists: false
+
+  /actions-runner/externals/node20/bin/corepack:
+    exists: false
+
+  /actions-runner/externals/node24/bin/node:
+    exists: true
+    filetype: file
+
+  /actions-runner/externals/node24/lib/node_modules/npm:
+    exists: false
+
+  /actions-runner/externals/node24/lib/node_modules/corepack:
+    exists: false
+
+  /actions-runner/externals/node24/bin/npm:
+    exists: false
+
+  /actions-runner/externals/node24/bin/npx:
+    exists: false
+
+  /actions-runner/externals/node24/bin/corepack:
+    exists: false
