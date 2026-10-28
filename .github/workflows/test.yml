@@ -36,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="v0.4.9"
+          VERSION="v0.4.10"
           BIN_DIR="$HOME/.local/bin"
 
           mkdir -p "$BIN_DIR"
@@ -48,9 +48,16 @@ jobs:
             exit 1
           fi
 
-          curl -fsSL \
-            -o "$BIN_DIR/goss" \
-            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+          # goss >=0.4.10 ships tarballs named with x86_64 instead of amd64
+          GOSS_ARCH="$ARCH"
+          if [ "$ARCH" = "amd64" ]; then GOSS_ARCH="x86_64"; fi
+          BASE="https://github.com/goss-org/goss/releases/download/${VERSION}"
+          TARBALL="goss_${VERSION#v}_linux_${GOSS_ARCH}.tar.gz"
+          TMP="$(mktemp -d)"
+          curl -fsSL -o "$TMP/$TARBALL" "$BASE/$TARBALL"
+          curl -fsSL -o "$TMP/SHA256SUMS" "$BASE/goss_${VERSION#v}_SHA256SUMS"
+          (cd "$TMP" && sha256sum -c --ignore-missing SHA256SUMS)
+          tar -xzf "$TMP/$TARBALL" -C "$BIN_DIR" goss
 
           curl -fsSL \
             -o "$BIN_DIR/dgoss" \
@@ -194,7 +201,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          VERSION="v0.4.9"
+          VERSION="v0.4.10"
           BIN_DIR="$HOME/.local/bin"
 
           mkdir -p "$BIN_DIR"
@@ -206,9 +213,16 @@ jobs:
             exit 1
           fi
 
-          curl -fsSL \
-            -o "$BIN_DIR/goss" \
-            "https://github.com/goss-org/goss/releases/download/${VERSION}/goss-linux-${ARCH}"
+          # goss >=0.4.10 ships tarballs named with x86_64 instead of amd64
+          GOSS_ARCH="$ARCH"
+          if [ "$ARCH" = "amd64" ]; then GOSS_ARCH="x86_64"; fi
+          BASE="https://github.com/goss-org/goss/releases/download/${VERSION}"
+          TARBALL="goss_${VERSION#v}_linux_${GOSS_ARCH}.tar.gz"
+          TMP="$(mktemp -d)"
+          curl -fsSL -o "$TMP/$TARBALL" "$BASE/$TARBALL"
+          curl -fsSL -o "$TMP/SHA256SUMS" "$BASE/goss_${VERSION#v}_SHA256SUMS"
+          (cd "$TMP" && sha256sum -c --ignore-missing SHA256SUMS)
+          tar -xzf "$TMP/$TARBALL" -C "$BIN_DIR" goss
 
           curl -fsSL \
             -o "$BIN_DIR/dgoss" \
