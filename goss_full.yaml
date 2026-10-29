@@ -23,3 +23,15 @@ command:
       - "Running something"
     stderr: ""
     timeout: 2000
+
+  bundled node runtimes work:
+    exec: "/actions-runner/externals/node20/bin/node -e '' && /actions-runner/externals/node24/bin/node -e ''"
+    exit-status: 0
+    stderr: ""
+    timeout: 5000
+
+  no bundled package managers:
+    exec: "find /actions-runner/externals -maxdepth 4 \\( -name npm -o -name npx -o -name corepack \\) -print"
+    exit-status: 0
+    stdout: ""
+    stderr: ""

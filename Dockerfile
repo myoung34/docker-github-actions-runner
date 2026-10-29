@@ -17,6 +17,8 @@ COPY install_actions.sh /actions-runner
 RUN chmod +x /actions-runner/install_actions.sh \
   && /actions-runner/install_actions.sh ${GH_RUNNER_VERSION} ${TARGETPLATFORM} \
   && rm /actions-runner/install_actions.sh \
+  && rm -rf /actions-runner/externals/node*/lib/node_modules/{npm,corepack} \
+       /actions-runner/externals/node*/bin/{npm,npx,corepack} \
   && chown -R runner /_work /actions-runner /opt/hostedtoolcache
 
 COPY token.sh entrypoint.sh app_token.sh /
