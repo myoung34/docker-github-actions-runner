@@ -52,7 +52,7 @@ Renovate, not by hand.
 
 ## HOW
 
-`test.yml` runs on every PR, across `{jammy, focal, noble}` ×
+`test.yml` runs on every PR, across `{jammy, noble, resolute}` ×
 `{amd64, arm64}`:
 
 ```bash
