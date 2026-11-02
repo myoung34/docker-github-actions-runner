@@ -28,6 +28,14 @@ jobs:
           output: trivy.sarif
           ignore-unfixed: true
           severity: HIGH,CRITICAL
+          limit-severities-for-sarif: true
+      - name: Prefix SARIF locations with the variant
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          v="${VARIANT#-}"
+          jq --arg v "${v:-default}" '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= "\($v)/\(.)"' \
+            trivy.sarif > trivy.tmp && mv trivy.tmp trivy.sarif
       - uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           sarif_file: trivy.sarif
