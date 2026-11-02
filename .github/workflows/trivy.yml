@@ -1,0 +1,34 @@
+name: Trivy image scan
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ['', -ubuntu-jammy, -ubuntu-focal, -ubuntu-noble, -ubuntu-resolute, -debian-bookworm, -debian-trixie]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Latest release tag
+        run: echo "TAG=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: myoung34/github-runner:${{ env.TAG }}${{ matrix.variant }}
+          format: sarif
+          output: trivy.sarif
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+      - uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: trivy.sarif
+          category: trivy${{ matrix.variant || '-default' }}
