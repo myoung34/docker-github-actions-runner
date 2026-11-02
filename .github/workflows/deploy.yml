@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        release: [jammy, focal, noble, resolute]
+        release: [jammy, noble, resolute]
         platform: [amd64, arm64]
       fail-fast: false
     steps:
@@ -326,7 +326,7 @@ jobs:
     needs: ubuntu_tests
     strategy:
       matrix:
-        release: [jammy, focal, noble, resolute]
+        release: [jammy, noble, resolute]
       fail-fast: false
     steps:
       - name: Copy Repo Files
