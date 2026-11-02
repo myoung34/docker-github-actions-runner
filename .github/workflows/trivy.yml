@@ -32,3 +32,21 @@ jobs:
         with:
           sarif_file: trivy.sarif
           category: trivy${{ matrix.variant || '-default' }}
+
+  notify:
+    needs: scan
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: read
+    steps:
+      - name: Post one Slack summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL not set, skipping"; exit 0; fi
+          counts=$(gh api --paginate "repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&tool_name=Trivy&per_page=100" \
+            --jq '.[] | .rule.security_severity_level // "unrated"' | sort | uniq -c | awk '{printf "%s%s %s", sep, $1, $2; sep=", "}')
+          text="Trivy scan (${{ needs.scan.result }}): open alerts: ${counts:-none}. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning?query=tool%3ATrivy"
+          jq -n --arg text "$text" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
