@@ -17,13 +17,15 @@ jobs:
         variant: ['', -ubuntu-jammy, -ubuntu-noble, -ubuntu-resolute, -debian-bookworm, -debian-trixie]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-      - name: Latest release tag
-        run: echo "TAG=$(git describe --tags --abbrev=0)" >> "$GITHUB_ENV"
+      - name: Floating tag (rebuilt nightly)
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          t="${VARIANT#-}"
+          echo "TAG=${t:-latest}" >> "$GITHUB_ENV"
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: myoung34/github-runner:${{ env.TAG }}${{ matrix.variant }}
+          image-ref: myoung34/github-runner:${{ env.TAG }}
           format: sarif
           output: trivy.sarif
           ignore-unfixed: true
