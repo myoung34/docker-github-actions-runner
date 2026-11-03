@@ -37,7 +37,7 @@ jobs:
           # Only OS packages (uri = image name) differ per variant; binaries share one alert.
           jq --arg v "${VARIANT#-}" '(.runs[].results[].locations[].physicalLocation.artifactLocation.uri) |= if . == "myoung34/github-runner" then "\($v)/\(.)" else . end' \
             trivy.sarif > trivy.tmp && mv trivy.tmp trivy.sarif
-      - uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/upload-sarif@1fc58d04a4d4374f921bdac573c3811c240f9c26 # v4.39.2
         with:
           sarif_file: trivy.sarif
           category: trivy${{ matrix.variant }}
