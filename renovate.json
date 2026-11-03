@@ -32,6 +32,21 @@
     {
       "matchDepTypes": ["devDependencies"],
       "automerge": true
+    },
+    {
+      "description": "Moving latest to a new Ubuntu release is a release decision, not a routine bump",
+      "matchFileNames": ["Dockerfile.base"],
+      "matchPackageNames": ["ubuntu"],
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["os-major"],
+      "prBodyNotes": [
+        ":warning: This moves `latest` and the plain version tags to a new Ubuntu release.",
+        "- [ ] Move the `latest` and plain-tag text in `README.md` to the new release's row",
+        "- [ ] Confirm the new codename is in the `base.yml`, `deploy.yml`, `test.yml` and `trivy.yml` matrices",
+        "- [ ] Smoke-test the `ubuntu-<new>` image on an older host (see #219 for the jammy precedent)",
+        "- [ ] Add a release note that says to pin `ubuntu-<old>` to stay on the old release"
+      ]
     }
   ],
   "platformAutomerge": true
