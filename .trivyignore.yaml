@@ -1,0 +1,24 @@
+# Findings triaged as not affecting this image. Scoped by path so the same
+# CVE in another binary still reports.
+vulnerabilities:
+  # yq is an offline YAML/JSON processor: it never serves HTTP, terminates
+  # TLS, verifies certificates, or makes HTTP/2 connections.
+  - id: CVE-2026-111943
+    paths: ["usr/local/bin/yq"]
+    statement: crypto/x509 intermediate denylist; yq does no TLS
+  - id: CVE-2026-78667
+    paths: ["usr/local/bin/yq"]
+    statement: net/http FileServer Range parsing; yq serves no HTTP
+  - id: CVE-2026-97031
+    paths: ["usr/local/bin/yq"]
+    statement: crypto/tls ECH server memory exhaustion; yq runs no TLS server
+  - id: CVE-2026-78669
+    paths: ["usr/local/bin/yq"]
+    statement: HTTP/2 SETTINGS CPU exhaustion; yq makes no HTTP/2 connections
+  # git-lfs v3.8.1 build graph (go list -deps) has neither package.
+  - id: CVE-2026-56854
+    paths: ["usr/local/bin/git-lfs"]
+    statement: x/crypto/ssh server-side check; x/crypto/ssh not compiled into git-lfs
+  - id: CVE-2026-56851
+    paths: ["usr/local/bin/git-lfs"]
+    statement: x/text precis Nickname panic; x/text/secure/precis not compiled into git-lfs

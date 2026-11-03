@@ -29,6 +29,7 @@ jobs:
           ignore-unfixed: true
           severity: HIGH,CRITICAL
           limit-severities-for-sarif: true
+          trivyignores: .trivyignore.yaml
       - name: Prefix SARIF locations with the variant
         env:
           VARIANT: ${{ matrix.variant }}
