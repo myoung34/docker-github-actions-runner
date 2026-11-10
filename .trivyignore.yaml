@@ -22,3 +22,7 @@ vulnerabilities:
   - id: CVE-2026-56851
     paths: ["usr/local/bin/git-lfs"]
     statement: x/text precis Nickname panic; x/text/secure/precis not compiled into git-lfs
+  # git-lfs v3.8.1 build graph (go list -deps) has no golang.org/x/net/html.
+  - id: CVE-2026-78661
+    paths: ["usr/local/bin/git-lfs"]
+    statement: x/net/html crafted HTML DoS; x/net/html not compiled into git-lfs

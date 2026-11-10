@@ -50,6 +50,7 @@ install_essentials
 configure_sources
 
 apt-get update
+apt-get upgrade -y
 # The docker group needs to run before installers
 groupadd -g "$(docker_group_id)" docker || :
 install_tools_apt
