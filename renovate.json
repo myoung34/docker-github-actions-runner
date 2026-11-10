@@ -31,6 +31,13 @@
       "matchStrings": ["image: (?<depName>tonistiigi/binfmt):(?<currentValue>qemu-v\\S+)"],
       "datasourceTemplate": "docker",
       "versioningTemplate": "regex:^qemu-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Tool versions marked with # renovate: comments in build/",
+      "managerFilePatterns": ["/^build/.+\\.sh$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+_VERSION=\"(?<currentValue>[^\"]+)\""],
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     }
   ],
   "packageRules": [
