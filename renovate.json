@@ -5,6 +5,7 @@
     "helpers:pinGitHubActionDigests",
     ":enablePreCommit"
   ],
+  "minimumReleaseAge": "3 days",
   "customManagers": [
     {
       "customType": "regex",
@@ -17,11 +18,26 @@
     },
     {
       "customType": "regex",
-      "description": "goss version in test workflow",
-      "managerFilePatterns": ["/^\\.github/workflows/test\\.yml$/"],
+      "description": "goss version in workflows",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
       "matchStrings": ["VERSION=\"(?<currentValue>v[^\"]+)\""],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "goss-org/goss"
+    },
+    {
+      "customType": "regex",
+      "description": "binfmt image used by setup-qemu-action",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": ["image: (?<depName>tonistiigi/binfmt):(?<currentValue>qemu-v\\S+)"],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^qemu-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Tool versions marked with # renovate: comments in build/",
+      "managerFilePatterns": ["/^build/.+\\.sh$/"],
+      "matchStrings": ["# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+\\w+_VERSION=\"(?<currentValue>[^\"]+)\""],
+      "extractVersionTemplate": "^v?(?<version>.+)$"
     }
   ],
   "packageRules": [
@@ -30,8 +46,10 @@
       "automerge": true
     },
     {
-      "matchDepTypes": ["devDependencies"],
-      "automerge": true
+      "description": "One PR for the docker/* actions, which usually release together",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["docker/**"],
+      "groupName": "docker actions"
     },
     {
       "description": "Moving latest to a new Ubuntu release is a release decision, not a routine bump",
