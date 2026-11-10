@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Pinned tool versions, bumped by Renovate via the "# renovate:" comments.
+# renovate: datasource=github-tags depName=aws/aws-cli
+AWS_CLI_VERSION="2.39.7"
+# renovate: datasource=github-releases depName=cli/cli
+GH_CLI_VERSION="2.103.3"
+# renovate: datasource=github-releases depName=git-lfs/git-lfs
+GIT_LFS_VERSION="3.8.1"
+# renovate: datasource=github-releases depName=PowerShell/PowerShell
+PWSH_VERSION="7.6.9"
+# renovate: datasource=github-releases depName=mikefarah/yq
+YQ_VERSION="4.54.3"
+
 function install_git() {
   ( apt-get install -y --no-install-recommends git \
    || apt-get install -t stable -y --no-install-recommends git )
@@ -17,7 +29,7 @@ function install_liblttng-ust() {
 }
 
 function install_aws-cli() {
-  ( curl "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "awscliv2.zip" \
+  ( curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m)-${AWS_CLI_VERSION}.zip" -o "awscliv2.zip" \
     && unzip -q awscliv2.zip -d /tmp/ \
     && /tmp/aws/install \
     && rm awscliv2.zip \
@@ -28,11 +40,8 @@ function install_aws-cli() {
 function install_git-lfs() {
   local DPKG_ARCH
   DPKG_ARCH="$(dpkg --print-architecture)"
-  GIT_LFS_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/git-lfs/git-lfs/releases/latest \
-      | jq -r '.tag_name' | sed 's/^v//g')
 
-  curl -s "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -L -o /tmp/lfs.tar.gz
+  curl -fsSL "https://github.com/git-lfs/git-lfs/releases/download/v${GIT_LFS_VERSION}/git-lfs-linux-${DPKG_ARCH}-v${GIT_LFS_VERSION}.tar.gz" -o /tmp/lfs.tar.gz
   tar -xzf /tmp/lfs.tar.gz -C /tmp
   "/tmp/git-lfs-${GIT_LFS_VERSION}/install.sh"
   rm -rf /tmp/lfs.tar.gz "/tmp/git-lfs-${GIT_LFS_VERSION}"
@@ -56,54 +65,31 @@ function install_container-tools() {
 }
 
 function install_github-cli() {
-  local DPKG_ARCH GH_CLI_VERSION GH_CLI_DOWNLOAD_URL
+  local DPKG_ARCH
 
   DPKG_ARCH="$(dpkg --print-architecture)"
 
-  GH_CLI_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/cli/cli/releases/latest \
-      | jq -r '.tag_name' | sed 's/^v//g')
-
-  GH_CLI_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/cli/cli/releases/latest \
-      | jq ".assets[] | select(.name == \"gh_${GH_CLI_VERSION}_linux_${DPKG_ARCH}.deb\")" \
-      | jq -r '.browser_download_url')
-
-  curl -sSLo /tmp/ghcli.deb "${GH_CLI_DOWNLOAD_URL}"
+  curl -fsSLo /tmp/ghcli.deb "https://github.com/cli/cli/releases/download/v${GH_CLI_VERSION}/gh_${GH_CLI_VERSION}_linux_${DPKG_ARCH}.deb"
   apt-get -y install /tmp/ghcli.deb
   rm /tmp/ghcli.deb
 }
 
 function install_yq() {
-  local DPKG_ARCH YQ_DOWNLOAD_URL
+  local DPKG_ARCH
 
   DPKG_ARCH="$(dpkg --print-architecture)"
 
-  YQ_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/mikefarah/yq/releases/latest \
-      | jq ".assets[] | select(.name == \"yq_linux_${DPKG_ARCH}.tar.gz\")" \
-      | jq -r '.browser_download_url')
-
-  curl -s "${YQ_DOWNLOAD_URL}" -L -o /tmp/yq.tar.gz
+  curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_${DPKG_ARCH}.tar.gz" -o /tmp/yq.tar.gz
   tar -xzf /tmp/yq.tar.gz -C /tmp
   mv "/tmp/yq_linux_${DPKG_ARCH}" /usr/local/bin/yq
 }
 
 function install_powershell() {
-  local DPKG_ARCH PWSH_VERSION PWSH_DOWNLOAD_URL
+  local DPKG_ARCH
 
   DPKG_ARCH="$(dpkg --print-architecture)"
 
-  PWSH_VERSION=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/PowerShell/PowerShell/releases/latest \
-      | jq -r '.tag_name' \
-      | sed 's/^v//g')
-
-  PWSH_DOWNLOAD_URL=$(curl -sL -H "Accept: application/vnd.github+json" \
-    https://api.github.com/repos/PowerShell/PowerShell/releases/latest \
-      | jq -r ".assets[] | select(.name == \"powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz\") | .browser_download_url")
-
-  curl -L -o /tmp/powershell.tar.gz "$PWSH_DOWNLOAD_URL"
+  curl -fsSL -o /tmp/powershell.tar.gz "https://github.com/PowerShell/PowerShell/releases/download/v${PWSH_VERSION}/powershell-${PWSH_VERSION}-linux-${DPKG_ARCH//amd64/x64}.tar.gz"
   mkdir -p /opt/powershell
   tar zxf /tmp/powershell.tar.gz -C /opt/powershell
   chmod +x /opt/powershell/pwsh
