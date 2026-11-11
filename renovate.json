@@ -20,7 +20,7 @@
       "customType": "regex",
       "description": "goss version in workflows",
       "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
-      "matchStrings": ["VERSION=\"(?<currentValue>v[^\"]+)\""],
+      "matchStrings": ["goss-version: \"?(?<currentValue>v[^\"\\s]+)\"?"],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "goss-org/goss"
     },
