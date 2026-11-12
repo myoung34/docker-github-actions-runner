@@ -1,15 +1,25 @@
 #!/bin/bash
 #
 # Request an ACCESS_TOKEN to be used by a GitHub APP
-# Environment variable that need to be set up:
+# Environment variables that need to be set up:
 # * APP_ID, the GitHub's app ID
-# * APP_PRIVATE_KEY, the content of GitHub app's private key in PEM format.
 # * APP_LOGIN, the login name used to install GitHub's app
+# * APP_PRIVATE_KEY, the content of GitHub app's private key in PEM format.
+# * or APP_PRIVATE_KEY_FILE, path to a file containing the GitHub app's private
+#   key in PEM format. When set, the file is read into APP_PRIVATE_KEY.
 #
 # https://github.com/orgs/community/discussions/24743#discussioncomment-3245300
 #
 
 set -o pipefail
+
+if [[ -n "${APP_PRIVATE_KEY_FILE:-}" ]]; then
+  if [[ ! -f "${APP_PRIVATE_KEY_FILE}" ]] || [[ ! -r "${APP_PRIVATE_KEY_FILE}" ]]; then
+    echo "ERROR: APP_PRIVATE_KEY_FILE '${APP_PRIVATE_KEY_FILE}' is not a readable file." >&2
+    exit 1
+  fi
+  APP_PRIVATE_KEY="$(< "${APP_PRIVATE_KEY_FILE}")"
+fi
 
 normalize_host() {
   local host="${1#http://}"

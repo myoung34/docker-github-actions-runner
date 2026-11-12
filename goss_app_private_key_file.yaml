@@ -1,0 +1,36 @@
+# APP_PRIVATE_KEY / APP_PRIVATE_KEY_FILE validation in configure_runner.
+# Needs DEBUG_ONLY=false so configure_runner runs; every case fails before any
+# network call, and DISABLE_AUTOMATIC_DEREGISTRATION=true keeps the trap off.
+command:
+  both-keys:
+    exec: /usr/bin/env APP_ID=1 APP_LOGIN=x APP_PRIVATE_KEY=k APP_PRIVATE_KEY_FILE=/tmp/k /entrypoint.sh true
+    exit-status: 1
+    stderr:
+      - "APP_PRIVATE_KEY and APP_PRIVATE_KEY_FILE are mutually exclusive"
+    timeout: 10000
+  both-keys-without-configure:
+    # DEBUG_ONLY=true skips configure_runner, like an existing or reused runner
+    exec: /usr/bin/env DEBUG_ONLY=true APP_PRIVATE_KEY=k APP_PRIVATE_KEY_FILE=/tmp/k /entrypoint.sh true
+    exit-status: 1
+    stderr:
+      - "APP_PRIVATE_KEY and APP_PRIVATE_KEY_FILE are mutually exclusive"
+    timeout: 10000
+  directory-as-file:
+    exec: /usr/bin/env APP_ID=1 APP_LOGIN=x APP_PRIVATE_KEY_FILE=/tmp /entrypoint.sh true
+    exit-status: 1
+    stderr:
+      - "APP_PRIVATE_KEY_FILE '/tmp' is not a readable file"
+    timeout: 10000
+  file-without-app-id:
+    exec: /usr/bin/env APP_PRIVATE_KEY_FILE=/tmp/k /entrypoint.sh true
+    exit-status: 1
+    stderr:
+      - "All of APP_ID, APP_PRIVATE_KEY (or APP_PRIVATE_KEY_FILE) and APP_LOGIN must be specified"
+    timeout: 10000
+  missing-file:
+    exec: /usr/bin/env APP_ID=1 APP_LOGIN=x APP_PRIVATE_KEY_FILE=/nonexistent /entrypoint.sh true
+    exit-status: 1
+    stderr:
+      - "APP_PRIVATE_KEY_FILE '/nonexistent' is not a readable file"
+      - "Failed to obtain access token for app_id 1"
+    timeout: 10000

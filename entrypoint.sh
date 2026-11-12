@@ -10,6 +10,12 @@ export -n ACCESS_TOKEN
 export -n RUNNER_TOKEN
 export -n APP_ID
 export -n APP_PRIVATE_KEY
+export -n APP_PRIVATE_KEY_FILE
+
+if [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_PRIVATE_KEY_FILE}" ]]; then
+  echo "ERROR: APP_PRIVATE_KEY and APP_PRIVATE_KEY_FILE are mutually exclusive." >&2
+  exit 1
+fi
 
 trap_with_arg() {
     func="$1" ; shift
@@ -32,11 +38,11 @@ deregister_runner() {
 
   if [[ -n "${ACCESS_TOKEN}" ]]; then
     # If using GitHub App authentication, refresh the access token before deregistration
-    if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
+    if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}${APP_PRIVATE_KEY_FILE}" ]] && [[ -n "${APP_LOGIN}" ]]; then
       echo "Refreshing access token for deregistration"
       nl="
 "
-      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+      NEW_ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_PRIVATE_KEY_FILE="${APP_PRIVATE_KEY_FILE}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
       if [[ -z "${NEW_ACCESS_TOKEN}" ]] || [[ "${NEW_ACCESS_TOKEN}" == "null" ]]; then
         echo "ERROR: Failed to refresh access token for deregistration"
         exit 1
@@ -137,17 +143,21 @@ esac
 
 configure_runner() {
   ARGS=()
-  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}" ]] && [[ -n "${APP_LOGIN}" ]]; then
+  if [[ -n "${APP_ID}" ]] && [[ -n "${APP_PRIVATE_KEY}${APP_PRIVATE_KEY_FILE}" ]] && [[ -n "${APP_LOGIN}" ]]; then
     if [[ -n "${ACCESS_TOKEN}" ]] || [[ -n "${RUNNER_TOKEN}" ]]; then
-      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID, APP_PRIVATE_KEY and APP_LOGIN." >&2
+      echo "ERROR: ACCESS_TOKEN or RUNNER_TOKEN provided but are mutually exclusive with APP_ID, APP_PRIVATE_KEY (or APP_PRIVATE_KEY_FILE) and APP_LOGIN." >&2
       exit 1
     fi
     echo "Obtaining access token for app_id ${APP_ID} and login ${APP_LOGIN}"
     nl="
 "
-    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
-  elif [[ -n "${APP_ID}" ]] || [[ -n "${APP_PRIVATE_KEY}" ]] || [[ -n "${APP_LOGIN}" ]]; then
-    echo "ERROR: All of APP_ID, APP_PRIVATE_KEY and APP_LOGIN must be specified." >&2
+    ACCESS_TOKEN=$(APP_ID="${APP_ID}" APP_PRIVATE_KEY="${APP_PRIVATE_KEY//\\n/${nl}}" APP_PRIVATE_KEY_FILE="${APP_PRIVATE_KEY_FILE}" APP_LOGIN="${APP_LOGIN}" bash /app_token.sh)
+    if [[ -z "${ACCESS_TOKEN}" ]] || [[ "${ACCESS_TOKEN}" == "null" ]]; then
+      echo "ERROR: Failed to obtain access token for app_id ${APP_ID}" >&2
+      exit 1
+    fi
+  elif [[ -n "${APP_ID}${APP_PRIVATE_KEY}${APP_PRIVATE_KEY_FILE}${APP_LOGIN}" ]]; then
+    echo "ERROR: All of APP_ID, APP_PRIVATE_KEY (or APP_PRIVATE_KEY_FILE) and APP_LOGIN must be specified." >&2
     exit 1
   fi
 
@@ -198,6 +208,7 @@ unset_config_vars() {
   unset ACCESS_TOKEN
   unset APP_ID
   unset APP_PRIVATE_KEY
+  unset APP_PRIVATE_KEY_FILE
   unset APP_LOGIN
   unset RUNNER_SCOPE
   unset ORG_NAME
