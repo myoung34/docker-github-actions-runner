@@ -17,8 +17,9 @@ Rules, in order:
    app_token.sh build/*.sh` before handing the PR over — CI runs both on
    every PR, so a failure there is a round trip you already paid for.
 1. Anything that touches a real runner registration (`ACCESS_TOKEN`,
-   `RUNNER_TOKEN`, `APP_PRIVATE_KEY`, deregistration behaviour) needs
-   **explicit operator approval first** — ask, show exactly what you
+   `RUNNER_TOKEN`, `APP_PRIVATE_KEY`, `APP_PRIVATE_KEY_FILE`,
+   deregistration behaviour) needs **explicit operator approval
+   first** — ask, show exactly what you
    intend to run, and wait. A botched deregistration leaves orphaned
    runners on someone else's org.
 
@@ -61,7 +62,7 @@ shellcheck entrypoint.sh           # pinned 0.11.0 in .tool-versions
 dgoss run ... <image> 10           # one run per goss_*.yaml, GOSS_SLEEP=1
 ```
 
-The six suites, each a separate `dgoss run` with `DEBUG_ONLY=true` and a
+The seven suites, each a separate `dgoss run` with `DEBUG_ONLY=true` and a
 `sleep` entrypoint:
 
 | file | what it pins |
@@ -72,6 +73,7 @@ The six suites, each a separate `dgoss run` with `DEBUG_ONLY=true` and a
 | `goss_reusage_fail.yaml` | deregistration on reusable runners |
 | `goss_trap_exit.yaml` | the EXIT trap deregisters (needs `DEBUG_ONLY=false`) |
 | `goss_workdir_root.yaml` | workdir derived from `RUNNER_WORKDIR_ROOT` |
+| `goss_app_private_key_file.yaml` | `APP_PRIVATE_KEY`/`APP_PRIVATE_KEY_FILE` validation (needs `DEBUG_ONLY=false`) |
 
 To reproduce one locally, follow the exact `docker buildx build` and
 `dgoss run` lines in `.github/workflows/test.yml` — they carry the
@@ -84,6 +86,10 @@ To reproduce one locally, follow the exact `docker buildx build` and
 - `entrypoint.sh` un-exports every credential (`export -n`) right after
   reading it, so a child process only sees a token if it is passed
   explicitly. Keep it that way when adding commands.
+- `APP_PRIVATE_KEY_FILE` is read by `app_token.sh` twice: at
+  registration and again at deregistration, to refresh the expired
+  app token. A key file removed mid-run means the runner is never
+  deregistered.
 - `deploy.yml` ignores pushes that only touch `Dockerfile.base` or
   `README.md`; base changes publish through `base.yml` instead.
 - Both workflows also run on a nightly cron, so an image can change

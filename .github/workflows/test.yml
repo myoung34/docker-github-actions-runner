@@ -129,6 +129,16 @@ jobs:
             if [ $? -ne 0 ]; then
               exit 1
             fi
+            # test APP_PRIVATE_KEY / APP_PRIVATE_KEY_FILE validation
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_app_private_key_file.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=false \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUN_AS_ROOT=true \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+            ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the EXIT trap on process crash
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_trap_exit.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=false \
@@ -256,6 +266,19 @@ jobs:
             -e EPHEMERAL=true \
             -e DISABLE_AUTO_UPDATE=true \
             ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
+            # test APP_PRIVATE_KEY / APP_PRIVATE_KEY_FILE validation
+            GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_app_private_key_file.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
+            -e DEBUG_ONLY=false \
+            -e REPO_URL=https://github.com/fake/repo \
+            -e RUN_AS_ROOT=true \
+            -e DISABLE_AUTOMATIC_DEREGISTRATION=true \
+            ${GH_RUNNER_IMAGE} 10
+            if [ $? -ne 0 ]; then
+              exit 1
+            fi
             # test the EXIT trap on process crash
             GOSS_VARS=goss_vars_${GH_RUNNER_IMAGE}.yaml GOSS_FILE=goss_trap_exit.yaml GOSS_SLEEP=1 $HOME/.local/bin/dgoss run --entrypoint /usr/bin/sleep \
             -e DEBUG_ONLY=false \
