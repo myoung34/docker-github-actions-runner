@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Pinned tool versions, bumped by Renovate via the "# renovate:" comments.
 # renovate: datasource=github-tags depName=aws/aws-cli
-AWS_CLI_VERSION="2.39.7"
+AWS_CLI_VERSION="2.40.0"
 # renovate: datasource=github-releases depName=cli/cli
 GH_CLI_VERSION="2.103.3"
 # renovate: datasource=github-releases depName=git-lfs/git-lfs
