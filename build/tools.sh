@@ -9,7 +9,7 @@ GH_CLI_VERSION="2.103.3"
 # renovate: datasource=github-releases depName=git-lfs/git-lfs
 GIT_LFS_VERSION="3.8.1"
 # renovate: datasource=github-releases depName=PowerShell/PowerShell
-PWSH_VERSION="7.6.9"
+PWSH_VERSION="7.7.0"
 # renovate: datasource=github-releases depName=mikefarah/yq
 YQ_VERSION="4.54.3"
 
