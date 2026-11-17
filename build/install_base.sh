@@ -35,6 +35,14 @@ function setup_sudoers() {
   echo '%sudo ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 }
 
+function setup_github_known_hosts() {
+  install -d -m 0755 /etc/ssh
+  curl -fsSL https://api.github.com/meta \
+    | jq -r '.ssh_keys[] | "github.com " + .' \
+    > /etc/ssh/ssh_known_hosts
+  chmod 0644 /etc/ssh/ssh_known_hosts
+}
+
 echo en_US.UTF-8 UTF-8 >> /etc/locale.gen
 
 scripts_dir=$(dirname "$0")
@@ -55,6 +63,7 @@ apt-get upgrade -y
 groupadd -g "$(docker_group_id)" docker || :
 install_tools_apt
 install_tools
+setup_github_known_hosts
 
 setup_sudoers
 groupadd -g "$(group_id)" runner

@@ -58,6 +58,11 @@ file:
     exists: true
   /usr/local/cargo/bin/rustup:
     exists: true
+  /etc/ssh/ssh_known_hosts:
+    exists: true
+    mode: "0644"
+    contents:
+      - /^github\.com /
   /etc/init.d/docker:
     exists: true
     owner: root
