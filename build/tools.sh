@@ -12,6 +12,10 @@ GIT_LFS_VERSION="3.8.1"
 PWSH_VERSION="7.7.0"
 # renovate: datasource=github-releases depName=mikefarah/yq
 YQ_VERSION="4.54.3"
+# renovate: datasource=github-releases depName=rust-lang/rustup
+RUSTUP_VERSION="1.29.3"
+# renovate: datasource=github-releases depName=rust-lang/rust
+RUST_VERSION="1.100.0"
 
 function install_git() {
   ( apt-get install -y --no-install-recommends git \
@@ -94,6 +98,29 @@ function install_powershell() {
   tar zxf /tmp/powershell.tar.gz -C /opt/powershell
   chmod +x /opt/powershell/pwsh
   ln -s /opt/powershell/pwsh /usr/bin/pwsh
+}
+
+function install_rustup() {
+  local RUST_ARCH
+
+  case "$(dpkg --print-architecture)" in
+    amd64) RUST_ARCH=x86_64-unknown-linux-gnu ;;
+    arm64) RUST_ARCH=aarch64-unknown-linux-gnu ;;
+    *)
+      echo "Unsupported arch for rustup: $(dpkg --print-architecture)"
+      exit 1
+      ;;
+  esac
+
+  export RUSTUP_HOME=/usr/local/rustup
+  export CARGO_HOME=/usr/local/cargo
+  curl -fsSL "https://static.rust-lang.org/rustup/archive/${RUSTUP_VERSION}/${RUST_ARCH}/rustup-init" -o /tmp/rustup-init
+  chmod +x /tmp/rustup-init
+  /tmp/rustup-init -y --no-modify-path --profile minimal \
+    --default-toolchain "${RUST_VERSION}" \
+    --component rustfmt,clippy
+  rm /tmp/rustup-init
+  chmod -R a+w "${RUSTUP_HOME}" "${CARGO_HOME}"
 }
 
 function install_tools() {

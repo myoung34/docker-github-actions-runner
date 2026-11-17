@@ -50,6 +50,12 @@ file:
     exists: true
   /usr/bin/dumb-init:
     exists: true
+  /usr/local/cargo/bin/cargo:
+    exists: true
+  /usr/local/cargo/bin/rustc:
+    exists: true
+  /usr/local/cargo/bin/rustup:
+    exists: true
   /etc/init.d/docker:
     exists: true
     owner: root

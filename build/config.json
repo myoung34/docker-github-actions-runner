@@ -105,6 +105,13 @@
       ]
     },
     {
+      "category": "rust",
+      "source": "script",
+      "packages": [
+        "rustup"
+      ]
+    },
+    {
       "category": "yq",
       "source": "script",
       "packages": [
