@@ -26,3 +26,24 @@ vulnerabilities:
   - id: CVE-2026-78661
     paths: ["usr/local/bin/git-lfs"]
     statement: x/net/html crafted HTML DoS; x/net/html not compiled into git-lfs
+  # Only HTTP/2 client use: a hostile LFS server can burn CPU in one job step,
+  # which it can already stall. No RCE or data exposure. Fixed in git-lfs main
+  # (x/net v0.61.0); drop this when Renovate bumps past v3.8.1.
+  - id: CVE-2026-78669
+    paths: ["usr/local/bin/git-lfs"]
+    statement: HTTP/2 SETTINGS CPU exhaustion; client-side DoS only, no fixed git-lfs release yet
+  # docker-compose binary links no golang.org/x/net/html (go tool nm).
+  - id: CVE-2026-78661
+    paths: ["usr/libexec/docker/cli-plugins/docker-compose"]
+    statement: x/net/html crafted HTML DoS; x/net/html not compiled into docker-compose
+  # buildx v0.39.0 build graph (go list -deps) has only go-archive/compression,
+  # not the Unpack/Untar/ApplyLayer extractors.
+  - id: CVE-2026-17106
+    paths: ["usr/libexec/docker/cli-plugins/docker-buildx"]
+    statement: go-archive tar link following; extraction code not compiled into docker-buildx
+  # WebUtilities comes in via Microsoft.DevTunnels.Connections for the opt-in
+  # DAP debugger. The runner parses no inbound multipart forms. Fixed upstream
+  # in actions/runner#4849; drop this when GH_RUNNER_VERSION ships it.
+  - id: CVE-2026-114149
+    paths: ["actions-runner/bin/Runner.Worker.deps.json"]
+    statement: ASP.NET Core multipart header-limit DoS; runner serves no multipart forms
