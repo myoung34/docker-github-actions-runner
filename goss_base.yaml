@@ -58,6 +58,8 @@ file:
     exists: true
   /usr/local/cargo/bin/rustup:
     exists: true
+  /usr/local/bin/mold:
+    exists: true
   /etc/ssh/ssh_known_hosts:
     exists: true
     mode: "0644"

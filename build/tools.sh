@@ -16,6 +16,8 @@ YQ_VERSION="4.54.3"
 RUSTUP_VERSION="1.29.3"
 # renovate: datasource=github-releases depName=rust-lang/rust
 RUST_VERSION="1.100.0"
+# renovate: datasource=github-releases depName=rui314/mold
+MOLD_VERSION="3.0.0"
 
 function install_git() {
   ( apt-get install -y --no-install-recommends git \
@@ -121,6 +123,25 @@ function install_rustup() {
     --component rustfmt,clippy
   rm /tmp/rustup-init
   chmod -R a+w "${RUSTUP_HOME}" "${CARGO_HOME}"
+}
+
+function install_mold() {
+  local MOLD_ARCH
+
+  case "$(dpkg --print-architecture)" in
+    amd64) MOLD_ARCH=x86_64 ;;
+    arm64) MOLD_ARCH=aarch64 ;;
+    *)
+      echo "Unsupported arch for mold: $(dpkg --print-architecture)"
+      exit 1
+      ;;
+  esac
+
+  curl -fsSL "https://github.com/rui314/mold/releases/download/v${MOLD_VERSION}/mold-${MOLD_VERSION}-${MOLD_ARCH}-linux.tar.gz" \
+    -o /tmp/mold.tar.gz
+  tar -xzf /tmp/mold.tar.gz -C /tmp
+  cp -a "/tmp/mold-${MOLD_VERSION}-${MOLD_ARCH}-linux/." /usr/local/
+  rm -rf /tmp/mold.tar.gz "/tmp/mold-${MOLD_VERSION}-${MOLD_ARCH}-linux"
 }
 
 function install_tools() {
