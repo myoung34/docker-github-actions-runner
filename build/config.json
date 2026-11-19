@@ -109,7 +109,8 @@
       "category": "rust",
       "source": "script",
       "packages": [
-        "rustup"
+        "rustup",
+        "mold"
       ]
     },
     {
