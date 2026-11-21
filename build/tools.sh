@@ -5,7 +5,7 @@ set -euo pipefail
 # renovate: datasource=github-tags depName=aws/aws-cli
 AWS_CLI_VERSION="2.41.0"
 # renovate: datasource=github-releases depName=cli/cli
-GH_CLI_VERSION="2.104.0"
+GH_CLI_VERSION="2.105.0"
 # renovate: datasource=github-releases depName=git-lfs/git-lfs
 GIT_LFS_VERSION="3.8.1"
 # renovate: datasource=github-releases depName=PowerShell/PowerShell
