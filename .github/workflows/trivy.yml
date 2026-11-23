@@ -1,16 +1,23 @@
-name: Trivy image scan
+name: Trivy
 on:
+  push:
+    branches: [master]
+  pull_request:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *' # nightly image scan (tags are rebuilt nightly)
+    - cron: '0 12 * * 0' # Sunday, ahead of the Monday Zapier digest
   workflow_dispatch:
 
 permissions:
   contents: read
-  security-events: write
 
 jobs:
-  scan:
+  image:
+    if: github.event.schedule == '0 6 * * *' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     strategy:
       fail-fast: false
       matrix:
@@ -42,20 +49,48 @@ jobs:
           sarif_file: trivy.sarif
           category: trivy${{ matrix.variant }}
 
-  notify:
-    needs: scan
-    if: always()
+  # Repo files: Dockerfiles, workflows, committed secrets.
+  fs:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          limit-severities-for-sarif: true
+          format: sarif
+          output: trivy.sarif
+          trivyignores: .trivyignore.yaml
+      # Fork PRs get a read-only token, so the upload would fail there.
+      - if: github.event_name != 'pull_request' || !github.event.pull_request.head.repo.fork
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: trivy.sarif
+          category: trivy-fs
+
+  report:
+    needs: [image, fs]
+    if: ${{ !cancelled() && (github.event.schedule == '0 12 * * 0' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     permissions:
       security-events: read
     steps:
-      - name: Post one Slack summary
+      - name: Send open Trivy alerts to the Zapier digest
         env:
           GH_TOKEN: ${{ github.token }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ZAPIER_HOOK: ${{ secrets.ZAPIER_TRIVY_HOOK }}
         run: |
-          if [ -z "$SLACK_WEBHOOK_URL" ]; then echo "SLACK_WEBHOOK_URL not set, skipping"; exit 0; fi
-          counts=$(gh api --paginate "repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&tool_name=Trivy&per_page=100" \
-            --jq '.[] | .rule.security_severity_level // "unrated"' | sort | uniq -c | awk '{printf "%s%s %s", sep, $1, $2; sep=", "}')
-          text="Trivy scan (${{ needs.scan.result }}): open alerts: ${counts:-none}. $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning?query=tool%3ATrivy"
-          jq -n --arg text "$text" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"
+          gh api --paginate "repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&tool_name=Trivy&per_page=100" \
+            --jq '.[] | .rule.security_severity_level // .rule.severity' \
+          | jq -R . | jq -s \
+              --arg repo "$GITHUB_REPOSITORY" \
+              --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/security/code-scanning?query=is%3Aopen+tool%3ATrivy" \
+              '(group_by(.) | map("\(.[0]) \(length)") | join(", ")) as $by
+               | {repo: $repo, total: length, url: $url,
+                  summary: "\($repo): \(length) open\(if length > 0 then " (\($by))" else "" end)"}' \
+          | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$ZAPIER_HOOK"

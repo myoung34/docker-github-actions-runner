@@ -51,3 +51,10 @@ vulnerabilities:
     paths: ["actions-runner/bin/Runner.Worker.deps.json"]
     purls: ["pkg:nuget/Microsoft.AspNetCore.WebUtilities@8.0.25"]
     statement: ASP.NET Core multipart header-limit DoS; runner serves no multipart forms
+misconfigurations:
+  # Root is the documented default (RUN_AS_ROOT=true, see README); the
+  # entrypoint drops to the `runner` user when RUN_AS_ROOT is anything else.
+  # A USER line would break the default and every existing deployment.
+  - id: DS-0002
+    paths: ["Dockerfile", "Dockerfile.base"]
+    statement: runs as root by design; RUN_AS_ROOT=false switches to the runner user
