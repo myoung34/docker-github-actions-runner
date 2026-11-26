@@ -46,6 +46,11 @@
       "automerge": true
     },
     {
+      "description": "aws-cli and codeql-action release several times a week; batch them into one PR each week",
+      "matchPackageNames": ["aws/aws-cli", "github/codeql-action"],
+      "schedule": ["* 0-3 * * 1"]
+    },
+    {
       "description": "One PR for the docker/* actions, which usually release together",
       "matchManagers": ["github-actions"],
       "matchPackageNames": ["docker/**"],
