@@ -168,7 +168,7 @@ configure_runner() {
   fi
 
   # shellcheck disable=SC2153
-  if [ -n "${EPHEMERAL}" ]; then
+  if [[ "${EPHEMERAL}" == "true" ]]; then
     echo "Ephemeral option is enabled"
     ARGS+=("--ephemeral")
   fi
