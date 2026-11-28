@@ -119,6 +119,13 @@
       "packages": [
         "yq"
       ]
+    },
+    {
+      "category": "opencode",
+      "source": "script",
+      "packages": [
+        "opencode"
+      ]
     }
   ]
 }

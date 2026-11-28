@@ -18,6 +18,8 @@ RUSTUP_VERSION="1.29.3"
 RUST_VERSION="1.100.0"
 # renovate: datasource=github-releases depName=rui314/mold
 MOLD_VERSION="3.0.0"
+# renovate: datasource=github-releases depName=sst/opencode
+OPENCODE_VERSION="1.19.6"
 
 function install_git() {
   ( apt-get install -y --no-install-recommends git \
@@ -142,6 +144,25 @@ function install_mold() {
   tar -xzf /tmp/mold.tar.gz -C /tmp
   cp -a "/tmp/mold-${MOLD_VERSION}-${MOLD_ARCH}-linux/." /usr/local/
   rm -rf /tmp/mold.tar.gz "/tmp/mold-${MOLD_VERSION}-${MOLD_ARCH}-linux"
+}
+
+function install_opencode() {
+  local OPENCODE_ASSET
+
+  case "$(dpkg --print-architecture)" in
+    amd64) OPENCODE_ASSET=opencode-linux-x64.tar.gz ;;
+    arm64) OPENCODE_ASSET=opencode-linux-arm64.tar.gz ;;
+    *)
+      echo "Unsupported arch for opencode: $(dpkg --print-architecture)"
+      exit 1
+      ;;
+  esac
+
+  curl -fsSL "https://github.com/sst/opencode/releases/download/v${OPENCODE_VERSION}/${OPENCODE_ASSET}" \
+    -o /tmp/opencode.tar.gz
+  tar -xzf /tmp/opencode.tar.gz -C /tmp
+  install -m 0755 /tmp/opencode /usr/local/bin/opencode
+  rm -f /tmp/opencode.tar.gz /tmp/opencode
 }
 
 function install_tools() {
